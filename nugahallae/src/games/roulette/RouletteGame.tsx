@@ -118,10 +118,10 @@ export function RouletteGame({
 
     later(() => {
       const next = resolveSpin(spinning, plan.landedIndex)
-      commit(next)
       setPassed(next.lastPassed)
       void haptic('tap')
       later(() => {
+        commit(next)
         setPassed(null)
         const folded = rotationRef.current % 360
         rotationRef.current = folded

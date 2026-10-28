@@ -78,7 +78,7 @@
   z-index: 3;
 }
 .rl-spin {
-  margin: 8px 16px max(24px, 34px);
+  margin: 8px 16px 34px;
   word-break: keep-all;
   width: calc(100% - 32px);
   max-width: 420px;

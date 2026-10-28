@@ -2,12 +2,16 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces } from '../../../domain/pieces'
 import { RouletteGame } from '../RouletteGame'
+import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
 
 const order = drawPieces(3, () => 0.5)
 
-beforeEach(() => vi.useFakeTimers())
+beforeEach(() => {
+  vi.useFakeTimers()
+  vi.mocked(haptic).mockClear()
+})
 afterEach(() => vi.useRealTimers())
 
 test('규칙 문구와 남은 말 수가 보인다', () => {
@@ -22,10 +26,26 @@ test('돌리기 연타해도 한 번만 돈다', () => {
   const btn = screen.getByRole('button', { name: '돌리기' })
   fireEvent.click(btn)
   fireEvent.click(btn)
-  act(() => { vi.advanceTimersByTime(4500) })
+  act(() => { vi.advanceTimersByTime(4500 + 1200) })
   expect(screen.getByText('남은 말 2개')).toBeTruthy()
+  act(() => { vi.advanceTimersByTime(10000) })
+  expect(screen.getByText('남은 말 2개')).toBeTruthy()
+})
+
+test('통과 오버레이 동안 돌리기는 비활성이고 눌러도 아무 일도 없다', () => {
+  render(<RouletteGame order={order} onFinish={() => {}} rng={() => 0.1} />)
+  fireEvent.click(screen.getByRole('button', { name: '돌리기' }))
+  act(() => { vi.advanceTimersByTime(4500) })
+  expect(screen.getByText('남은 말 3개')).toBeTruthy()
+  const btn = screen.getByRole('button', { name: '돌리기' }) as HTMLButtonElement
+  expect(btn.disabled).toBe(true)
+  fireEvent.click(btn)
   act(() => { vi.advanceTimersByTime(1200) })
   expect(screen.getByText('남은 말 2개')).toBeTruthy()
+  act(() => { vi.advanceTimersByTime(10000) })
+  expect(screen.getByText('남은 말 2개')).toBeTruthy()
+  expect(haptic).toHaveBeenCalledTimes(1)
+  expect(haptic).toHaveBeenCalledWith('tap')
 })
 
 test('3명이면 통과 2번 후 onFinish가 남은 말로 1번 호출된다', () => {
@@ -35,6 +55,7 @@ test('3명이면 통과 2번 후 onFinish가 남은 말로 1번 호출된다', (
   act(() => { vi.advanceTimersByTime(4500) })
   expect(screen.getByText(/통과!$/)).toBeTruthy()
   act(() => { vi.advanceTimersByTime(1200) })
+  expect(haptic).toHaveBeenCalledTimes(1)
   fireEvent.click(screen.getByRole('button', { name: '돌리기' }))
   act(() => { vi.advanceTimersByTime(7000 + 1200 + 1000) })
   expect(onFinish).toHaveBeenCalledTimes(1)
