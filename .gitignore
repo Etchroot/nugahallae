@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-pages/
+*.ait
+.superpowers/
+jev-harness-report.md
+.claude/settings.local.json
