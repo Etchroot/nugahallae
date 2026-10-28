@@ -48,6 +48,9 @@ function renderApp() {
 }
 
 beforeEach(() => {
+  // 연속 탭 방지(400ms)를 통과하도록 시계가 호출마다 1초씩 간다.
+  let t = 0
+  vi.spyOn(performance, 'now').mockImplementation(() => (t += 1000))
   backHandler = null
   closeApp.mockClear()
 })

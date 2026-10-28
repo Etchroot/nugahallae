@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTapGuard } from '../../app/useTapGuard'
 import type { GameProps } from '../types'
 import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
@@ -78,6 +79,7 @@ export function RouletteGame({
   const [durationMs, setDurationMs] = useState(0)
   const [passed, setPassed] = useState<Piece | null>(null)
 
+  const guard = useTapGuard()
   const stateRef = useRef(state)
   const rotationRef = useRef(0)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
@@ -168,7 +170,7 @@ export function RouletteGame({
         )}
       </div>
 
-      <button type="button" className="rl-spin" disabled={spinning} onClick={spin}>
+      <button type="button" className="rl-spin" disabled={spinning} onClick={guard(spin)}>
         돌리기
       </button>
     </div>

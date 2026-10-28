@@ -5,6 +5,7 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { closeApp, onBack } from './platform/sdk'
 import { DEFAULT_SETTINGS, loadSettings, normalizePenalty, saveSettings } from './domain/settings'
 import type { Settings } from './domain/settings'
+import type { Piece } from './domain/pieces'
 import { findGame } from './games/registry'
 import { HomeScreen } from './screens/HomeScreen'
 import { PrepareScreen } from './screens/PrepareScreen'
@@ -23,6 +24,8 @@ function App() {
   const confirmRef = useRef(confirm)
   confirmRef.current = confirm
   const touchedRef = useRef(false)
+  // 그만할까요 창이 열린 채 게임이 끝나면 걸린 말을 잠시 쥐고 있다가 계속하기 때 결과로 보낸다.
+  const heldLoserRef = useRef<Piece | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -37,7 +40,7 @@ function App() {
   useEffect(() => {
     return onBack(() => {
       if (confirmRef.current !== null) {
-        setConfirm(null)
+        cancelConfirmRef.current()
         return
       }
       const action = backActionFor(screenRef.current)
@@ -53,6 +56,28 @@ function App() {
     void saveSettings(next)
   }
 
+  useEffect(() => {
+    if (screen.name !== 'play') {
+      heldLoserRef.current = null
+      if (confirmRef.current === 'quitGame') setConfirm(null)
+    }
+  }, [screen.name])
+
+  const finishGame = (gameId: string, loser: Piece) => {
+    if (confirmRef.current === 'quitGame') heldLoserRef.current = loser
+    else setScreen({ name: 'result', gameId, loser })
+  }
+
+  const cancelConfirm = () => {
+    setConfirm(null)
+    const held = heldLoserRef.current
+    heldLoserRef.current = null
+    const cur = screenRef.current
+    if (held && cur.name === 'play') setScreen({ name: 'result', gameId: cur.gameId, loser: held })
+  }
+  const cancelConfirmRef = useRef(cancelConfirm)
+  cancelConfirmRef.current = cancelConfirm
+
   const game = screen.name === 'home' ? undefined : findGame(screen.gameId)
   const goHome = () => setScreen({ name: 'home' })
 
@@ -62,7 +87,10 @@ function App() {
       <HomeScreen
         settings={settings}
         onChange={changeSettings}
-        onPickGame={(gameId) => setScreen({ name: 'prepare', gameId })}
+        onPickGame={(gameId) => {
+          touchedRef.current = true
+          setScreen({ name: 'prepare', gameId })
+        }}
       />
     )
   } else if (screen.name === 'prepare') {
@@ -72,7 +100,6 @@ function App() {
         game={game}
         playerCount={settings.playerCount}
         onStart={(order) => setScreen({ name: 'play', gameId: screen.gameId, order })}
-        onBack={goHome}
       />
     )
   } else if (screen.name === 'play') {
@@ -80,7 +107,7 @@ function App() {
       <PlayScreen
         game={game}
         order={screen.order}
-        onFinish={(loser) => setScreen({ name: 'result', gameId: screen.gameId, loser })}
+        onFinish={(loser) => finishGame(screen.gameId, loser)}
       />
     )
   } else {
@@ -114,10 +141,11 @@ function App() {
         confirmLabel="그만하기"
         cancelLabel="계속하기"
         onConfirm={() => {
+          heldLoserRef.current = null
           setConfirm(null)
           setScreen({ name: 'home' })
         }}
-        onCancel={() => setConfirm(null)}
+        onCancel={cancelConfirm}
       />
     </>
   )
