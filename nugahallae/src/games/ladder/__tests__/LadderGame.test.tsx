@@ -63,6 +63,7 @@ test('내려가는 중에는 어떤 말도 누를 수 없고 연타도 무시', 
 test('끝까지 진행하면 벌칙 도착 말로 onFinish 1회, 햅틱 정확히', () => {
   const l = createLadder(order.length, rngA())
   const loserIdx = order.findIndex((_, i) => traceLadder(l, i).end === l.bad)
+  expect(loserIdx).toBeGreaterThan(0) // 통과 햅틱 검증이 의미 있으려면 앞사람이 있어야 한다
   const onFinish = vi.fn()
   render(<LadderGame order={order} onFinish={onFinish} rng={rngA()} />)
   for (let i = 0; i <= loserIdx; i++) {
@@ -97,6 +98,17 @@ test('진행 중 언마운트하면 onFinish가 호출되지 않는다', () => {
   unmount()
   advance(10000)
   expect(onFinish).not.toHaveBeenCalled()
+})
+
+test('내려가는 도중(TRACE_MS/2)에 언마운트하면 onFinish도 칸 공개도 없다', () => {
+  const onFinish = vi.fn()
+  const { unmount } = render(<LadderGame order={order} onFinish={onFinish} rng={rngA()} />)
+  fireEvent.click(pieceBtn(0))
+  advance(TRACE_MS / 2)
+  unmount()
+  advance(10000)
+  expect(onFinish).not.toHaveBeenCalled()
+  expect(vi.mocked(haptic)).not.toHaveBeenCalled()
 })
 
 test('2명, 10명 모두 렌더된다', () => {
