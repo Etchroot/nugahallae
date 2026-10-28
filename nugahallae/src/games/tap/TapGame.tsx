@@ -6,6 +6,7 @@ import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
+import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import {
   COUNT_STEP_MS, DURATION_MS, GO_AT_MS, beginGo, endRound, initRound, recordText, startCountdown,
@@ -24,7 +25,7 @@ export function TapGame({
   order,
   onFinish,
   rng = defaultRng,
-  now,
+  now = () => performance.now(),
 }: GameProps & { rng?: Rng; now?: () => number }) {
   const [idx, setIdx] = useState(0)
   const [round, setRound] = useState<RoundState>(initRound)
@@ -32,6 +33,11 @@ export function TapGame({
   const [rows, setRows] = useState<Row[]>([])
   const roundRef = useRef(round)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const t0 = useRef(0)
+  const voided = useRef(false)
+  const idxRef = useRef(0)
+  const [retry, setRetry] = useState(false)
+  const { guard, prime } = useScreenGuard(now)
 
   const { ranked, overlay, finish } = useRecordFinish<Row>({
     onFinish,
@@ -57,24 +63,58 @@ export function TapGame({
     timers.current.push(setTimeout(fn, ms))
   }
 
+  // 5초 연타 구간 동안 화면이 숨겨지면(백그라운드) 그 시도는 무효로 한다
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden && roundRef.current.phase === 'go') voided.current = true
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+
+  const finishWindow = () => {
+    const remain = DURATION_MS - (now() - t0.current)
+    if (remain > 0) {
+      // 타이머가 일찍 발화했다: 남은 시간만큼 다시 건다
+      later(finishWindow, remain)
+      return
+    }
+    if (voided.current) {
+      voided.current = false
+      setRetry(true)
+      setCd(null)
+      commit(initRound())
+      return
+    }
+    const done = endRound(roundRef.current)
+    commit(done)
+    setRows((rs) => [...rs, { piece: order[idxRef.current], v: done.count }])
+  }
+
+  const start = () => {
+    const cur = roundRef.current
+    if (cur.phase !== 'idle') return
+    setRetry(false)
+    voided.current = false
+    commit(startCountdown(cur))
+    setCd(3)
+    later(() => setCd(2), COUNT_STEP_MS)
+    later(() => setCd(1), COUNT_STEP_MS * 2)
+    later(() => {
+      setCd(null)
+      t0.current = now()
+      commit(beginGo(roundRef.current))
+      later(finishWindow, DURATION_MS)
+    }, GO_AT_MS)
+  }
+
   const press = () => {
     const cur = roundRef.current
     if (cur.phase === 'idle') {
-      commit(startCountdown(cur))
-      setCd(3)
-      later(() => setCd(2), COUNT_STEP_MS)
-      later(() => setCd(1), COUNT_STEP_MS * 2)
-      later(() => {
-        setCd(null)
-        commit(beginGo(roundRef.current))
-      }, GO_AT_MS)
-      later(() => {
-        const done = endRound(roundRef.current)
-        commit(done)
-        setRows((rs) => [...rs, { piece: order[idx], v: done.count }])
-      }, GO_AT_MS + DURATION_MS)
+      guard(start)()
     } else if (cur.phase === 'go') {
       commit(tapPad(cur))
+      prime() // 연타 직후 나타나는 `다음 사람` 버튼을 더블탭에서 보호
     }
   }
 
@@ -84,6 +124,7 @@ export function TapGame({
       finish(rows)
       return
     }
+    idxRef.current = idx + 1
     setIdx(idx + 1)
     setCd(null)
     commit(initRound())
@@ -135,6 +176,9 @@ export function TapGame({
         >
           {label}
         </button>
+        <p className="tp-retry" role="status">
+          {retry ? '다시 해 주세요' : ''}
+        </p>
         <div className="tp-bar" aria-hidden="true">
           <i
             key={idx + '-' + (round.phase === 'go' ? 'run' : 'idle')}
@@ -145,7 +189,7 @@ export function TapGame({
       </div>
       <div className="rg-after">
         {round.phase === 'done' && (
-          <NextButton key="next" last={idx + 1 >= order.length} onNext={next} now={now} />
+          <NextButton key="next" last={idx + 1 >= order.length} onNext={guard(next)} />
         )}
       </div>
     </div>

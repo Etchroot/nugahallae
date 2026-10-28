@@ -24,7 +24,9 @@ export function settleWorst<T>(
   const worst = sign * score(sorted[sorted.length - 1])
   const tied = sorted.filter((r) => sign * score(r) === worst)
   const idx = Math.min(tied.length - 1, Math.floor(rng() * tied.length))
-  const loser = tied[idx]
-  const ranked = [...sorted.filter((r) => r !== loser), loser]
+  // 동점 구간은 정렬 결과의 끝에 모여 있다. 고른 행을 인덱스로 빼서 중복 값도 안전하다.
+  const pos = sorted.length - tied.length + idx
+  const loser = sorted[pos]
+  const ranked = [...sorted.slice(0, pos), ...sorted.slice(pos + 1), loser]
   return { ranked, loser, tie: tied.length > 1 }
 }

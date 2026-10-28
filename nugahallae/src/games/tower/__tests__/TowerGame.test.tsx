@@ -49,18 +49,43 @@ test('한 줄의 마지막 블록 안내, 안전하게 빼면 안내가 사라�
   expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
 })
 
-test('무너지면 연출 후 onFinish가 뺀 말로 1회, haptic error 1회, 이후 입력 무시', () => {
+test('무너지면 연출 후 onFinish가 뺀 말로 1회, haptic error 1회', () => {
   const onFinish = vi.fn()
   render(<TowerGame order={order} onFinish={onFinish} rng={BOOM} />)
   fireEvent.click(block(0, 0))
-  fireEvent.click(block(0, 0)) // 같은 블록 연타
-  fireEvent.click(block(1, 0)) // 무너진 뒤 입력
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
   advance(5000)
   expect(screen.getByText(`${pieceLabel(order[0])} 와르르!`)).toBeTruthy()
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[0])
+})
+
+test('무너진 뒤 블록 입력은 판정(rng)을 다시 부르지 않고 햅틱·종료도 늘지 않는다', () => {
+  const onFinish = vi.fn()
+  const rng = vi.fn(() => 0)
+  render(<TowerGame order={order} onFinish={onFinish} rng={rng} />)
+  fireEvent.click(block(0, 0))
+  const calls = rng.mock.calls.length
+  // 무너진 뒤 모든 블록은 disabled라 클릭 자체가 막힌다
+  expect(screen.getAllByRole('button', { name: /^블록 / }).every((b) => (b as HTMLButtonElement).disabled)).toBe(true)
+  fireEvent.click(block(0, 0))
+  fireEvent.click(block(1, 0))
+  expect(rng.mock.calls.length).toBe(calls)
+  advance(5000)
+  expect(haptic).toHaveBeenCalledTimes(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
+})
+
+test('이미 뺀 블록은 비활성이라 다시 눌러도 판정(rng)이 늘지 않는다', () => {
+  const rng = vi.fn(() => 0.999)
+  render(<TowerGame order={order} onFinish={() => {}} rng={rng} />)
+  fireEvent.click(block(0, 0))
+  expect(rng).toHaveBeenCalledTimes(1)
+  expect(block(0, 0).disabled).toBe(true)
+  fireEvent.click(block(0, 0))
+  expect(rng).toHaveBeenCalledTimes(1)
+  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
 })
 
 test('차례가 넘어갈 때 haptic tap만 1회씩', () => {

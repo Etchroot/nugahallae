@@ -32,12 +32,14 @@ const mount = (onFinish = vi.fn(), o = order, rng = () => 0) => {
 }
 /** 준비 → 대기 → 초록 → ms 후 탭 */
 const reactAfter = (ms: number) => {
+  clock += 500 // 탭 가드(400ms) 이후
   tapPad()
   advance(WAIT)
   advance(ms)
   tapPad()
 }
 const foul = () => {
+  clock += 500
   tapPad()
   advance(500) // 탭 가드(400ms) 이후
   tapPad()
@@ -147,4 +149,25 @@ test('결과 연출 도중 언마운트 → onFinish 미호출', () => {
   unmount()
   advance(5000)
   expect(onFinish).not.toHaveBeenCalled()
+})
+
+test('결과 직후(100ms 안) 다음 사람을 눌러도 건너뛰지 않는다', () => {
+  mount()
+  reactAfter(300)
+  clock += 100
+  fireEvent.click(screen.getByRole('button', { name: '다음 사람' }))
+  expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
+  expect(pad().textContent).toBe('300 ms')
+})
+
+test('다음 사람 직후(100ms 안) 패드를 눌러도 다음 사람이 시작되지 않는다', () => {
+  mount()
+  reactAfter(300)
+  next()
+  clock += 100
+  tapPad()
+  expect(pad().getAttribute('data-state')).toBe('idle')
+  clock += 400
+  tapPad()
+  expect(pad().getAttribute('data-state')).toBe('wait')
 })

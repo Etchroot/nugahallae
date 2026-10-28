@@ -15,7 +15,10 @@ beforeEach(() => {
   vi.mocked(haptic).mockClear()
   clock = 10000
 })
-afterEach(() => vi.useRealTimers())
+afterEach(() => {
+  vi.useRealTimers()
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => false })
+})
 
 const advance = (ms: number) => act(() => { clock += ms; vi.advanceTimersByTime(ms) })
 const pad = () => screen.getByTestId('pad')
@@ -30,10 +33,16 @@ const mount = (onFinish = vi.fn(), o = order, rng = () => 0) => {
 }
 /** 시작 탭 → 카운트다운 → n번 연타 → 5초 */
 const round = (n: number) => {
+  clock += 500 // 탭 가드(400ms) 이후
   tapPad()
   advance(2100)
   tapPad(n)
   advance(5000)
+}
+
+const setHidden = (hidden: boolean) => {
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden })
+  document.dispatchEvent(new Event('visibilitychange'))
 }
 
 test('규칙 띠, 차례, 시작 패드가 보인다', () => {
@@ -135,4 +144,70 @@ test('결과 연출 도중 언마운트 → onFinish 미호출', () => {
   unmount()
   advance(5000)
   expect(onFinish).not.toHaveBeenCalled()
+})
+
+test('종료 타이머가 일찍 와도 5초가 안 지났으면 남은 시간만큼 다시 건다', () => {
+  mount()
+  tapPad()
+  advance(2100)
+  tapPad(3)
+  // 타이머만 5초 진행(시계는 3초): 백그라운드에서 타이머가 몰려 발화한 상황
+  act(() => { clock += 3000; vi.advanceTimersByTime(5000) })
+  expect(pad().textContent).toBe('3') // 아직 진행 중
+  tapPad(2)
+  advance(2000)
+  expect(pad().textContent).toContain('5회')
+})
+
+test('5초 동안 화면이 숨겨졌으면 그 시도는 무효, 같은 사람이 다시 한다', () => {
+  const onFinish = mount(vi.fn(), drawPieces(2, () => 0.5))
+  tapPad()
+  advance(2100)
+  tapPad(4)
+  setHidden(true)
+  advance(1000)
+  setHidden(false)
+  advance(5000)
+  expect(screen.getByText('다시 해 주세요')).toBeTruthy()
+  expect(pad().textContent).toBe('탭해서 시작')
+  expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
+  expect(screen.queryByRole('button', { name: '다음 사람' })).toBeNull()
+  // 다시 시작하면 안내가 사라지고 정상 진행
+  clock += 500
+  tapPad()
+  expect(screen.queryByText('다시 해 주세요')).toBeNull()
+  advance(2100)
+  tapPad(6)
+  advance(5000)
+  expect(pad().textContent).toContain('6회')
+  expect(onFinish).not.toHaveBeenCalled()
+})
+
+test('연타 막판 탭 직후(100ms 안) 나타난 다음 사람 버튼은 눌려도 건너뛰지 않는다', () => {
+  mount()
+  clock += 500
+  tapPad()
+  advance(2100)
+  tapPad(10)
+  advance(4900)
+  tapPad() // 종료 100ms 전의 마지막 탭
+  advance(100)
+  expect(pad().textContent).toContain('11회')
+  fireEvent.click(screen.getByRole('button', { name: '다음 사람' }))
+  expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
+  clock += 400
+  fireEvent.click(screen.getByRole('button', { name: '다음 사람' }))
+  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+})
+
+test('다음 사람 직후(100ms 안) 패드를 눌러도 다음 사람이 시작되지 않는다', () => {
+  mount()
+  round(10)
+  next()
+  clock += 100
+  tapPad()
+  expect(pad().textContent).toBe('탭해서 시작')
+  clock += 400
+  tapPad()
+  expect(pad().textContent).toBe('3')
 })

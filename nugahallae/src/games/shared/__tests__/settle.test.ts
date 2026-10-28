@@ -48,3 +48,13 @@ test('원본 배열을 바꾸지 않는다', () => {
   settleWorst(rows, (x) => x.v, 'higher', () => 0)
   expect(rows).toEqual(copy)
 })
+
+test('같은 원시값이 중복돼도 loser 한 행만 빠진다 (ranked 길이 유지)', () => {
+  const r = settleWorst([7, 7, 1], (x) => x, 'higher', () => 0)
+  expect(r.ranked).toEqual([1, 7, 7])
+  expect(r.loser).toBe(7)
+  expect(r.tie).toBe(true)
+  const l = settleWorst([2, 2, 9], (x) => x, 'lower', () => 0.99)
+  expect(l.ranked).toEqual([9, 2, 2])
+  expect(l.ranked).toHaveLength(3)
+})

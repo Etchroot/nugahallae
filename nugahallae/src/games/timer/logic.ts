@@ -23,7 +23,8 @@ export function displayElapsed(ms: number): string {
 
 export function makeRecord(piece: Piece, elapsedMs: number, target: number): TimerRecord {
   const v = elapsedMs / 1000
-  return { piece, v, d: Math.abs(v - target) }
+  // 화면에 보이는 0.01초 단위로 맞춰 같은 표시값은 동점으로 친다
+  return { piece, v, d: Math.round(Math.abs(v - target) * 100) / 100 }
 }
 
 export function recordText(r: TimerRecord): string {

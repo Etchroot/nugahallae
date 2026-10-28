@@ -30,3 +30,8 @@ test('기록은 실제 시간과 목표와의 차이(절댓값)', () => {
 test('기록 문구는 {v}초 (±{d})', () => {
   expect(recordText(makeRecord(p[0], 7310, 7))).toBe('7.31초 (±0.31)')
 })
+
+test('차이는 0.01초로 반올림해 화면에 같게 보이는 기록은 같은 값이다', () => {
+  expect(makeRecord(p[0], 7310, 7.5).d).toBe(makeRecord(p[1], 7690, 7.5).d)
+  expect(makeRecord(p[0], 7310, 7.5).d).toBe(0.19)
+})

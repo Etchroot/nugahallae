@@ -64,6 +64,7 @@
 }
 .tw-blk {
   flex: 1;
+  position: relative;
   min-width: 0;
   padding: 0;
   border: 0;
@@ -73,6 +74,12 @@
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   transition: transform 800ms cubic-bezier(0.3, 0.1, 0.6, 1), opacity 800ms;
+}
+.tw-blk::before {
+  /* 줄·열 사이 간격(4px)까지 탭 영역으로 덮어 탭 영역 간격을 없앤다 */
+  content: '';
+  position: absolute;
+  inset: -2px;
 }
 .tw-blk:active:not(:disabled) { background: #b97d44; }
 .tw-locked .tw-blk { background: #8a6a4b; }

@@ -4,9 +4,9 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
-import { useTapGuard } from '../../app/useTapGuard'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
+import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import { FOUL, pickWait, recordText, whyText } from './logic'
 import '../shared/record.css'
@@ -40,8 +40,8 @@ export function ReactionGame({
   const padRef = useRef<PadState>('idle')
   const t0 = useRef(0)
   const waitTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // 준비 탭과 부정출발 탭이 한 번의 더블탭으로 겹치지 않게 한다. 초록 이후 탭은 가드 없이 즉시 측정한다.
-  const guard = useTapGuard(now)
+  // 화면 공용 가드: 준비·부정출발·다음 사람 탭이 더블탭으로 겹치지 않게 한다. 초록 이후 탭은 즉시 측정하고 시각만 기록(prime)한다.
+  const { guard, prime } = useScreenGuard(now)
 
   const { ranked, overlay, finish } = useRecordFinish<Row>({
     onFinish,
@@ -72,6 +72,7 @@ export function ReactionGame({
       setMs(v)
       setP('done')
       record(v)
+      prime()
     } else if (cur === 'idle') {
       guard(() => {
         setP('wait')
@@ -141,7 +142,7 @@ export function ReactionGame({
         </button>
       </div>
       <div className="rg-after">
-        {finished && <NextButton last={idx + 1 >= order.length} onNext={next} now={now} />}
+        {finished && <NextButton last={idx + 1 >= order.length} onNext={guard(next)} />}
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
+import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import { displayElapsed, makeRecord, pickTarget, recordText } from './logic'
 import type { TimerRecord } from './logic'
@@ -31,6 +32,7 @@ export function TimerGame({
   const t0 = useRef(0)
   const phaseRef = useRef<Phase>('ready')
   const interval = useRef<ReturnType<typeof setInterval> | null>(null)
+  const { guard } = useScreenGuard(now)
 
   const { ranked, overlay, finish } = useRecordFinish<TimerRecord>({
     onFinish,
@@ -120,7 +122,7 @@ export function TimerGame({
       </div>
       <div className="rg-after">
         {phase === 'ready' && (
-          <button key="start" type="button" className="rg-btn" onClick={start}>
+          <button key="start" type="button" className="rg-btn" onClick={guard(start)}>
             시작
           </button>
         )}
@@ -129,11 +131,11 @@ export function TimerGame({
             key="stop"
             type="button"
             className="rg-btn rg-danger"
-            onPointerDown={stop}
+            onPointerDown={guard(stop)}
             onKeyDown={(e) => {
               if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
                 e.preventDefault()
-                stop()
+                guard(stop)()
               }
             }}
             onContextMenu={(e) => e.preventDefault()}
@@ -142,7 +144,7 @@ export function TimerGame({
           </button>
         )}
         {phase === 'stopped' && (
-          <NextButton key="next" last={isLast} onNext={next} now={now} />
+          <NextButton key="next" last={isLast} onNext={guard(next)} />
         )}
       </div>
     </div>

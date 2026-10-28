@@ -1,18 +1,7 @@
-import { useTapGuard } from '../../app/useTapGuard'
-
-/** `다음 사람 →` / `결과 보기`. 직전 탭 직후의 더블탭은 무시한다 */
-export function NextButton({
-  last,
-  onNext,
-  now,
-}: {
-  last: boolean
-  onNext: () => void
-  now?: () => number
-}) {
-  const guard = useTapGuard(now)
+/** `다음 사람 →` / `결과 보기`. onNext는 화면 공용 가드(useScreenGuard)로 감싸서 넘긴다 */
+export function NextButton({ last, onNext }: { last: boolean; onNext: () => void }) {
   return (
-    <button type="button" className="rg-btn" onClick={guard(onNext)}>
+    <button type="button" className="rg-btn" onClick={onNext}>
       {last ? (
         '결과 보기'
       ) : (

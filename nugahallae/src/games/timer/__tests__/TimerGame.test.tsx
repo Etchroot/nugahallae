@@ -25,6 +25,7 @@ const mount = (onFinish = vi.fn(), rng = () => 0.5) => {
 }
 /** 시작 → ms 후 멈춤 */
 const play = (ms: number) => {
+  clock += 500 // 탭 가드(400ms) 이후
   fireEvent.click(screen.getByRole('button', { name: '시작' }))
   clock += ms
   advance(ms)
@@ -132,4 +133,40 @@ test('결과 연출 도중 언마운트 → onFinish 미호출', () => {
   unmount()
   advance(5000)
   expect(onFinish).not.toHaveBeenCalled()
+})
+
+test('멈춤 직후(100ms 안) 다음 사람을 눌러도 결과 화면을 건너뛰지 않는다', () => {
+  mount()
+  play(7500)
+  clock += 100
+  fireEvent.click(screen.getByRole('button', { name: '다음 사람' }))
+  expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
+  expect(screen.getByText('7.50초 (±0.00)')).toBeTruthy()
+  clock += 400
+  fireEvent.click(screen.getByRole('button', { name: '다음 사람' }))
+  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+})
+
+test('다음 사람 직후(100ms 안) 시작을 눌러도 다음 사람의 타이머는 시작되지 않는다', () => {
+  mount()
+  play(7500)
+  next()
+  clock += 100
+  fireEvent.click(screen.getByRole('button', { name: '시작' }))
+  expect(screen.getByRole('button', { name: '시작' })).toBeTruthy()
+  clock += 400
+  fireEvent.click(screen.getByRole('button', { name: '시작' }))
+  expect(screen.getByRole('button', { name: '멈춰!' })).toBeTruthy()
+})
+
+test('같은 반올림 값은 동점: 목표 7.5초에서 ±0.19로 같은 두 기록', () => {
+  mount(vi.fn(), () => 0.5)
+  play(7310) // d 0.19
+  next()
+  play(7690) // d 0.19
+  next()
+  play(7500) // d 0
+  next()
+  advance(900)
+  expect(screen.getByText(/목표에서 0\.19초 벗어났어요 \(동점자 중 랜덤\)$/)).toBeTruthy()
 })
