@@ -12,6 +12,9 @@ vi.mock('../platform/sdk', () => ({
     }
   },
   closeApp: () => closeApp(),
+  haptic: async () => {},
+  storageGet: async () => null,
+  storageSet: async () => {},
 }))
 
 // TDS ConfirmDialog는 jsdom에서 언마운트 시 난독화된 셀렉터 해제 코드가 실패한다.
@@ -49,9 +52,9 @@ beforeEach(() => {
   closeApp.mockClear()
 })
 
-test('홈 placeholder가 보인다', () => {
+test('홈 화면이 보인다', () => {
   renderApp()
-  expect(screen.getByText('홈')).toBeInTheDocument()
+  expect(screen.getByText('인원수')).toBeInTheDocument()
 })
 
 test('홈에서 뒤로가기 → 종료 확인, 닫기 누르면 closeApp', async () => {
@@ -68,4 +71,40 @@ test('언마운트 시 onBack 해제', () => {
   expect(backHandler).not.toBeNull()
   unmount()
   expect(backHandler).toBeNull()
+})
+
+function goToPlay() {
+  renderApp()
+  fireEvent.click(screen.getByText('돌림판'))
+  for (let i = 1; i <= 4; i++) {
+    fireEvent.click(screen.getByText(`${i}번째 사람, 화면을 눌러 말을 뽑으세요`))
+    fireEvent.click(screen.getByText('확인했어요'))
+  }
+  fireEvent.click(screen.getByText('시작하기'))
+  expect(screen.getByRole('button', { name: '돌리기' })).toBeInTheDocument()
+}
+
+test('플레이 중 뒤로가기 → 그만할까요 확인, 계속하기는 게임 유지', () => {
+  goToPlay()
+  act(() => backHandler!())
+  expect(screen.getByText('게임을 그만할까요?')).toBeInTheDocument()
+  fireEvent.click(screen.getByText('계속하기'))
+  expect(screen.queryByText('게임을 그만할까요?')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '돌리기' })).toBeInTheDocument()
+})
+
+test('그만하기는 홈으로 간다', () => {
+  goToPlay()
+  act(() => backHandler!())
+  fireEvent.click(screen.getByText('그만하기'))
+  expect(screen.getByText('인원수')).toBeInTheDocument()
+})
+
+test('다이얼로그가 열린 상태에서 뒤로가기는 다이얼로그를 닫는다', () => {
+  goToPlay()
+  act(() => backHandler!())
+  expect(screen.getByText('게임을 그만할까요?')).toBeInTheDocument()
+  act(() => backHandler!())
+  expect(screen.queryByText('게임을 그만할까요?')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '돌리기' })).toBeInTheDocument()
 })

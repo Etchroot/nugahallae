@@ -3,25 +3,43 @@ import { backActionFor } from './app/flow'
 import type { Screen } from './app/flow'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { closeApp, onBack } from './platform/sdk'
+import { DEFAULT_SETTINGS, loadSettings, normalizePenalty, saveSettings } from './domain/settings'
+import type { Settings } from './domain/settings'
+import { findGame } from './games/registry'
+import { HomeScreen } from './screens/HomeScreen'
+import { PrepareScreen } from './screens/PrepareScreen'
+import { PlayScreen } from './screens/PlayScreen'
+import { ResultScreen } from './screens/ResultScreen'
 import './App.css'
 
 type Confirm = 'close' | 'quitGame' | null
 
-const PLACEHOLDER: Record<Screen['name'], string> = {
-  home: '홈',
-  prepare: '준비',
-  play: '플레이',
-  result: '결과',
-}
-
 function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
   const [confirm, setConfirm] = useState<Confirm>(null)
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const screenRef = useRef(screen)
   screenRef.current = screen
+  const confirmRef = useRef(confirm)
+  confirmRef.current = confirm
+  const touchedRef = useRef(false)
+
+  useEffect(() => {
+    let alive = true
+    void loadSettings().then((s) => {
+      if (alive && !touchedRef.current) setSettings(s)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     return onBack(() => {
+      if (confirmRef.current !== null) {
+        setConfirm(null)
+        return
+      }
       const action = backActionFor(screenRef.current)
       if (action.kind === 'confirmClose') setConfirm('close')
       else if (action.kind === 'confirmQuitGame') setConfirm('quitGame')
@@ -29,9 +47,56 @@ function App() {
     })
   }, [])
 
+  const changeSettings = (next: Settings) => {
+    touchedRef.current = true
+    setSettings(next)
+    void saveSettings(next)
+  }
+
+  const game = screen.name === 'home' ? undefined : findGame(screen.gameId)
+  const goHome = () => setScreen({ name: 'home' })
+
+  let body
+  if (screen.name === 'home' || !game) {
+    body = (
+      <HomeScreen
+        settings={settings}
+        onChange={changeSettings}
+        onPickGame={(gameId) => setScreen({ name: 'prepare', gameId })}
+      />
+    )
+  } else if (screen.name === 'prepare') {
+    body = (
+      <PrepareScreen
+        key={screen.gameId + ':' + settings.playerCount}
+        game={game}
+        playerCount={settings.playerCount}
+        onStart={(order) => setScreen({ name: 'play', gameId: screen.gameId, order })}
+        onBack={goHome}
+      />
+    )
+  } else if (screen.name === 'play') {
+    body = (
+      <PlayScreen
+        game={game}
+        order={screen.order}
+        onFinish={(loser) => setScreen({ name: 'result', gameId: screen.gameId, loser })}
+      />
+    )
+  } else {
+    body = (
+      <ResultScreen
+        loser={screen.loser}
+        penalty={normalizePenalty(settings.penalty)}
+        onAgain={() => setScreen({ name: 'prepare', gameId: screen.gameId })}
+        onOtherGame={goHome}
+      />
+    )
+  }
+
   return (
     <>
-      <main>{PLACEHOLDER[screen.name]}</main>
+      <main>{body}</main>
       <ConfirmDialog
         open={confirm === 'close'}
         title="누가할래를 닫을까요?"

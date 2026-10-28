@@ -1,5 +1,7 @@
+@import url('https://cdn.jsdelivr.net/gh/toss/tossface/dist/tossface.css');
+
 :root {
-  font-family: sans-serif;
+  font-family: 'Tossface', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
 }
 
 * {

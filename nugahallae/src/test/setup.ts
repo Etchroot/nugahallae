@@ -14,3 +14,14 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
+
+// jsdom에는 ResizeObserver도 없다(TDS TextField 등이 사용). 테스트용 최소 shim.
+if (typeof window !== 'undefined' && !('ResizeObserver' in window)) {
+  class ResizeObserverShim {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  ;(window as unknown as { ResizeObserver: unknown }).ResizeObserver = ResizeObserverShim
+  ;(globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = ResizeObserverShim
+}
