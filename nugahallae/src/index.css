@@ -3,7 +3,7 @@
 /* 앱은 라이트 전용: 다크 모드에서도 캔버스·기본 글자색이 어두워지지 않게 고정한다. */
 :root {
   color-scheme: light;
-  font-family: 'Tossface', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif, 'Tossface';
 }
 
 * {
