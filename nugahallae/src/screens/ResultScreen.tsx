@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { BottomCTA, Button } from '@toss/tds-mobile'
 import { pieceLabel } from '../domain/pieces'
 import type { Piece } from '../domain/pieces'
 import { haptic } from '../platform/sdk'
 import './screens.css'
-
-const SUSPENSE_MS = 1500
 
 interface Props {
   loser: Piece
@@ -13,26 +11,11 @@ interface Props {
   onOtherGame: () => void
 }
 
+// 대부분의 게임은 끝나는 순간 벌칙자가 정해지므로, 결과는 기다림 없이 바로 보여 준다.
 export function ResultScreen({ loser, onAgain, onOtherGame }: Props) {
-  const [shown, setShown] = useState(false)
-
   useEffect(() => {
-    const t = setTimeout(() => {
-      setShown(true)
-      void haptic('success')
-    }, SUSPENSE_MS)
-    return () => clearTimeout(t)
+    void haptic('success')
   }, [])
-
-  if (!shown) {
-    return (
-      <div className="rs-root">
-        <div className="rs-wait" role="status">
-          두구두구…
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="rs-root">

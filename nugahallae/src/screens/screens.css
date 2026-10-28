@@ -43,7 +43,6 @@
   align-items: center; justify-content: center; gap: 16px; padding: 24px 20px 24px;
   text-align: center; word-break: keep-all; color: #191f28;
 }
-.rs-wait { font-size: 28px; font-weight: 700; color: #4e5968; }
 .rs-loser { font-size: 28px; font-weight: 700; animation: rs-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
 .rs-emoji { font-size: 96px; line-height: 1; animation: rs-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
 .rs-flash { position: fixed; inset: 0; pointer-events: none; animation: rs-flash 0.8s ease-out both; }
