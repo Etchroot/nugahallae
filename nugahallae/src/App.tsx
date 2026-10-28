@@ -1,63 +1,61 @@
-import { Asset, Button, Top } from "@toss/tds-mobile";
-import "./App.css";
+import { useEffect, useRef, useState } from 'react'
+import { backActionFor } from './app/flow'
+import type { Screen } from './app/flow'
+import { ConfirmDialog } from './components/ConfirmDialog'
+import { closeApp, onBack } from './platform/sdk'
+import './App.css'
 
-function App() {
-  return (
-    <>
-      <Top
-        title={<Top.TitleParagraph size={22}>반가워요</Top.TitleParagraph>}
-        subtitleBottom={
-          <Top.SubtitleParagraph size={17}>
-            앱인토스 개발을 시작해 보세요.
-          </Top.SubtitleParagraph>
-        }
-      />
+type Confirm = 'close' | 'quitGame' | null
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          padding: "24px",
-        }}
-      >
-        <Button
-          as="a"
-          variant="weak"
-          href="https://developers-apps-in-toss.toss.im"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          개발자센터
-        </Button>
-        <Button
-          as="a"
-          variant="weak"
-          href="https://techchat-apps-in-toss.toss.im"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          개발자 커뮤니티
-        </Button>
-      </div>
-
-      <div
-        style={{
-          position: "fixed",
-          bottom: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-        }}
-      >
-        <Asset.Image
-          alt="apps in toss logo"
-          frameShape={{ width: 160 }}
-          backgroundColor="transparent"
-          src={`${import.meta.env.BASE_URL}appsintoss-logo.png`}
-        />
-      </div>
-    </>
-  );
+const PLACEHOLDER: Record<Screen['name'], string> = {
+  home: '홈',
+  prepare: '준비',
+  play: '플레이',
+  result: '결과',
 }
 
-export default App;
+function App() {
+  const [screen, setScreen] = useState<Screen>({ name: 'home' })
+  const [confirm, setConfirm] = useState<Confirm>(null)
+  const screenRef = useRef(screen)
+  screenRef.current = screen
+
+  useEffect(() => {
+    return onBack(() => {
+      const action = backActionFor(screenRef.current)
+      if (action.kind === 'confirmClose') setConfirm('close')
+      else if (action.kind === 'confirmQuitGame') setConfirm('quitGame')
+      else setScreen(action.screen)
+    })
+  }, [])
+
+  return (
+    <>
+      <main>{PLACEHOLDER[screen.name]}</main>
+      <ConfirmDialog
+        open={confirm === 'close'}
+        title="누가할래를 닫을까요?"
+        confirmLabel="닫기"
+        cancelLabel="취소"
+        onConfirm={() => {
+          setConfirm(null)
+          closeApp()
+        }}
+        onCancel={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        open={confirm === 'quitGame'}
+        title="게임을 그만할까요?"
+        confirmLabel="그만하기"
+        cancelLabel="계속하기"
+        onConfirm={() => {
+          setConfirm(null)
+          setScreen({ name: 'home' })
+        }}
+        onCancel={() => setConfirm(null)}
+      />
+    </>
+  )
+}
+
+export default App
