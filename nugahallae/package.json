@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "deploy": "ait deploy",
     "test": "vitest run",
-    "build:pages": "vite build --base=./ --outDir dist-pages"
+    "dev:web": "vite dev --mode web",
+    "build:pages": "vite build --mode web --base=./ --outDir dist-pages"
   },
   "dependencies": {
     "@apps-in-toss/web-framework": "3.8.1",

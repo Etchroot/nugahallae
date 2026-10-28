@@ -1,0 +1,89 @@
+/* 데모 웹 빌드 전용 스타일 (tds-mobile.tsx 대체 부품) */
+.tw-btn {
+  min-height: 56px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 16px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tw-btn--full { width: 100%; }
+.tw-btn--primary-fill { background: #3182f6; color: #fff; }
+.tw-btn--primary-weak { background: #e8f3ff; color: #1b64da; }
+.tw-btn--dark-fill { background: #333d4b; color: #fff; }
+.tw-btn--dark-weak { background: #f2f4f6; color: #4e5968; }
+.tw-btn:active { filter: brightness(0.95); }
+
+.tw-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 20px calc(34px + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 24px);
+  box-sizing: border-box;
+}
+.tw-cta--double { display: flex; gap: 8px; }
+
+.tw-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tw-row__contents { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.tw-row__top { font-size: 17px; font-weight: 600; color: #191f28; }
+.tw-row__bottom { font-size: 15px; color: #6b7684; word-break: keep-all; }
+.tw-row__arrow { flex: none; color: #b0b8c1; }
+
+.tw-spinner { display: inline-flex; align-items: center; gap: 4px; }
+.tw-spinner button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #f2f4f6;
+  font-size: 22px;
+  color: #333d4b;
+  cursor: pointer;
+}
+.tw-spinner button:disabled { opacity: 0.35; cursor: default; }
+.tw-spinner__value { min-width: 40px; text-align: center; font-size: 20px; font-weight: 700; color: #191f28; }
+
+.tw-field { display: flex; flex-direction: column; gap: 6px; }
+.tw-field__label { font-size: 15px; color: #4e5968; }
+.tw-field input {
+  min-height: 48px;
+  border: 0;
+  border-bottom: 2px solid #e5e8eb;
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+  background: none;
+}
+.tw-field input:focus { border-bottom-color: #3182f6; }
+
+.tw-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+}
+.tw-dialog { width: 100%; max-width: 360px; padding: 24px 20px 20px; border-radius: 20px; background: #fff; }
+.tw-dialog__title { margin: 0 0 20px; font-size: 19px; font-weight: 700; color: #191f28; word-break: keep-all; }
+.tw-dialog__buttons { display: flex; gap: 8px; }

@@ -32,15 +32,19 @@ npx tsc -b   # 타입 검사
 
 ## 빌드
 
-- GitHub Pages용(SDK 없는 정적 빌드): `npm run build:pages` → `nugahallae/dist-pages/`
-- 토스 앱 번들: `npm run build` → `nugahallae/nugahallae.ait` 생성.
+이 앱은 빌드가 두 가지입니다.
+
+- **토스 앱 번들**: `npm run build` → `nugahallae/nugahallae.ait`.
+  토스 디자인 시스템(TDS)을 쓰며, 앱인토스(토스 앱 안)에서 실행됩니다.
   `ait build`를 쓰므로 앱인토스 콘솔의 앱 등록(appName `nugahallae`)이 맞아야 하고, 배포(`npm run deploy`)에는 콘솔 로그인/API 키가 필요합니다.
+- **데모 웹 빌드**: `npm run build:pages` → `nugahallae/dist-pages/` (로컬 확인은 `npm run dev:web`).
+  TDS는 앱인토스 밖에서 실행되지 않으므로, 이 빌드에서만 `src/web/`의 대체 부품으로 바꿔 끼웁니다(`vite.config.ts`의 `--mode web`). 게임 로직과 화면 흐름은 토스 앱 번들과 같습니다.
 
-`main` 브랜치에 push하면 `.github/workflows/pages.yml`이 Pages 빌드를 배포합니다. 저장소 Settings > Pages의 Source를 "GitHub Actions"로 설정하세요.
+`main` 브랜치에 push하면 `.github/workflows/pages.yml`이 데모 웹 빌드를 GitHub Pages에 배포합니다.
 
-## 배포 주소
+## 데모 주소
 
-(배포 후 여기에 주소를 적어 주세요: `https://<사용자>.github.io/<저장소>/`)
+https://etchroot.github.io/nugahallae/ (휴대폰 브라우저로 여는 것을 권장합니다)
 
 ## 폴더 구조
 
@@ -54,6 +58,7 @@ nugahallae/
     screens/    홈 · 준비 · 플레이 · 결과 화면
     components/ 공통 컴포넌트
     games/      미니게임 (registry.ts, types.ts, <id>/)
+    web/        데모 웹 빌드 전용 TDS 대체 부품
     __tests__/  앱 테스트, 금지어 가드(copy-guard)
 ```
 
