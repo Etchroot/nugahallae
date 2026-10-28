@@ -13,6 +13,7 @@ import { TapGame } from './tap/TapGame'
 import { FingerGame } from './finger/FingerGame'
 import { TraceGame } from './trace/TraceGame'
 import { GaugeGame } from './gauge/GaugeGame'
+import { OrderGame } from './order/OrderGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -143,6 +144,15 @@ export const GAMES: GameDefinition[] = [
     rule: '좌우로 오가는 막대를 정중앙에서 멈춰요. 모두 같은 속도예요. 중앙에서 가장 먼 사람이 벌칙이에요.',
     tint: '#ffe9e3',
     Component: GaugeGame,
+  },
+  {
+    id: 'order',
+    icon: '🔢',
+    title: '1부터 16까지',
+    summary: '순서대로 누르기, 가장 느리면 벌칙',
+    rule: '1부터 16까지 숫자를 순서대로 최대한 빨리 눌러요. 틀린 숫자를 누르면 1초가 더해져요. 가장 느린 사람이 벌칙이에요.',
+    tint: '#e6f4ff',
+    Component: OrderGame,
   },
 ]
 
