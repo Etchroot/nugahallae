@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import type { GameProps } from '../types'
 import { pieceLabel } from '../../domain/pieces'
@@ -11,8 +11,8 @@ import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import {
-  H, W, ROAD_W, START_R, inStartCircle, isInsideRoad, makePath, makeRecord, nextMaxProgress,
-  progressDist, reachedFinish, recordText, totalLength, traceScore, whyText,
+  H, W, ROAD_W, START_R, canStart, makePath, makeRecord, recordText, sweep, totalLength,
+  traceScore, whyText,
 } from './logic'
 import type { Point, TraceRecord } from './logic'
 import '../shared/record.css'
@@ -40,6 +40,9 @@ export function TraceGame({
   const phaseRef = useRef<Phase>('ready')
   const trailRef = useRef<Point[]>([])
   const maxProg = useRef(0)
+  const lastPt = useRef<Point | null>(null)
+  const pointerId = useRef<number | null>(null)
+  const raf = useRef<number | null>(null)
   const t0 = useRef(0)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const { guard, prime } = useScreenGuard(now)
@@ -52,71 +55,94 @@ export function TraceGame({
     why: whyText,
   })
 
+  // 그리는 동안의 궤적은 ref에 쌓고, 화면 갱신은 프레임당 한 번만
+  const cancelFrame = () => {
+    if (raf.current !== null) cancelAnimationFrame(raf.current)
+    raf.current = null
+  }
+  useEffect(() => cancelFrame, [])
+  const scheduleRender = () => {
+    if (raf.current !== null) return
+    raf.current = requestAnimationFrame(() => {
+      raf.current = null
+      setTrail(trailRef.current.slice())
+    })
+  }
+
   const setP = (p: Phase) => {
     phaseRef.current = p
     setPhase(p)
   }
 
-  const toLocal = (e: ReactPointerEvent<SVGSVGElement>): Point => {
+  const toLocalXY = (clientX: number, clientY: number): Point => {
     const r = svgRef.current?.getBoundingClientRect()
     const sx = r && r.width > 0 ? W / r.width : 1
     const sy = r && r.height > 0 ? H / r.height : 1
-    return { x: (e.clientX - (r?.left ?? 0)) * sx, y: (e.clientY - (r?.top ?? 0)) * sy }
+    return { x: (clientX - (r?.left ?? 0)) * sx, y: (clientY - (r?.top ?? 0)) * sy }
   }
+  const toLocal = (e: ReactPointerEvent<SVGSVGElement>): Point => toLocalXY(e.clientX, e.clientY)
 
   const end = (piece: Piece, timeSec: number | null, failAt: Point | null) => {
     const progress = timeSec !== null ? 1 : maxProg.current / total
     const rec = makeRecord(piece, { progress, timeSec, trail: trailRef.current, failAt })
+    cancelFrame()
+    pointerId.current = null
     setRecords((rs) => [...rs, rec])
     setLastRec(rec)
-    setTrail(trailRef.current)
+    setTrail(trailRef.current.slice())
     setP('done')
     prime()
     if (timeSec === null) void haptic('tap')
   }
 
-  const addPoint = (p: Point) => {
-    trailRef.current = [...trailRef.current, p]
-    setTrail(trailRef.current)
-  }
-
   const onDown = (e: ReactPointerEvent<SVGSVGElement>) => {
     if (phaseRef.current !== 'ready') return
     const p = toLocal(e)
-    if (!inStartCircle(p, path)) return
+    if (!canStart(p, path)) return
     guard(() => {
       try {
         svgRef.current?.setPointerCapture?.(e.pointerId)
       } catch {
         /* 일부 환경은 캡처를 지원하지 않는다 */
       }
+      pointerId.current = e.pointerId
       t0.current = now()
       maxProg.current = 0
+      lastPt.current = p
       trailRef.current = [p]
-      setTrail(trailRef.current)
+      setTrail([p])
       setLastRec(null)
       setP('drawing')
     })()
   }
 
   const onMove = (e: ReactPointerEvent<SVGSVGElement>) => {
-    if (phaseRef.current !== 'drawing') return
-    const p = toLocal(e)
+    if (phaseRef.current !== 'drawing' || e.pointerId !== pointerId.current) return
+    const native = e.nativeEvent as PointerEvent
+    const co = typeof native.getCoalescedEvents === 'function' ? native.getCoalescedEvents() : []
+    const pts =
+      co.length > 0 ? co.map((c) => toLocalXY(c.clientX, c.clientY)) : [toLocal(e)]
     const piece = order[idx]
-    addPoint(p)
-    if (!isInsideRoad(p, path)) {
-      end(piece, null, p)
-      return
+    for (const p of pts) {
+      const r = sweep(path, maxProg.current, lastPt.current, p)
+      maxProg.current = r.maxProg
+      if (!r.ok) {
+        trailRef.current.push(r.failAt ?? p)
+        end(piece, null, r.failAt ?? p)
+        return
+      }
+      trailRef.current.push(p)
+      lastPt.current = p
+      if (r.finished) {
+        end(piece, (now() - t0.current) / 1000, null)
+        return
+      }
     }
-    maxProg.current = nextMaxProgress(maxProg.current, progressDist(p, path))
-    if (reachedFinish(p, path)) {
-      maxProg.current = total
-      end(piece, (now() - t0.current) / 1000, null)
-    }
+    scheduleRender()
   }
 
   const onUp = (e: ReactPointerEvent<SVGSVGElement>) => {
-    if (phaseRef.current !== 'drawing') return
+    if (phaseRef.current !== 'drawing' || e.pointerId !== pointerId.current) return
     end(order[idx], null, toLocal(e))
   }
 

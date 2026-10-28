@@ -64,18 +64,18 @@ test('멈춘 위치가 주입 시간으로 정확히 계산된다(화면 갱신�
 
 test('반올림: 소수 1자리', () => {
   mount()
-  play(100) // 위치 0.5-0.1111 → 22.2
-  expect(screen.getByText('중앙에서 22.2')).toBeTruthy()
+  play(200) // 위치 0.5-0.2222 → 44.4
+  expect(screen.getByText('중앙에서 44.4')).toBeTruthy()
 })
 
 test('마지막 사람은 결과 보기, 가장 먼 사람이 onFinish로 1회, 햅틱 error 1회', () => {
   const onFinish = mount()
-  play(100) // 22.2
+  play(180) // 40.0
   next()
   expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
   play(225) // 50
   next()
-  play(150) // 33.3
+  play(200) // 44.4
   expect(screen.queryByRole('button', { name: '다음 사람' })).toBeNull()
   next()
   const items = screen.getAllByRole('listitem')
@@ -98,14 +98,14 @@ test('동점이면 (동점자 중 랜덤)', () => {
   next()
   play(225)
   next()
-  play(100)
+  play(180)
   next()
   expect(screen.getByText(/중앙에서 50\.0 벗어났어요 \(동점자 중 랜덤\)$/)).toBeTruthy()
 })
 
 test('멈춰 직후(100ms 안) 다음 사람 연타는 무시된다', () => {
   mount()
-  play(100)
+  play(180)
   clock += 100
   fireEvent.click(screen.getByRole('button', { name: '다음 사람' }))
   expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
@@ -116,33 +116,33 @@ test('멈춰 직후(100ms 안) 다음 사람 연타는 무시된다', () => {
 
 test('다음 사람 직후(100ms 안) 시작 연타로 바로 시작되지 않는다', () => {
   mount()
-  play(100)
+  play(180)
   next()
   clock += 100
   fireEvent.click(screen.getByRole('button', { name: '시작' }))
   expect(screen.getByRole('button', { name: '시작' })).toBeTruthy()
 })
 
-test('시작 직후 100ms 안의 멈춤 입력은 무시된다', () => {
+test('시작 직후 180ms 안의 멈춤 입력은 무시된다', () => {
   mount()
   clock += 500
   fireEvent.click(screen.getByRole('button', { name: '시작' }))
-  clock += 99
+  clock += 179
   fireEvent.pointerDown(screen.getByRole('button', { name: '멈춰!' }))
   expect(screen.getByRole('button', { name: '멈춰!' })).toBeTruthy()
   clock += 1
   fireEvent.pointerDown(screen.getByRole('button', { name: '멈춰!' }))
-  expect(screen.getByText('중앙에서 22.2')).toBeTruthy()
+  expect(screen.getByText('중앙에서 40.0')).toBeTruthy()
 })
 
 test('멈춘 뒤 중복 멈춤 입력은 기록되지 않는다', () => {
   const onFinish = mount()
-  play(100)
+  play(180)
   expect(screen.queryByRole('button', { name: '멈춰!' })).toBeNull()
   next()
-  play(100)
+  play(180)
   next()
-  play(100)
+  play(180)
   next()
   advance(RECORD_END_MS)
   expect(onFinish).toHaveBeenCalledTimes(1)
@@ -181,7 +181,7 @@ test('진행 중 언마운트 → onFinish·햅틱 없음, 타이머 정리', ()
 test('결과 연출 도중 언마운트 → onFinish 미호출', () => {
   const onFinish = vi.fn()
   const { unmount } = render(<GaugeGame order={drawPieces(2, () => 0.5)} onFinish={onFinish} rng={() => 0.5} now={now} />)
-  play(100)
+  play(180)
   next()
   play(200)
   next()

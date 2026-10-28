@@ -1,8 +1,7 @@
 import { test, expect } from 'vitest'
 import {
-  ROAD_W, START_R, makePath, totalLength, distToSegment, distToPath, isInsideRoad,
-  progressDist, nextMaxProgress, reachedFinish, inStartCircle, traceScore, makeRecord,
-  recordText, whyText,
+  ROAD_W, START_R, makePath, totalLength, distToSegment, distToPath, sweep, canStart,
+  segSegDist, traceScore, makeRecord, recordText, whyText,
 } from '../logic'
 import { drawPieces } from '../../../domain/pieces'
 import { settleWorst } from '../../shared/settle'
@@ -47,35 +46,86 @@ test('점-선분 거리', () => {
   expect(distToSegment({ x: 2, y: 0 }, a, a)).toBe(2)
 })
 
+test('길 생성: 인접하지 않은 구간끼리 길 폭 이상 떨어져 있다(여러 시드)', () => {
+  for (let seed = 1; seed <= 300; seed++) {
+    const p = makePath(seeded(seed))
+    for (let i = 0; i < p.length - 1; i++) {
+      for (let j = i + 2; j < p.length - 1; j++) {
+        expect(segSegDist(p[i], p[i + 1], p[j], p[j + 1])).toBeGreaterThanOrEqual(ROAD_W)
+      }
+    }
+  }
+})
+
 test('길 안/밖: 중심선까지 거리 28 이하면 안', () => {
   const path = [{ x: 100, y: 0 }, { x: 100, y: 100 }]
   expect(distToPath({ x: 120, y: 50 }, path)).toBe(20)
-  expect(isInsideRoad({ x: 128, y: 50 }, path)).toBe(true)
-  expect(isInsideRoad({ x: 128.5, y: 50 }, path)).toBe(false)
-  expect(isInsideRoad({ x: 70, y: 50 }, path)).toBe(false)
+  expect(sweep(path, 0, null, { x: 128, y: 50 }).ok).toBe(true)
+  const r = sweep(path, 0, null, { x: 128.5, y: 50 })
+  expect(r.ok).toBe(false)
+  expect(r.failAt).toEqual({ x: 128.5, y: 50 })
 })
 
-test('진행 거리 투영과 단조 증가(뒤로 가도 최대값 유지)', () => {
+test('진행은 단조 증가(뒤로 가도 최대값 유지), 완주 판정', () => {
   const path = [{ x: 100, y: 0 }, { x: 100, y: 100 }, { x: 200, y: 100 }]
-  expect(totalLength(path)).toBe(200)
-  expect(progressDist({ x: 100, y: 40 }, path)).toBe(40)
-  expect(progressDist({ x: 150, y: 100 }, path)).toBe(150)
-  let m = 0
-  m = nextMaxProgress(m, progressDist({ x: 100, y: 60 }, path))
-  expect(m).toBe(60)
-  m = nextMaxProgress(m, progressDist({ x: 100, y: 20 }, path))
-  expect(m).toBe(60)
-  m = nextMaxProgress(m, progressDist({ x: 100, y: 90 }, path))
+  let m = sweep(path, 0, null, { x: 100, y: 40 }).maxProg
+  expect(m).toBe(40)
+  m = sweep(path, m, { x: 100, y: 40 }, { x: 100, y: 20 }).maxProg
+  expect(m).toBe(40)
+  m = sweep(path, m, { x: 100, y: 20 }, { x: 100, y: 90 }).maxProg
   expect(m).toBe(90)
+  const fin = sweep(path, m, { x: 100, y: 90 }, { x: 200, y: 100 })
+  expect(fin.ok).toBe(true)
+  expect(fin.finished).toBe(true)
+  expect(fin.maxProg).toBe(200)
 })
 
-test('시작 원 판정과 완주 판정', () => {
+test('시작: 시작 원 안이면서 길 안일 때만', () => {
   const path = [{ x: 100, y: 40 }, { x: 100, y: 300 }]
-  expect(inStartCircle({ x: 100, y: 72 }, path)).toBe(true)
-  expect(inStartCircle({ x: 100, y: 73 }, path)).toBe(false)
-  expect(reachedFinish({ x: 100, y: 299 }, path)).toBe(false)
-  expect(reachedFinish({ x: 110, y: 300 }, path)).toBe(true)
-  expect(reachedFinish({ x: 190, y: 300 }, path)).toBe(false)
+  expect(canStart({ x: 100, y: 40 }, path)).toBe(true)
+  expect(canStart({ x: 120, y: 60 }, path)).toBe(true)
+  // 원 안(거리 30)이지만 길 밖(28 초과)
+  expect(canStart({ x: 130, y: 40 }, path)).toBe(false)
+  expect(canStart({ x: 100, y: 80 }, path)).toBe(false)
+})
+
+test('다른 팔로 건너뛰면 진행을 얻지 못하고 실패한다', () => {
+  // U자 길: 오른쪽 팔(arc 220~420)이 왼쪽 팔(0~200)에서 20px 거리
+  const path = [{ x: 100, y: 0 }, { x: 100, y: 200 }, { x: 120, y: 200 }, { x: 120, y: 0 }]
+  const r = sweep(path, 0, null, { x: 120, y: 10 })
+  // 가까운 같은 팔(길 안, 진행 10)이지 먼 팔(진행 410)이 아니다
+  expect(r.ok).toBe(true)
+  expect(r.maxProg).toBeLessThan(30)
+  const far = sweep(path, 0, null, { x: 120, y: 190 })
+  expect(far.ok).toBe(false)
+  expect(far.maxProg).toBe(0)
+})
+
+test('빠른 직선 스와이프로 벽을 건너뛰면 첫 벽 밖 지점에서 실패', () => {
+  const path = [{ x: 100, y: 0 }, { x: 100, y: 200 }]
+  const r = sweep(path, 0, { x: 100, y: 50 }, { x: 300, y: 50 })
+  expect(r.ok).toBe(false)
+  expect(r.failAt!.x).toBeGreaterThan(128)
+  expect(r.failAt!.x).toBeLessThanOrEqual(136)
+  expect(r.maxProg).toBe(50)
+})
+
+test('성실하게 따라가면 100%에 도달', () => {
+  for (const seed of [1, 2, 3, 4, 5]) {
+    const path = makePath(seeded(seed))
+    let m = 0
+    let prev = null as { x: number; y: number } | null
+    let finished = false
+    for (const q of [...path]) {
+      const r = sweep(path, m, prev, q)
+      expect(r.ok).toBe(true)
+      m = r.maxProg
+      prev = q
+      finished = r.finished
+    }
+    expect(finished).toBe(true)
+    expect(m).toBeCloseTo(totalLength(path), 5)
+  }
 })
 
 test('점수 공식: 미완주 < 완주, 완주끼리 느릴수록 나쁨', () => {

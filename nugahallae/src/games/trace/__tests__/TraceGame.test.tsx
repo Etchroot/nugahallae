@@ -2,7 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { TraceGame } from '../TraceGame'
-import { makePath, totalLength, progressDist } from '../logic'
+import { makePath, totalLength, distToPath, ROAD_W } from '../logic'
 import { RECORD_END_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
@@ -37,9 +37,9 @@ const mount = (onFinish = vi.fn(), people = order) => {
   return onFinish
 }
 const area = () => screen.getByTestId('trace-area')
-const ev = (type: 'pointerDown' | 'pointerMove' | 'pointerUp', x: number, y: number) => {
+const ev = (type: 'pointerDown' | 'pointerMove' | 'pointerUp', x: number, y: number, pointerId = 1) => {
   const fire = fireEvent[type]
-  fire(area(), { clientX: x, clientY: y, pointerId: 1 })
+  fire(area(), { clientX: x, clientY: y, pointerId })
 }
 /** 지정한 점에서 클릭이 아닌 포인터 시퀀스 헬퍼 */
 const startAt = (x = path[0].x, y = path[0].y) => {
@@ -94,10 +94,10 @@ test('길을 따라가다 벽을 벗어나면 그 진행률로 기록, 햅틱 ta
   startAt()
   trace(3)
   ev('pointerMove', 0, path[3].y + 150)
-  const expected = Math.floor(
-    (progressDist(path[3], path) / total) * 100,
-  )
-  expect(screen.getByText(`${expected}%`)).toBeTruthy()
+  // 벽을 넘어가는 길에서도 벽 직전까지의 진행은 인정된다(꺾임점 3 직후 몇 %)
+  const pct = Number(screen.getByText(/^\d+%$/).textContent!.replace('%', ''))
+  expect(pct).toBeGreaterThanOrEqual(pctAt(3))
+  expect(pct).toBeLessThan(100)
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('tap')
   // 이후 움직임·손 떼기는 무시
@@ -105,6 +105,48 @@ test('길을 따라가다 벽을 벗어나면 그 진행률로 기록, 햅틱 ta
   ev('pointerUp', path[4].x, path[4].y)
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(screen.getByRole('button', { name: '다음 사람' })).toBeTruthy()
+  expect(screen.getByLabelText('실패 지점')).toBeTruthy()
+})
+
+test('다른 손가락(pointerId)의 이동·떼기는 진행 중인 시도에 영향이 없다', () => {
+  mount()
+  startAt()
+  trace(2)
+  ev('pointerMove', 0, 0, 2)
+  ev('pointerUp', path[2].x, path[2].y, 2)
+  expect(screen.queryByRole('button', { name: '다음 사람' })).toBeNull()
+  expect(haptic).not.toHaveBeenCalled()
+  ev('pointerUp', path[2].x, path[2].y, 1)
+  expect(screen.getByRole('button', { name: '다음 사람' })).toBeTruthy()
+})
+
+test('시작 원 안이어도 길 밖(중심에서 30px 옆)을 누르면 시작되지 않는다', () => {
+  mount()
+  const dx = path[1].x - path[0].x
+  const dy = path[1].y - path[0].y
+  const len = Math.hypot(dx, dy)
+  // 진행 방향에 수직으로 30px
+  const x = path[0].x + (-dy / len) * 30
+  const y = path[0].y + (dx / len) * 30
+  expect(Math.hypot(x - path[0].x, y - path[0].y)).toBeCloseTo(30, 5)
+  startAt(x, y)
+  expect(screen.queryByRole('button', { name: /^(다음 사람|결과 보기)$/ })).toBeNull()
+  expect(haptic).not.toHaveBeenCalled()
+  // 아직 시작 전이므로 이어서 시작 원 중심을 누르면 정상 시작
+  startAt()
+  ev('pointerUp', path[0].x, path[0].y)
+  expect(screen.getByRole('button', { name: '다음 사람' })).toBeTruthy()
+})
+
+test('빠르게 벽 너머 먼 길로 건너뛰면 진행 없이 실패한다', () => {
+  mount()
+  startAt()
+  const far = path[8]
+  expect(distToPath(far, path.slice(0, 3))).toBeGreaterThan(ROAD_W / 2)
+  ev('pointerMove', far.x, far.y)
+  expect(screen.getByRole('button', { name: '다음 사람' })).toBeTruthy()
+  const pct = Number(screen.getByText(/^\d+%$/).textContent!.replace('%', ''))
+  expect(pct).toBeLessThanOrEqual(3)
   expect(screen.getByLabelText('실패 지점')).toBeTruthy()
 })
 

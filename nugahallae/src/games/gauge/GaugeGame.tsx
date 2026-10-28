@@ -15,7 +15,7 @@ import './gauge.css'
 
 const TICK_MS = 16
 /** 시작 탭의 더블탭이 곧바로 멈춤으로 처리되지 않게 하는 잠금(900ms 왕복이라 400ms 가드는 너무 길다) */
-export const STOP_LOCK_MS = 100
+export const STOP_LOCK_MS = 180
 const RULE = '정중앙에서 멈추기! 가장 멀면 벌칙'
 
 type Phase = 'ready' | 'running' | 'stopped'
