@@ -14,6 +14,8 @@ import { FingerGame } from './finger/FingerGame'
 import { TraceGame } from './trace/TraceGame'
 import { GaugeGame } from './gauge/GaugeGame'
 import { RulerGame } from './ruler/RulerGame'
+import { OrderGame } from './order/OrderGame'
+import { ColorGame } from './color/ColorGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -153,6 +155,24 @@ export const GAMES: GameDefinition[] = [
     rule: '제시된 길이만큼 손가락으로 가로선을 그어요. 자는 없어요, 감으로! 정답과 가장 많이 차이 난 사람이 벌칙이에요.',
     tint: '#fff4e0',
     Component: RulerGame,
+  },
+  {
+    id: 'order',
+    icon: '🔢',
+    title: '1부터 16까지',
+    summary: '순서대로 누르기, 가장 느리면 벌칙',
+    rule: '1부터 16까지 숫자를 순서대로 최대한 빨리 눌러요. 틀린 숫자를 누르면 1초가 더해져요. 가장 느린 사람이 벌칙이에요.',
+    tint: '#e6f4ff',
+    Component: OrderGame,
+  },
+  {
+    id: 'color',
+    icon: '🎨',
+    title: '글자 색 맞히기',
+    summary: '글자 말고 색을 골라요',
+    rule: '화면에 나온 글자의 뜻이 아니라 글자 색을 골라요. 10문제를 가장 느리게 푼 사람이 벌칙이에요. 틀리면 1초가 더해져요.',
+    tint: '#f6e8ff',
+    Component: ColorGame,
   },
 ]
 

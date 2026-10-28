@@ -1,0 +1,54 @@
+.og-next {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffc342;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.og-next b { font-size: 40px; font-weight: 700; margin-left: 8px; color: #fff; }
+.og-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+}
+.og-cell {
+  min-width: 64px;
+  min-height: 64px;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 12px;
+  background: #3182f6;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.og-cell:disabled { opacity: 0.2; }
+.og-cell.og-wrong { background: #f04452; }
+.og-count {
+  font-size: 96px;
+  font-weight: 700;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+}
+.og-rec {
+  min-height: 28px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffc342;
+  text-align: center;
+}
+.og-penalty {
+  min-width: 56px;
+  margin-left: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f04452;
+  text-align: left;
+}
