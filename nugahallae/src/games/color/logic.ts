@@ -4,6 +4,7 @@ import type { Rng } from '../../domain/rng'
 export const PENALTY_MS = 1000
 export const COUNT_STEP_MS = 700
 export const SHAKE_MS = 200
+export const PENALTY_FLASH_MS = 600
 /** 문제 전환 직후 입력 무시 시간 */
 export const INPUT_LOCK_MS = 120
 export const QUESTION_COUNT = 10

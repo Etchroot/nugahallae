@@ -44,3 +44,11 @@
   color: #ffc342;
   text-align: center;
 }
+.og-penalty {
+  min-width: 56px;
+  margin-left: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f04452;
+  text-align: left;
+}

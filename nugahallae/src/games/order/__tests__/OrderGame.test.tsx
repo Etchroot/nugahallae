@@ -36,13 +36,14 @@ const startRound = () => {
   clock += 500
   fireEvent.click(screen.getByRole('button', { name: '시작' }))
   advance(2100) // 3·2·1
+  clock += 120 // 격자 등장 직후 입력 잠금(120ms) 통과
 }
 /** 격자가 나타난 뒤 totalMs 동안 1~16을 누르되, 마지막(16)을 totalMs에 누른다 */
 const run = (totalMs: number, wrongs = 0) => {
   startRound()
   for (let i = 0; i < wrongs; i++) fireEvent.pointerDown(cell(16))
   for (let n = 1; n <= 16; n++) {
-    if (n === 16) clock += totalMs
+    if (n === 16) clock += totalMs - 120
     fireEvent.pointerDown(cell(n))
   }
 }
@@ -87,10 +88,42 @@ test('틀린 칸은 진행 안 되고 +1초, 200ms 동안 빨갛게', () => {
   fireEvent.pointerDown(cell(5))
   expect(screen.getByTestId('order-next').textContent).toBe('1')
   expect(cell(5).className).toContain('og-wrong')
+  expect(screen.getByTestId('order-penalty').textContent).toBe('+1초')
   advance(199)
   expect(cell(5).className).toContain('og-wrong')
   advance(1)
   expect(cell(5).className).not.toContain('og-wrong')
+})
+
+test('틀린 탭의 +1초 문구는 600ms 뒤 사라지고, 연속 오답이면 다시 600ms', () => {
+  mount()
+  startRound()
+  expect(screen.getByTestId('order-penalty').textContent).toBe('')
+  fireEvent.pointerDown(cell(5))
+  advance(400)
+  fireEvent.pointerDown(cell(6))
+  advance(500)
+  expect(screen.getByTestId('order-penalty').textContent).toBe('+1초')
+  advance(100)
+  expect(screen.getByTestId('order-penalty').textContent).toBe('')
+})
+
+test('격자 등장 직후 120ms 입력은 무시(벌점 없음), 시간은 t0부터', () => {
+  mount()
+  clock += 500
+  fireEvent.click(screen.getByRole('button', { name: '시작' }))
+  advance(2100)
+  clock += 119
+  fireEvent.pointerDown(cell(5)) // 늦은 손가락: 오답이어도 무시
+  fireEvent.pointerDown(cell(1)) // 정답도 무시
+  expect(screen.getByTestId('order-next').textContent).toBe('1')
+  expect(screen.getByTestId('order-penalty').textContent).toBe('')
+  clock += 1
+  fireEvent.pointerDown(cell(1))
+  expect(screen.getByTestId('order-next').textContent).toBe('2')
+  clock += 4880
+  for (let n = 2; n <= 16; n++) fireEvent.pointerDown(cell(n))
+  expect(screen.getByText('5.00초')).toBeTruthy()
 })
 
 test('시간은 격자 등장~16 누른 순간 + 실수당 1초 (주입 now)', () => {
@@ -112,7 +145,7 @@ test('이미 누른 칸 중복 탭은 무시(벌점 없음)', () => {
   fireEvent.pointerDown(cell(1))
   fireEvent.pointerDown(cell(1))
   expect(screen.getByTestId('order-next').textContent).toBe('2')
-  clock += 3000
+  clock += 2880
   for (let n = 2; n <= 16; n++) fireEvent.pointerDown(cell(n))
   expect(screen.getByText('3.00초')).toBeTruthy()
 })

@@ -90,7 +90,7 @@ test('3·2·1 뒤 첫 문제와 답 버튼 4개(고정 순서)', () => {
   expect(word.textContent).toBe(nameOf(QS[0].word))
   const names = screen.getAllByTestId('color-answer').map((b) => b.textContent)
   expect(names).toEqual(['빨강', '파랑', '노랑', '보라'])
-  expect(screen.getByTestId('color-progress').textContent).toBe('1 / 10')
+  expect(screen.getByTestId('color-progress').textContent).toContain('1 / 10')
 })
 
 test('모든 사람이 같은 10문제', () => {
@@ -111,19 +111,44 @@ test('모든 사람이 같은 10문제', () => {
   expect(seen[0]).toEqual(QS.map((q) => `${nameOf(q.word)}/${q.ink}`))
 })
 
-test('오답이면 같은 문제 유지, +1초, 버튼 200ms 흔들림', () => {
+test('오답이면 같은 문제 유지, 누른 버튼만 200ms 흔들림, +1초 문구', () => {
   mount()
   startRound()
   clock += 500
   const wrong = QS[0].ink === 'red' ? '파랑' : '빨강'
   answer(wrong)
-  expect(screen.getByTestId('color-progress').textContent).toBe('1 / 10')
+  expect(screen.getByTestId('color-progress').textContent).toContain('1 / 10')
   expect(screen.getByTestId('color-word').getAttribute('data-ink')).toBe(QS[0].ink)
-  expect(screen.getByTestId('color-answers').className).toContain('cg-shake')
-  advance(199)
-  expect(screen.getByTestId('color-answers').className).toContain('cg-shake')
-  advance(1)
+  const shaking = screen.getAllByTestId('color-answer').filter((b) => b.className.includes('cg-shake'))
+  expect(shaking.map((b) => b.textContent)).toEqual([wrong])
   expect(screen.getByTestId('color-answers').className).not.toContain('cg-shake')
+  expect(screen.getByTestId('color-penalty').textContent).toBe('+1초')
+  advance(199)
+  expect(screen.getAllByTestId('color-answer').some((b) => b.className.includes('cg-shake'))).toBe(true)
+  advance(1)
+  expect(screen.getAllByTestId('color-answer').some((b) => b.className.includes('cg-shake'))).toBe(false)
+  advance(400)
+  expect(screen.getByTestId('color-penalty').textContent).toBe('')
+})
+
+test('같은 버튼을 연속 오답하면 흔들림이 다시 시작된다', () => {
+  mount()
+  startRound()
+  clock += 500
+  const wrong = QS[0].ink === 'red' ? '파랑' : '빨강'
+  answer(wrong)
+  const first = screen.getByRole('button', { name: wrong })
+  advance(100)
+  clock += 100
+  answer(wrong)
+  const second = screen.getByRole('button', { name: wrong })
+  expect(second.className).toContain('cg-shake')
+  expect(second).not.toBe(first) // 새로 마운트되어 애니메이션 재시작
+  advance(199)
+  expect(second.className).toContain('cg-shake') // 두 번째 탭 기준 200ms
+  advance(1)
+  expect(screen.getByRole('button', { name: wrong }).className).not.toContain('cg-shake')
+  expect(screen.getByTestId('color-progress').textContent).toContain('1 / 10')
 })
 
 test('시간 = 첫 문제 표시~10번째 정답 + 오답당 1초', () => {
@@ -143,13 +168,13 @@ test('문제 전환 직후 120ms 동안 입력 무시', () => {
   startRound()
   clock += 500
   answer(nameOf(QS[0].ink)) // 정답, 다음 문제로
-  expect(screen.getByTestId('color-progress').textContent).toBe('2 / 10')
+  expect(screen.getByTestId('color-progress').textContent).toContain('2 / 10')
   clock += 119
   answer(nameOf(QS[1].ink)) // 무시
-  expect(screen.getByTestId('color-progress').textContent).toBe('2 / 10')
+  expect(screen.getByTestId('color-progress').textContent).toContain('2 / 10')
   clock += 1
   answer(nameOf(QS[1].ink))
-  expect(screen.getByTestId('color-progress').textContent).toBe('3 / 10')
+  expect(screen.getByTestId('color-progress').textContent).toContain('3 / 10')
 })
 
 test('시작 직후(첫 문제 표시 후)에도 120ms 입력 무시, 무시된 입력은 오답 아님', () => {
@@ -157,10 +182,11 @@ test('시작 직후(첫 문제 표시 후)에도 120ms 입력 무시, 무시된 
   startRound()
   clock += 50
   answer(nameOf(QS[0].ink === 'red' ? 'blue' : 'red'))
-  expect(screen.getByTestId('color-answers').className).not.toContain('cg-shake')
+  expect(screen.getByTestId('color-penalty').textContent).toBe('')
+  expect(screen.getAllByTestId('color-answer').some((b) => b.className.includes('cg-shake'))).toBe(false)
   clock += 70
   answer(nameOf(QS[0].ink))
-  expect(screen.getByTestId('color-progress').textContent).toBe('2 / 10')
+  expect(screen.getByTestId('color-progress').textContent).toContain('2 / 10')
 })
 
 test('모두 끝나면 가장 느린 사람이 onFinish로 1회, 햅틱 error 1회', () => {

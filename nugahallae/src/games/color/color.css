@@ -1,3 +1,15 @@
+.cg-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 28px;
+}
+.cg-penalty {
+  min-width: 48px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f04452;
+}
 .cg-progress {
   font-size: 15px;
   font-weight: 700;
@@ -35,9 +47,10 @@
 }
 .cg-answer:active { background: #4e5968; }
 .cg-dot {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
   flex: none;
 }
 .cg-shake { animation: cg-shake 200ms linear; }

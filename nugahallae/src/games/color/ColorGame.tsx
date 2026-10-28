@@ -9,7 +9,7 @@ import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import {
-  COLORS, COUNT_STEP_MS, INPUT_LOCK_MS, QUESTION_COUNT, SHAKE_MS, makeQuestions, makeRecord,
+  COLORS, COUNT_STEP_MS, INPUT_LOCK_MS, PENALTY_FLASH_MS, QUESTION_COUNT, SHAKE_MS, makeQuestions, makeRecord,
   recordText, whyText,
 } from './logic'
 import type { ColorRecord } from './logic'
@@ -34,7 +34,8 @@ export function ColorGame({
   const [phase, setPhase] = useState<Phase>('ready')
   const [cd, setCd] = useState(3)
   const [qi, setQi] = useState(0)
-  const [shake, setShake] = useState(false)
+  const [shake, setShake] = useState<{ id: string; n: number } | null>(null)
+  const [penalty, setPenalty] = useState(false)
   const [records, setRecords] = useState<ColorRecord[]>([])
   const [lastRec, setLastRec] = useState<ColorRecord | null>(null)
   const [retry, setRetry] = useState(false)
@@ -45,6 +46,8 @@ export function ColorGame({
   const shownAt = useRef(0)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const penaltyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const shakeCount = useRef(0)
   const { guard, prime } = useScreenGuard(now)
 
   const { ranked, overlay, finish } = useRecordFinish<ColorRecord>({
@@ -60,6 +63,8 @@ export function ColorGame({
     timers.current.length = 0
     if (shakeTimer.current !== null) clearTimeout(shakeTimer.current)
     shakeTimer.current = null
+    if (penaltyTimer.current !== null) clearTimeout(penaltyTimer.current)
+    penaltyTimer.current = null
   }
   useEffect(() => clearTimers, [])
 
@@ -77,7 +82,8 @@ export function ColorGame({
       if (document.visibilityState !== 'hidden') return
       if (phaseRef.current !== 'count' && phaseRef.current !== 'play') return
       clearTimers()
-      setShake(false)
+      setShake(null)
+      setPenalty(false)
       setRetry(true)
       setP('ready')
     }
@@ -109,9 +115,13 @@ export function ColorGame({
     if (t - shownAt.current < INPUT_LOCK_MS) return
     if (colorId !== questions[qiRef.current].ink) {
       mistakes.current += 1
-      setShake(true)
+      shakeCount.current += 1
+      setShake({ id: colorId, n: shakeCount.current })
       if (shakeTimer.current !== null) clearTimeout(shakeTimer.current)
-      shakeTimer.current = setTimeout(() => setShake(false), SHAKE_MS)
+      shakeTimer.current = setTimeout(() => setShake(null), SHAKE_MS)
+      setPenalty(true)
+      if (penaltyTimer.current !== null) clearTimeout(penaltyTimer.current)
+      penaltyTimer.current = setTimeout(() => setPenalty(false), PENALTY_FLASH_MS)
       return
     }
     if (qiRef.current + 1 >= QUESTION_COUNT) {
@@ -165,8 +175,13 @@ export function ColorGame({
         {phase === 'count' && <div className="cg-count">{cd}</div>}
         {phase === 'play' && (
           <>
-            <div className="cg-progress" data-testid="color-progress">
-              {qi + 1} / {QUESTION_COUNT}
+            <div className="cg-progress-row">
+              <span className="cg-progress" data-testid="color-progress">
+                {qi + 1} / {QUESTION_COUNT}
+              </span>
+              <span className="cg-penalty" data-testid="color-penalty" role="status">
+                {penalty ? '+1초' : ''}
+              </span>
             </div>
             <div
               className="cg-word"
@@ -176,16 +191,14 @@ export function ColorGame({
             >
               {colorById(q.word).name}
             </div>
-            <div
-              className={'cg-answers' + (shake ? ' cg-shake' : '')}
-              data-testid="color-answers"
-            >
+            <div className="cg-answers" data-testid="color-answers">
               {COLORS.map((c) => (
                 <button
-                  key={c.id}
+                  // 오답마다 키가 바뀌어 다시 마운트 → 흔들림이 처음부터 재시작
+                  key={shake?.id === c.id ? `${c.id}-${shake.n}` : c.id}
                   type="button"
                   data-testid="color-answer"
-                  className="cg-answer"
+                  className={'cg-answer' + (shake?.id === c.id ? ' cg-shake' : '')}
                   onPointerDown={() => answer(c.id)}
                   onKeyDown={(e) => {
                     if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {

@@ -4,6 +4,9 @@ import type { Rng } from '../../domain/rng'
 export const PENALTY_MS = 1000
 export const COUNT_STEP_MS = 700
 export const WRONG_FLASH_MS = 200
+export const PENALTY_FLASH_MS = 600
+/** 격자 등장 직후 입력 무시 시간(카운트다운 때 올라온 늦은 손가락 보호) */
+export const INPUT_LOCK_MS = 120
 export const GRID_SIZE = 16
 
 export interface OrderRecord {

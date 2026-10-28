@@ -9,7 +9,7 @@ import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import {
-  COUNT_STEP_MS, GRID_SIZE, WRONG_FLASH_MS, makeRecord, recordText, shuffleGrid, whyText,
+  COUNT_STEP_MS, GRID_SIZE, INPUT_LOCK_MS, PENALTY_FLASH_MS, WRONG_FLASH_MS, makeRecord, recordText, shuffleGrid, whyText,
 } from './logic'
 import type { OrderRecord } from './logic'
 import '../shared/record.css'
@@ -31,6 +31,7 @@ export function OrderGame({
   const [grid, setGrid] = useState<number[]>([])
   const [target, setTarget] = useState(1)
   const [wrong, setWrong] = useState<number | null>(null)
+  const [penalty, setPenalty] = useState(false)
   const [records, setRecords] = useState<OrderRecord[]>([])
   const [lastRec, setLastRec] = useState<OrderRecord | null>(null)
   const [retry, setRetry] = useState(false)
@@ -40,6 +41,7 @@ export function OrderGame({
   const t0 = useRef(0)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const penaltyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { guard, prime } = useScreenGuard(now)
 
   const { ranked, overlay, finish } = useRecordFinish<OrderRecord>({
@@ -55,6 +57,8 @@ export function OrderGame({
     timers.current.length = 0
     if (flashTimer.current !== null) clearTimeout(flashTimer.current)
     flashTimer.current = null
+    if (penaltyTimer.current !== null) clearTimeout(penaltyTimer.current)
+    penaltyTimer.current = null
   }
   useEffect(() => clearTimers, [])
 
@@ -73,6 +77,7 @@ export function OrderGame({
       if (phaseRef.current !== 'count' && phaseRef.current !== 'play') return
       clearTimers()
       setWrong(null)
+      setPenalty(false)
       setGrid([])
       setRetry(true)
       setP('ready')
@@ -101,12 +106,16 @@ export function OrderGame({
 
   const press = (n: number) => {
     if (phaseRef.current !== 'play') return
+    if (now() - t0.current < INPUT_LOCK_MS) return
     if (n < targetRef.current) return // 이미 누른 칸
     if (n !== targetRef.current) {
       mistakes.current += 1
       setWrong(n)
       if (flashTimer.current !== null) clearTimeout(flashTimer.current)
       flashTimer.current = setTimeout(() => setWrong(null), WRONG_FLASH_MS)
+      setPenalty(true)
+      if (penaltyTimer.current !== null) clearTimeout(penaltyTimer.current)
+      penaltyTimer.current = setTimeout(() => setPenalty(false), PENALTY_FLASH_MS)
       return
     }
     if (n === GRID_SIZE) {
@@ -163,6 +172,9 @@ export function OrderGame({
             <div className="og-next">
               다음
               <b data-testid="order-next">{target}</b>
+              <span className="og-penalty" data-testid="order-penalty" role="status">
+                {penalty ? '+1초' : ''}
+              </span>
             </div>
             <div className="og-grid" data-testid="order-grid">
               {grid.map((n) => (
