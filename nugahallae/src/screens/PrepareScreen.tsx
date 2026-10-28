@@ -39,6 +39,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
   const [picked, setPicked] = useState<Piece[]>([]) // 고른 순서 = 게임 차례
   const [confirming, setConfirming] = useState<Piece | null>(null)
   const guard = useTapGuard()
+  const auto = game.pieceMode === 'auto'
 
   const header = (
     <>
@@ -77,15 +78,30 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
             </button>
           </div>
         </div>
-        <BottomCTA
-          fixed
-          onClick={() => {
-            onCountChosen(count)
-            setPieces(drawPieces(count))
-          }}
-        >
-          말 뽑기 시작
-        </BottomCTA>
+        {auto ? (
+          <>
+            <p className="sc-auto-note">이 게임은 손가락을 올리는 순서대로 말이 정해져요</p>
+            <BottomCTA
+              fixed
+              onClick={guard(() => {
+                onCountChosen(count)
+                onStart(drawPieces(count))
+              })}
+            >
+              시작하기
+            </BottomCTA>
+          </>
+        ) : (
+          <BottomCTA
+            fixed
+            onClick={() => {
+              onCountChosen(count)
+              setPieces(drawPieces(count))
+            }}
+          >
+            말 뽑기 시작
+          </BottomCTA>
+        )}
       </div>
     )
   }

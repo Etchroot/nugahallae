@@ -10,6 +10,7 @@ import { TowerGame } from './tower/TowerGame'
 import { TimerGame } from './timer/TimerGame'
 import { ReactionGame } from './reaction/ReactionGame'
 import { TapGame } from './tap/TapGame'
+import { FingerGame } from './finger/FingerGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -29,7 +30,6 @@ export const GAMES: GameDefinition[] = [
     summary: '꾹 눌러 붓기, 넘치게 하면 벌칙',
     rule: '차례대로 잔에 물을 부어요. 꾹 누르면 콸콸, 살짝 탭하면 한 방울! 한 방울이라도 부어야 넘길 수 있고, 넘치게 한 사람이 벌칙이에요.',
     tint: '#e3f2ff',
-    badge: 'NEW',
     Component: PourGame,
   },
   {
@@ -112,6 +112,17 @@ export const GAMES: GameDefinition[] = [
     rule: '내 차례에 버튼을 누르면 3초 카운트다운 후 5초 동안 연타! 가장 적게 누른 사람이 벌칙이에요.',
     tint: '#fff0e3',
     Component: TapGame,
+  },
+  {
+    id: 'finger',
+    icon: '🖐️',
+    title: '손가락 룰렛',
+    summary: '다 같이 손가락 올리고 찍히면 벌칙',
+    rule: '모두 동시에 화면에 손가락을 올려요. 빛이 손가락들을 돌다가 한 명을 찍어요. 찍힌 사람이 벌칙이에요. 손가락을 떼면 다시 시작해요.',
+    tint: '#fff3d6',
+    badge: 'NEW',
+    pieceMode: 'auto',
+    Component: FingerGame,
   },
 ]
 

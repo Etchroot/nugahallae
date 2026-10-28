@@ -1,0 +1,99 @@
+.fg-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #191f28;
+  color: #fff;
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  box-sizing: border-box;
+  overflow: hidden;
+  word-break: keep-all;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+.fg-bar {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  background: #333d4b;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.fg-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.fg-guide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #e5e8eb;
+  pointer-events: none;
+}
+.fg-ring {
+  position: absolute;
+  box-sizing: border-box;
+  width: 88px;
+  height: 88px;
+  border: 6px solid #fff;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform 120ms ease-out, background 120ms ease-out, box-shadow 120ms ease-out;
+}
+.fg-emoji { font-size: 40px; line-height: 1; }
+.fg-lit {
+  transform: scale(1.18);
+  background: rgba(255, 244, 180, 0.55);
+  box-shadow: 0 0 28px 8px rgba(255, 230, 120, 0.85);
+}
+.fg-picked {
+  transform: scale(1.7);
+  background: rgba(240, 68, 82, 0.55);
+  box-shadow: 0 0 40px 14px rgba(240, 68, 82, 0.8);
+  z-index: 2;
+}
+.fg-overlay {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  max-width: 88%;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.82);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 3;
+  pointer-events: none;
+}
+.fg-hint {
+  margin: 0;
+  padding: 12px 16px 34px;
+  font-size: 15px;
+  color: #b0b8c1;
+  text-align: center;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fg-ring { transition: none; }
+}

@@ -110,6 +110,28 @@ test('다시 고르기: 하나 이상 고른 뒤 보이고, 선택 초기화·�
   expect(cards().every((c) => !(c as HTMLButtonElement).disabled)).toBe(true)
 })
 
+test("pieceMode 'auto' 게임은 말 카드 없이 시작하기만, onStart는 인원수 길이의 말 배열", async () => {
+  const onStart = vi.fn<(order: Piece[]) => void>()
+  const onCountChosen = vi.fn()
+  const auto = { title: '손가락 룰렛', rule: '규칙', pieceMode: 'auto' } as unknown as GameDefinition
+  render(
+    <TDSMobileAITProvider brandPrimaryColor="#3182F6">
+      <PrepareScreen game={auto} initialCount={4} onCountChosen={onCountChosen} onStart={onStart} />
+    </TDSMobileAITProvider>,
+  )
+  expect(screen.getByText('이 게임은 손가락을 올리는 순서대로 말이 정해져요')).toBeInTheDocument()
+  expect(screen.queryByText('말 뽑기 시작')).not.toBeInTheDocument()
+  expect(screen.queryAllByTestId('piece-card')).toHaveLength(0)
+  fireEvent.click(screen.getByLabelText('인원 늘리기'))
+  await advance(400)
+  fireEvent.click(screen.getByText('시작하기'))
+  expect(onCountChosen).toHaveBeenCalledWith(5)
+  expect(onStart).toHaveBeenCalledTimes(1)
+  const got = onStart.mock.calls[0][0]
+  expect(got).toHaveLength(5)
+  expect(new Set(got.map((p) => p.id)).size).toBe(5)
+})
+
 test('확인 상태 문구에 pieceLabel이 쓰인다', () => {
   setup(2)
   fireEvent.click(cards()[0])

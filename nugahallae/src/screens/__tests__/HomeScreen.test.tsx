@@ -64,6 +64,13 @@ test('카드를 누르면 onPickGame', () => {
   expect(pick).toHaveBeenCalledWith('roulette')
 })
 
+test('NEW 배지는 손가락 룰렛에만', () => {
+  renderHome()
+  const withNew = cards().filter((c) => c.textContent?.includes('NEW'))
+  expect(withNew).toHaveLength(1)
+  expect(withNew[0].textContent).toContain('손가락 룰렛')
+})
+
 test('지우기 버튼은 글자가 있을 때만 보이고 누르면 전체 목록이 돌아온다', () => {
   renderHome()
   expect(screen.queryByLabelText('검색어 지우기')).not.toBeInTheDocument()
