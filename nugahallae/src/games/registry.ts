@@ -6,6 +6,7 @@ import { CrocGame } from './croc/CrocGame'
 import { BombGame } from './bomb/BombGame'
 import { BalloonGame } from './balloon/BalloonGame'
 import { UpdownGame } from './updown/UpdownGame'
+import { TowerGame } from './tower/TowerGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -72,6 +73,15 @@ export const GAMES: GameDefinition[] = [
     rule: '1~100 사이에 폭탄 숫자가 숨어 있어요. 돌아가며 범위 안의 숫자를 부르면 UP/DOWN으로 범위가 좁혀져요. 폭탄 숫자를 부른 사람이 벌칙이에요.',
     tint: '#efe8ff',
     Component: UpdownGame,
+  },
+  {
+    id: 'tower',
+    icon: '🧱',
+    title: '블록 탑',
+    summary: '하나씩 빼다 무너뜨리면 벌칙',
+    rule: '돌아가며 블록을 하나씩 빼요. 맨 윗줄은 못 빼고, 한 줄에 마지막 남은 블록도 못 빼요. 뺄수록 탑이 불안해져요. 무너뜨린 사람이 벌칙이에요.',
+    tint: '#fbeee0',
+    Component: TowerGame,
   },
 ]
 
