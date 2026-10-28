@@ -165,3 +165,81 @@ test('동점이면 rng로 고르고 문구에 (동점자 중 랜덤)', () => {
   playAll([5, 7, 6]) // 오차 1, 1, 0
   expect(screen.getByRole('status').textContent).toMatch(/ 1\.0cm 차이 났어요 \(동점자 중 랜덤\)$/)
 })
+
+const SHAPES = 'line,circle,path,rect,polyline'
+
+test('손을 떼면 그은 선과 끝점이 화면에서 사라지고, 다음 사람에게 앞사람 흔적이 없다', () => {
+  mount()
+  drag(20, 100, 20 + 4.2 * CM_PX, 100, false)
+  expect(area().querySelectorAll('line').length).toBeGreaterThan(0)
+  fireEvent.pointerUp(area(), { clientX: 20 + 4.2 * CM_PX, clientY: 100, pointerId: 1 })
+  expect(screen.getByText('기록했어요')).toBeTruthy()
+  expect(area().querySelectorAll(SHAPES)).toHaveLength(0)
+  advance(1000)
+  expect(area().querySelectorAll(SHAPES)).toHaveLength(0)
+  next()
+  expect(area().querySelectorAll(SHAPES)).toHaveLength(0)
+  expect(screen.queryByText('기록했어요')).toBeNull()
+})
+
+test('끝나기 전까지 innerHTML 어디에도 길이·오차·±가 새지 않는다', () => {
+  mount()
+  drawCm(4.2)
+  next()
+  drag(20, 100, 20 + 5 * CM_PX, 100, false)
+  fireEvent.pointerUp(area(), { clientX: 20 + 5 * CM_PX, clientY: 100, pointerId: 1 })
+  const html = document.body.innerHTML
+  expect(html).not.toMatch(/±/)
+  expect(html).not.toMatch(/4\.2|5\.0|189|158\.76|226\.8/)
+  expect(area().innerHTML).toBe('')
+})
+
+test('pointercancel은 기록하지 않고 다시 해 주세요', () => {
+  mount()
+  drag(20, 100, 20 + 5 * CM_PX, 100, false)
+  fireEvent.pointerCancel(area(), { clientX: 0, clientY: 0, pointerId: 1 })
+  expect(screen.getByText('다시 해 주세요')).toBeTruthy()
+  expect(screen.queryByText('기록했어요')).toBeNull()
+  expect(area().querySelectorAll(SHAPES)).toHaveLength(0)
+  expect(screen.queryByRole('button', { name: /다음 사람|결과 보기/ })).toBeNull()
+  drawCm(5)
+  expect(screen.getByText('기록했어요')).toBeTruthy()
+})
+
+test('lostpointercapture도 시도를 무효로 한다', () => {
+  mount()
+  drag(20, 100, 20 + 5 * CM_PX, 100, false)
+  fireEvent.lostPointerCapture(area(), { pointerId: 1 })
+  expect(screen.getByText('다시 해 주세요')).toBeTruthy()
+  expect(screen.queryByText('기록했어요')).toBeNull()
+})
+
+test('정상 종료 뒤 늦게 오는 lostpointercapture는 기록을 지우지 않는다', () => {
+  mount()
+  drawCm(5)
+  fireEvent.lostPointerCapture(area(), { pointerId: 1 })
+  expect(screen.getByText('기록했어요')).toBeTruthy()
+})
+
+test('그리는 폭은 SVG 실제 폭(clientWidth)을 따르고, 목표도 그 폭에 맞춘다', () => {
+  const spy = vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(300)
+  try {
+    render(<RulerGame order={order} onFinish={vi.fn()} rng={() => 0.999999} now={now} />)
+    expect(area().getAttribute('viewBox')).toBe('0 0 300 240')
+    expect(screen.getByText('7cm를 그어 보세요')).toBeTruthy()
+  } finally {
+    spy.mockRestore()
+  }
+})
+
+test('두 번째 손가락은 선을 움직이거나 끝낼 수 없다', () => {
+  mount()
+  fireEvent.pointerDown(area(), { clientX: 20, clientY: 100, pointerId: 1 })
+  fireEvent.pointerDown(area(), { clientX: 200, clientY: 150, pointerId: 2 })
+  fireEvent.pointerMove(area(), { clientX: 20 + 5 * CM_PX, clientY: 100, pointerId: 1 })
+  fireEvent.pointerMove(area(), { clientX: 300, clientY: 100, pointerId: 2 })
+  fireEvent.pointerUp(area(), { clientX: 300, clientY: 100, pointerId: 2 })
+  expect(screen.queryByText('기록했어요')).toBeNull()
+  fireEvent.pointerUp(area(), { clientX: 20 + 5 * CM_PX, clientY: 100, pointerId: 1 })
+  expect(screen.getByText('기록했어요')).toBeTruthy()
+})

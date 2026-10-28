@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import type { GameProps } from '../types'
 import { pieceLabel } from '../../domain/pieces'
@@ -29,7 +29,9 @@ export function RulerGame({
   now = () => performance.now(),
 }: GameProps & { rng?: Rng; now?: () => number }) {
   const [vw, setVw] = useState(viewWidth)
-  const [target] = useState(() => pickTarget(rng, maxTargetCm(viewWidth())))
+  const [pickedTarget] = useState(() => pickTarget(rng, maxTargetCm(viewWidth())))
+  // 실제 그리는 폭에 안 들어가는 목표는 폭에 맞게 낮춘다
+  const target = Math.min(pickedTarget, maxTargetCm(vw))
   const [idx, setIdx] = useState(0)
   const [phase, setPhase] = useState<Phase>('ready')
   const [records, setRecords] = useState<RulerRecord[]>([])
@@ -55,10 +57,24 @@ export function RulerGame({
     setPhase(p)
   }
 
-  useEffect(() => {
-    const onResize = () => setVw(viewWidth())
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+  // 그리는 폭은 SVG가 실제로 차지하는 CSS px로 잡아 1cm = 37.8 보이는 px을 보장한다
+  useLayoutEffect(() => {
+    const measure = () => {
+      const w = svgRef.current?.clientWidth ?? 0
+      setVw(w > 0 ? w : viewWidth())
+    }
+    measure()
+    const el = svgRef.current
+    let ro: ResizeObserver | null = null
+    if (el && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(measure)
+      ro.observe(el)
+    }
+    window.addEventListener('resize', measure)
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
   // 백그라운드로 가면 그리던 시도는 무효 → 같은 사람이 다시
@@ -132,11 +148,22 @@ export function RulerGame({
       return
     }
     const rec = makeRecord(order[idx], cm, target)
-    setLine({ x0: s.x, x1, y: s.y })
+    // 다음 사람이 따라 그리지 못하게 뗀 즉시 선을 지운다
+    setLine(null)
     setRecords((rs) => [...rs, rec])
     setMsg('none')
     setP('done')
     prime()
+  }
+
+  // 취소·캡처 상실: 좌표를 믿을 수 없으니 시도를 버리고 같은 사람이 다시
+  const onAbort = (e: ReactPointerEvent<SVGSVGElement>) => {
+    if (phaseRef.current !== 'drawing' || e.pointerId !== pointerId.current) return
+    pointerId.current = null
+    startRef.current = null
+    setLine(null)
+    setMsg('retry')
+    setP('ready')
   }
 
   const next = () => {
@@ -234,7 +261,8 @@ export function RulerGame({
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
-          onPointerCancel={onUp}
+          onPointerCancel={onAbort}
+          onLostPointerCapture={onAbort}
           onContextMenu={(e) => e.preventDefault()}
         >
           {line && (
