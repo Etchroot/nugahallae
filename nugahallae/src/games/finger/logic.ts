@@ -15,12 +15,16 @@ export interface FingerState {
   fingers: number[]
   /** 인원 초과로 무시 중인 pointerId */
   ignored: number[]
-  /** 걸린 손가락의 fingers 인덱스 (spinning/done) */
+  /** pointerId → 말 번호(order 인덱스). 손가락이 떠 있는 동안 고정 */
+  slots: Record<number, number>
+  /** 걸린 손가락의 fingers 위치 (spinning/done) — 하이라이트 순환용 */
   target: number | null
+  /** 걸린 손가락의 말 번호 = loser는 order[targetSlot] */
+  targetSlot: number | null
 }
 
 export function initFinger(n: number): FingerState {
-  return { phase: 'waiting', n, fingers: [], ignored: [], target: null }
+  return { phase: 'waiting', n, fingers: [], ignored: [], slots: {}, target: null, targetSlot: null }
 }
 
 export function addFinger(s: FingerState, id: number): FingerState {
@@ -28,24 +32,37 @@ export function addFinger(s: FingerState, id: number): FingerState {
   if (s.fingers.includes(id) || s.ignored.includes(id)) return s
   if (s.fingers.length >= s.n) return { ...s, ignored: [...s.ignored, id] }
   const fingers = [...s.fingers, id]
-  return { ...s, fingers, phase: fingers.length === s.n ? 'armed' : 'waiting' }
+  const used = new Set(Object.values(s.slots))
+  let slot = 0
+  while (used.has(slot)) slot++
+  return {
+    ...s,
+    fingers,
+    slots: { ...s.slots, [id]: slot },
+    phase: fingers.length === s.n ? 'armed' : 'waiting',
+  }
 }
 
 export function removeFinger(s: FingerState, id: number): FingerState {
   if (s.phase === 'done') return s
   if (s.ignored.includes(id)) return { ...s, ignored: s.ignored.filter((x) => x !== id) }
   if (!s.fingers.includes(id)) return s
+  const { [id]: _freed, ...slots } = s.slots
+  void _freed
   return {
     ...s,
     fingers: s.fingers.filter((x) => x !== id),
+    slots,
     phase: 'waiting',
     target: null,
+    targetSlot: null,
   }
 }
 
 export function startSpin(s: FingerState, rng: Rng): FingerState {
   if (s.phase !== 'armed') return s
-  return { ...s, phase: 'spinning', target: Math.floor(rng() * s.n) }
+  const target = Math.floor(rng() * s.n)
+  return { ...s, phase: 'spinning', target, targetSlot: s.slots[s.fingers[target]] }
 }
 
 export function finishSpin(s: FingerState): FingerState {

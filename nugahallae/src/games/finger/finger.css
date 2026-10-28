@@ -24,6 +24,7 @@
   font-size: 15px;
   font-weight: 700;
   text-align: center;
+  pointer-events: none;
 }
 .fg-area {
   position: relative;
@@ -88,6 +89,7 @@
 }
 .fg-hint {
   margin: 0;
+  min-height: 22px;
   padding: 12px 16px 34px;
   font-size: 15px;
   color: #b0b8c1;

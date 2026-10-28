@@ -92,6 +92,42 @@ test('하이라이트 중 손가락을 떼면 리셋되고, 다시 올리면 처
   expect(haptic).toHaveBeenCalledTimes(1)
 })
 
+test('손가락 하나를 떼도 남은 손가락의 말은 바뀌지 않고, 새 손가락은 빈 번호를 받는다', () => {
+  render(<FingerGame order={order} onFinish={() => {}} rng={() => 0} />)
+  down(1); down(2); down(3)
+  up(2)
+  let rings = screen.getAllByTestId('finger-ring')
+  expect(rings.map((r) => r.textContent)).toEqual([order[0].emoji, order[2].emoji])
+  down(4)
+  rings = screen.getAllByTestId('finger-ring')
+  expect(rings.map((r) => r.textContent)).toEqual([order[0].emoji, order[2].emoji, order[1].emoji])
+})
+
+test('armed 중 인원 초과 손가락이 닿아도 타이머는 하나만(찍힘 1회)', () => {
+  const onFinish = vi.fn()
+  render(<FingerGame order={order} onFinish={onFinish} rng={() => 0} />)
+  down(1); down(2); down(3)
+  advance(500)
+  down(4)
+  advance(ARM_MS + SPIN_MS)
+  expect(haptic).toHaveBeenCalledTimes(1)
+  advance(END_EFFECT_MS + 10000)
+  expect(onFinish).toHaveBeenCalledTimes(1)
+})
+
+test('lostpointercapture도 뗀 것으로 처리', () => {
+  render(<FingerGame order={order} onFinish={() => {}} rng={() => 0} />)
+  down(1); down(2); down(3)
+  fireEvent(area(), ev('lostpointercapture', 3))
+  expect(screen.getByText('2/3명')).toBeTruthy()
+})
+
+test('css: 규칙 띠는 포인터를 받지 않고 힌트는 고정 높이', () => {
+  const css = readFileSync(join(__dirname, '..', 'finger.css'), 'utf8')
+  expect(css.match(/\.fg-bar\s*\{([^}]*)\}/)?.[1]).toMatch(/pointer-events:\s*none/)
+  expect(css.match(/\.fg-hint\s*\{([^}]*)\}/)?.[1]).toMatch(/min-height:\s*\d+px/)
+})
+
 test('pointercancel도 뗀 것으로 처리', () => {
   render(<FingerGame order={order} onFinish={() => {}} rng={() => 0} />)
   down(1); down(2); down(3)

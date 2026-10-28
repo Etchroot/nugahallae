@@ -65,6 +65,18 @@ test('armed/spinning 중 손가락이 떨어지면 waiting으로, 남은 손가�
   expect(c.fingers).toEqual([2, 3, 9])
 })
 
+test('말 번호(slot)는 손가락이 떠 있는 동안 고정, 뗀 번호는 가장 낮은 빈 번호로 재사용', () => {
+  const s = full(3)
+  expect(s.slots).toEqual({ 1: 0, 2: 1, 3: 2 })
+  const a = removeFinger(s, 2)
+  expect(a.slots).toEqual({ 1: 0, 3: 2 })
+  const b = addFinger(a, 9)
+  expect(b.slots).toEqual({ 1: 0, 3: 2, 9: 1 })
+  const sp = startSpin(b, () => 0.5) // fingers [1,3,9] 중 위치 1 = 손가락 3
+  expect(sp.target).toBe(1)
+  expect(sp.targetSlot).toBe(2)
+})
+
 test('startSpin은 armed에서만, rng로 대상 고정', () => {
   const w = addFinger(initFinger(3), 1)
   expect(startSpin(w, () => 0)).toBe(w)

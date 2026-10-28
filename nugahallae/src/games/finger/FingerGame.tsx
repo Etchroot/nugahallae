@@ -77,9 +77,9 @@ export function FingerGame({
 
   const conclude = () => {
     const done = finishSpin(stateRef.current)
-    if (done === stateRef.current || done.target === null) return
+    if (done === stateRef.current || done.targetSlot === null) return
     commit(done)
-    const loser = order[done.target]
+    const loser = order[done.targetSlot]
     void haptic('error')
     setOverlay(`${pieceLabel(loser)} 찍혔다!`)
     schedule(() => onFinishRef.current(loser), END_EFFECT_MS)
@@ -110,7 +110,7 @@ export function FingerGame({
       const p = place(e)
       setPos((cur) => ({ ...cur, [e.pointerId]: p }))
     }
-    if (next.phase === 'armed') arm()
+    if (next.phase === 'armed' && prev.phase !== 'armed') arm()
   }
 
   const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -158,6 +158,7 @@ export function FingerGame({
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={onUp}
+        onLostPointerCapture={onUp}
         onContextMenu={(e) => e.preventDefault()}
       >
         {guide && (
@@ -168,7 +169,7 @@ export function FingerGame({
         {state.fingers.map((id, i) => {
           const p = pos[id]
           if (!p) return null
-          const piece = order[i]
+          const piece = order[state.slots[id]]
           const isLit = running && state.phase === 'spinning' && lit === i
           const isPicked = state.phase === 'done' && state.target === i
           return (
