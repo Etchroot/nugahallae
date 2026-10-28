@@ -1,0 +1,22 @@
+.tm-target {
+  font-size: 20px;
+  color: #b0b8c1;
+}
+.tm-target b {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+.tm-time {
+  font-size: min(22vw, 96px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.tm-blind { color: #6b7684; }
+.tm-rec {
+  min-height: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffc342;
+}

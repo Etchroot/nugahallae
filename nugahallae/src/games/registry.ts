@@ -7,6 +7,7 @@ import { BombGame } from './bomb/BombGame'
 import { BalloonGame } from './balloon/BalloonGame'
 import { UpdownGame } from './updown/UpdownGame'
 import { TowerGame } from './tower/TowerGame'
+import { TimerGame } from './timer/TimerGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -82,6 +83,15 @@ export const GAMES: GameDefinition[] = [
     rule: '돌아가며 블록을 하나씩 빼요. 맨 윗줄은 못 빼고, 한 줄에 마지막 남은 블록도 못 빼요. 뺄수록 탑이 불안해져요. 무너뜨린 사람이 벌칙이에요.',
     tint: '#fbeee0',
     Component: TowerGame,
+  },
+  {
+    id: 'timer',
+    icon: '⏱️',
+    title: '타이머 멈추기',
+    summary: '목표 시간에 가장 먼 사람',
+    rule: '목표 시간이 정해져요. 시작을 누르고 목표 시간이라고 생각될 때 멈추세요. 1.5초가 지나면 숫자가 가려져요. 목표에서 가장 먼 사람이 벌칙이에요.',
+    tint: '#e3f7f4',
+    Component: TimerGame,
   },
 ]
 

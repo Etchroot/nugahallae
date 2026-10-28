@@ -1,0 +1,126 @@
+/* 순서 기록형 게임(타이머·반응속도·연타) 공통 레이아웃 */
+.rg-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #191f28;
+  color: #fff;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: max(34px, env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  word-break: keep-all;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.rg-bar {
+  width: 100%;
+  flex: none;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  background: #333d4b;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.rg-turn {
+  flex: none;
+  margin-top: 20px;
+  padding: 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.rg-stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.rg-btn {
+  flex: none;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  min-height: 56px;
+  margin: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  background: #3182f6;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  word-break: keep-all;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.rg-btn:active { background: #1b64da; }
+.rg-btn.rg-danger { background: #f04452; min-height: 88px; font-size: 22px; }
+.rg-btn.rg-danger:active { background: #d9333f; }
+.rg-after {
+  flex: none;
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  justify-content: center;
+}
+.rg-overlay {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: 88%;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.88);
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 3;
+}
+.rg-rank-wrap {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px 16px 0;
+  max-width: 420px;
+}
+.rg-rank-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.rg-rank {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rg-rank li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: #333d4b;
+  font-size: 16px;
+}
+.rg-rank b { font-weight: 700; white-space: nowrap; }
+.rg-rank li.rg-lose { background: #f04452; color: #fff; }
