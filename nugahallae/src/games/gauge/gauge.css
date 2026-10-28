@@ -1,0 +1,42 @@
+.gg-track {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 64px;
+  border-radius: 16px;
+  background: #333d4b;
+}
+.gg-zone {
+  position: absolute;
+  left: 46%;
+  width: 8%;
+  top: 0;
+  bottom: 0;
+  background: rgba(49, 130, 246, 0.35);
+}
+.gg-center {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  bottom: -8px;
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+}
+.gg-marker {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 8px;
+  margin-left: -4px;
+  border-radius: 4px;
+  background: #ffc342;
+}
+.gg-marker.gg-fixed { background: #f04452; }
+.gg-rec {
+  min-height: 28px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffc342;
+  text-align: center;
+}
