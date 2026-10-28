@@ -1,7 +1,7 @@
 import { test, expect } from 'vitest'
 import {
   ROAD_W, START_R, makePath, totalLength, distToSegment, distToPath, sweep, canStart,
-  segSegDist, traceScore, makeRecord, recordText, whyText,
+  segSegDist, interiorAngleDeg, traceScore, makeRecord, recordText, whyText,
 } from '../logic'
 import { drawPieces } from '../../../domain/pieces'
 import { settleWorst } from '../../shared/settle'
@@ -47,13 +47,54 @@ test('점-선분 거리', () => {
 })
 
 test('길 생성: 인접하지 않은 구간끼리 길 폭 이상 떨어져 있다(여러 시드)', () => {
-  for (let seed = 1; seed <= 300; seed++) {
+  for (let seed = 1; seed <= 3000; seed++) {
     const p = makePath(seeded(seed))
     for (let i = 0; i < p.length - 1; i++) {
       for (let j = i + 2; j < p.length - 1; j++) {
         expect(segSegDist(p[i], p[i + 1], p[j], p[j + 1])).toBeGreaterThanOrEqual(ROAD_W)
       }
     }
+  }
+})
+
+test('길 생성: 모든 꺾임의 안쪽 각도는 75도 이상(날카로운 모서리 없음)', () => {
+  for (let seed = 1; seed <= 3000; seed++) {
+    const p = makePath(seeded(seed))
+    for (let i = 1; i < p.length - 1; i++) {
+      expect(interiorAngleDeg(p[i - 1], p[i], p[i + 1])).toBeGreaterThanOrEqual(75 - 1e-9)
+    }
+  }
+})
+
+test('모서리 안쪽을 25px 벗어나 붙어 가도 100%에 도달한다(여러 시드)', () => {
+  for (let seed = 1; seed <= 600; seed++) {
+    const path = makePath(seeded(seed))
+    // 각 꺾임점에서 안쪽 이등분선 방향으로 25px 옮긴 점을 이어 간다
+    const pts = [path[0]]
+    for (let i = 1; i < path.length - 1; i++) {
+      const a = path[i - 1]
+      const v = path[i]
+      const b = path[i + 1]
+      const ua = { x: a.x - v.x, y: a.y - v.y }
+      const ub = { x: b.x - v.x, y: b.y - v.y }
+      const la = Math.hypot(ua.x, ua.y)
+      const lb = Math.hypot(ub.x, ub.y)
+      const bis = { x: ua.x / la + ub.x / lb, y: ua.y / la + ub.y / lb }
+      const bl = Math.hypot(bis.x, bis.y)
+      pts.push({ x: v.x + (bis.x / bl) * 25, y: v.y + (bis.y / bl) * 25 })
+    }
+    pts.push(path[path.length - 1])
+    let m = 0
+    let prev: { x: number; y: number } | null = null
+    let finished = false
+    for (const q of pts) {
+      const r = sweep(path, m, prev, q)
+      expect(r.ok, `seed ${seed}`).toBe(true)
+      m = r.maxProg
+      prev = q
+      finished = r.finished
+    }
+    expect(finished, `seed ${seed}`).toBe(true)
   }
 })
 

@@ -74,11 +74,21 @@ export function TraceGame({
     setPhase(p)
   }
 
+  // 화면 좌표 → 논리(viewBox) 좌표. SVG의 실제 변환(레터박스 포함)을 쓰고,
+  // getScreenCTM이 없는 환경은 meet 방식(균일 배율 + 중앙 정렬)으로 계산한다.
   const toLocalXY = (clientX: number, clientY: number): Point => {
-    const r = svgRef.current?.getBoundingClientRect()
-    const sx = r && r.width > 0 ? W / r.width : 1
-    const sy = r && r.height > 0 ? H / r.height : 1
-    return { x: (clientX - (r?.left ?? 0)) * sx, y: (clientY - (r?.top ?? 0)) * sy }
+    const svg = svgRef.current
+    const ctm = svg?.getScreenCTM?.()
+    if (ctm) {
+      const m = ctm.inverse()
+      return { x: m.a * clientX + m.c * clientY + m.e, y: m.b * clientX + m.d * clientY + m.f }
+    }
+    const r = svg?.getBoundingClientRect()
+    if (!r || r.width <= 0 || r.height <= 0) return { x: clientX, y: clientY }
+    const k = Math.min(r.width / W, r.height / H)
+    const ox = r.left + (r.width - W * k) / 2
+    const oy = r.top + (r.height - H * k) / 2
+    return { x: (clientX - ox) / k, y: (clientY - oy) / k }
   }
   const toLocal = (e: ReactPointerEvent<SVGSVGElement>): Point => toLocalXY(e.clientX, e.clientY)
 
@@ -198,6 +208,7 @@ export function TraceGame({
           width={W}
           height={H}
           viewBox={`0 0 ${W} ${H}`}
+          style={{ aspectRatio: `${W} / ${H}` }}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}

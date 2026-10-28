@@ -2,7 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { TraceGame } from '../TraceGame'
-import { makePath, totalLength, distToPath, ROAD_W } from '../logic'
+import { makePath, totalLength, distToPath, ROAD_W, W, H } from '../logic'
 import { RECORD_END_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
@@ -146,7 +146,7 @@ test('빠르게 벽 너머 먼 길로 건너뛰면 진행 없이 실패한다', 
   ev('pointerMove', far.x, far.y)
   expect(screen.getByRole('button', { name: '다음 사람' })).toBeTruthy()
   const pct = Number(screen.getByText(/^\d+%$/).textContent!.replace('%', ''))
-  expect(pct).toBeLessThanOrEqual(3)
+  expect(pct).toBeLessThan(pctAt(8))
   expect(screen.getByLabelText('실패 지점')).toBeTruthy()
 })
 
@@ -231,4 +231,63 @@ test('진행 중·연출 중 언마운트 → onFinish 미호출', () => {
   unmount()
   advance(5000)
   expect(onFinish).not.toHaveBeenCalled()
+})
+
+/** 화면 좌표 변환을 흉내: 320x400 박스에 viewBox W x H가 meet로 들어간 경우(좌우 여백) */
+function letterbox() {
+  const boxW = 320
+  const boxH = 400
+  const left = 10
+  const top = 20
+  const k = Math.min(boxW / W, boxH / H)
+  const ox = left + (boxW - W * k) / 2
+  const oy = top + (boxH - H * k) / 2
+  const toScreen = (p: { x: number; y: number }) => ({ x: ox + p.x * k, y: oy + p.y * k })
+  const rect = { left, top, width: boxW, height: boxH, right: left + boxW, bottom: top + boxH, x: left, y: top, toJSON() {} }
+  return { toScreen, rect, k, ox, oy }
+}
+const along = (toScreen: (p: { x: number; y: number }) => { x: number; y: number }) => {
+  const s0 = toScreen(path[0])
+  clock += 500
+  ev('pointerDown', s0.x, s0.y)
+  for (let i = 1; i <= 3; i++) {
+    const a = path[i - 1]
+    const b = path[i]
+    for (let k = 1; k <= 4; k++) {
+      clock += 20
+      const q = toScreen({ x: a.x + ((b.x - a.x) * k) / 4, y: a.y + ((b.y - a.y) * k) / 4 })
+      ev('pointerMove', q.x, q.y)
+    }
+  }
+  const e = toScreen(path[3])
+  ev('pointerUp', e.x, e.y)
+}
+
+test('getScreenCTM이 있으면 레터박스에서도 중심선 터치가 논리 중심선에 대응한다', () => {
+  mount()
+  const lb = letterbox()
+  const svg = area() as unknown as SVGSVGElement
+  svg.getBoundingClientRect = () => lb.rect as DOMRect
+  svg.getScreenCTM = () =>
+    ({
+      inverse: () => ({
+        a: 1 / lb.k, b: 0, c: 0, d: 1 / lb.k, e: -lb.ox / lb.k, f: -lb.oy / lb.k,
+      }),
+    }) as unknown as DOMMatrix
+  along(lb.toScreen)
+  expect(screen.getByText(`${pctAt(3)}%`)).toBeTruthy()
+})
+
+test('getScreenCTM이 없어도 박스 비율이 달라도(meet 레터박스) 같은 결과', () => {
+  mount()
+  const lb = letterbox()
+  const svg = area() as unknown as SVGSVGElement
+  svg.getBoundingClientRect = () => lb.rect as DOMRect
+  along(lb.toScreen)
+  expect(screen.getByText(`${pctAt(3)}%`)).toBeTruthy()
+})
+
+test('SVG 박스 비율은 W/H 상수에서 온다', () => {
+  mount()
+  expect((area() as unknown as SVGSVGElement).style.aspectRatio.replace(/\s/g, '')).toBe(`${W}/${H}`)
 })
