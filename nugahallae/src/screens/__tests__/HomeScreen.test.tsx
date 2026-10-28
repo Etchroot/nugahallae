@@ -63,3 +63,14 @@ test('카드를 누르면 onPickGame', () => {
   fireEvent.click(screen.getByText('돌림판'))
   expect(pick).toHaveBeenCalledWith('roulette')
 })
+
+test('지우기 버튼은 글자가 있을 때만 보이고 누르면 전체 목록이 돌아온다', () => {
+  renderHome()
+  expect(screen.queryByLabelText('검색어 지우기')).not.toBeInTheDocument()
+  fireEvent.change(search(), { target: { value: '잔' } })
+  expect(cards()).toHaveLength(1)
+  fireEvent.click(screen.getByLabelText('검색어 지우기'))
+  expect(search()).toHaveValue('')
+  expect(cards()).toHaveLength(3)
+  expect(screen.queryByLabelText('검색어 지우기')).not.toBeInTheDocument()
+})

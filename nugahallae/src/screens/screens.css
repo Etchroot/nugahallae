@@ -56,8 +56,8 @@
 /* 홈 */
 .hm-page { min-height: 100vh; background: #f7f8fa; word-break: keep-all; overflow-wrap: break-word; color: #191f28; }
 .hm-hero {
-  position: relative; box-sizing: border-box; height: 330px; overflow: hidden; color: #fff;
-  padding: calc(env(safe-area-inset-top) + 40px) 20px 0;
+  position: relative; box-sizing: border-box; min-height: 330px; overflow: hidden; color: #fff;
+  padding: calc(env(safe-area-inset-top) + 40px) 20px 98px;
   background: linear-gradient(160deg, #ff8a3d 0%, #ff5f8f 55%, #a66bff 100%);
 }
 .hm-sticker { position: absolute; font-size: 40px; line-height: 1; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18)); }
@@ -75,11 +75,15 @@
   padding: 0 18px; color: #8b95a1; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 .hm-search svg { flex: none; }
-.hm-search input {
+.hm-clear {
+  flex: none; width: 44px; height: 44px; margin-right: -14px; border: 0; border-radius: 22px;
+  background: transparent; color: #8b95a1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.hm-search .hm-input {
   flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent;
   font: inherit; font-size: 16px; color: #191f28;
 }
-.hm-search input::placeholder { color: #8b95a1; }
+.hm-input::placeholder { color: #8b95a1; }
 .hm-body { padding: 20px 16px 40px; }
 .hm-sec { display: flex; justify-content: space-between; align-items: baseline; margin: 0 4px 12px; }
 .hm-sec h2 { margin: 0; font-size: 19px; font-weight: 700; }
@@ -93,7 +97,7 @@
 .hm-ico { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
 .hm-name { margin: 14px 0 4px; font-size: 17px; font-weight: 700; }
 .hm-desc { font-size: 15px; color: #6b7684; line-height: 1.4; }
-.hm-badge { position: absolute; top: 14px; right: 14px; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+.hm-badge { position: absolute; top: 14px; right: 14px; font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
 .hm-badge-hot { background: #fff1e6; color: #e8590c; }
 .hm-badge-new { background: #e8f3ff; color: #1b64da; }
 .hm-empty { margin: 48px 0; text-align: center; font-size: 16px; color: #6b7684; }

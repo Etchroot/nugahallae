@@ -1,6 +1,8 @@
 @import url('https://cdn.jsdelivr.net/gh/toss/tossface/dist/tossface.css');
 
+/* 앱은 라이트 전용: 다크 모드에서도 캔버스·기본 글자색이 어두워지지 않게 고정한다. */
 :root {
+  color-scheme: light;
   font-family: 'Tossface', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
 }
 
@@ -9,6 +11,8 @@
 }
 
 body {
+  background-color: #ffffff;
+  color: #191f28;
   margin: 0;
   min-width: 320px;
   min-height: 100vh;

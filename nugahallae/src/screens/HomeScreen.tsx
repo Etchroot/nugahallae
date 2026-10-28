@@ -20,6 +20,15 @@ function SearchIcon() {
   )
 }
 
+function ClearIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="currentColor" />
+      <path d="M9 9l6 6M15 9l-6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export function HomeScreen({ onPickGame }: Props) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
@@ -45,12 +54,20 @@ export function HomeScreen({ onPickGame }: Props) {
         <label className="hm-search">
           <SearchIcon />
           <input
-            type="search"
+            className="hm-input"
+            type="text"
+            inputMode="search"
+            enterKeyHint="search"
             value={query}
             placeholder="어떤 게임 할까요?"
             aria-label="게임 검색"
             onChange={(e) => setQuery(e.target.value)}
           />
+          {query && (
+            <button type="button" className="hm-clear" aria-label="검색어 지우기" onClick={() => setQuery('')}>
+              <ClearIcon />
+            </button>
+          )}
         </label>
       </section>
 
