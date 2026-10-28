@@ -8,6 +8,7 @@ import { BalloonGame } from './balloon/BalloonGame'
 import { UpdownGame } from './updown/UpdownGame'
 import { TowerGame } from './tower/TowerGame'
 import { TimerGame } from './timer/TimerGame'
+import { ReactionGame } from './reaction/ReactionGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -92,6 +93,15 @@ export const GAMES: GameDefinition[] = [
     rule: '목표 시간이 정해져요. 시작을 누르고 목표 시간이라고 생각될 때 멈추세요. 1.5초가 지나면 숫자가 가려져요. 목표에서 가장 먼 사람이 벌칙이에요.',
     tint: '#e3f7f4',
     Component: TimerGame,
+  },
+  {
+    id: 'reaction',
+    icon: '⚡',
+    title: '반응속도',
+    summary: '제일 느린 사람',
+    rule: '화면을 누르면 빨간색으로 바뀌어요. 초록색이 되는 순간 최대한 빨리 탭! 빨간색일 때 누르면 부정출발이에요. 가장 느린 사람이 벌칙이에요.',
+    tint: '#e5effa',
+    Component: ReactionGame,
   },
 ]
 

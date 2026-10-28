@@ -1,0 +1,18 @@
+.rc-pad {
+  flex: 1;
+  width: 100%;
+  max-width: 420px;
+  min-height: 220px;
+  border: 0;
+  border-radius: 24px;
+  background: #4e5968;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  word-break: keep-all;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.rc-wait { background: #f04452; }
+.rc-go { background: #03b26c; }
+.rc-foul { background: #8b1e2a; }
