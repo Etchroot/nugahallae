@@ -8,8 +8,8 @@
 }
 .tr-area {
   flex: none;
-  width: 320px;
-  max-width: 100%;
+  /* 화면 높이에 맞춰 줄인다(규칙 띠·차례·힌트·하단 버튼 몫 약 250px). 좌표는 getScreenCTM으로 변환하므로 크기와 무관하다. */
+  width: min(320px, 100%, calc((100dvh - 250px) * 320 / 520));
   height: auto;
   touch-action: none;
   border-radius: 16px;
