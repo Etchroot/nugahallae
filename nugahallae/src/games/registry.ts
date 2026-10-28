@@ -2,6 +2,7 @@ import type { GameDefinition } from './types'
 import { RouletteGame } from './roulette/RouletteGame'
 import { PourGame } from './pour/PourGame'
 import { LadderGame } from './ladder/LadderGame'
+import { CrocGame } from './croc/CrocGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -32,6 +33,15 @@ export const GAMES: GameDefinition[] = [
     rule: '차례대로 내 말을 눌러 사다리를 내려가요. 아래 칸 중 벌칙은 딱 하나! 벌칙 칸에 도착한 사람이 걸려요.',
     tint: '#e8f8ef',
     Component: LadderGame,
+  },
+  {
+    id: 'croc',
+    icon: '🐊',
+    title: '악어 이빨',
+    summary: '아픈 이빨 누르면 콱!',
+    rule: '돌아가며 악어 이빨을 하나씩 눌러요. 숨겨진 아픈 이빨을 누르면 악어가 콱! 물린 사람이 벌칙이에요.',
+    tint: '#e6f6e6',
+    Component: CrocGame,
   },
 ]
 
