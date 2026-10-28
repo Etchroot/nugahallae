@@ -81,7 +81,8 @@ function goToPlay() {
   fireEvent.click(screen.getByText('돌림판'))
   fireEvent.click(screen.getByText('말 뽑기 시작'))
   for (let i = 1; i <= 4; i++) {
-    fireEvent.click(screen.getByText(`${i}번째 사람, 화면을 눌러 말을 뽑으세요`))
+    expect(screen.getByText(`${i}번째 사람, 내 말을 하나 골라요`)).toBeInTheDocument()
+    fireEvent.click(screen.getAllByTestId('piece-card').find((c) => !(c as HTMLButtonElement).disabled)!)
     fireEvent.click(screen.getByText('확인했어요'))
   }
   fireEvent.click(screen.getByText('시작하기'))

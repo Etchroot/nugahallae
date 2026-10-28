@@ -71,7 +71,8 @@ function pickGame(title: string, players?: number) {
 
 async function drawAll(n: number) {
   for (let i = 1; i <= n; i++) {
-    fireEvent.click(screen.getByText(`${i}번째 사람, 화면을 눌러 말을 뽑으세요`))
+    expect(screen.getByText(`${i}번째 사람, 내 말을 하나 골라요`)).toBeInTheDocument()
+    fireEvent.click(screen.getAllByTestId('piece-card').find((c) => !(c as HTMLButtonElement).disabled)!)
     await advance(400)
     fireEvent.click(screen.getByText('확인했어요'))
     await advance(400)
@@ -106,33 +107,32 @@ test('홈 → 돌림판 → 3명 말 뽑기 → 시작 → 끝까지 → 결과�
   expect(vi.mocked(haptic).mock.calls.filter((c) => c[0] === 'success')).toHaveLength(1)
 })
 
-test('뽑은 직후 바로 확인했어요를 눌러도(더블탭) 말을 보여준 채로 남는다', async () => {
+test('고른 직후 바로 확인했어요를 눌러도(더블탭) 말을 보여준 채로 남는다', async () => {
   renderApp()
   await flush()
   pickGame('돌림판')
-  fireEvent.click(screen.getByText('1번째 사람, 화면을 눌러 말을 뽑으세요'))
+  fireEvent.click(screen.getAllByTestId('piece-card')[0])
   // 같은 자리에 나타난 진짜 확인 버튼에 두 번째 탭이 들어온다
   fireEvent.click(screen.getByText('확인했어요'))
   expect(screen.getByText(/내 말을 기억하세요/)).toBeInTheDocument()
-  expect(screen.queryByText('2번째 사람, 화면을 눌러 말을 뽑으세요')).not.toBeInTheDocument()
+  expect(screen.queryByText('2번째 사람, 내 말을 하나 골라요')).not.toBeInTheDocument()
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
-  expect(screen.getByText('2번째 사람, 화면을 눌러 말을 뽑으세요')).toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
 })
 
-test('확인했어요 직후 바로 뽑기 자리를 눌러도(더블탭) 다음 사람 대기 상태가 유지된다', async () => {
+test('확인했어요 직후 바로 다른 카드를 눌러도(더블탭) 다음 사람 대기 상태가 유지된다', async () => {
   renderApp()
   await flush()
   pickGame('돌림판')
-  fireEvent.click(screen.getByText('1번째 사람, 화면을 눌러 말을 뽑으세요'))
+  fireEvent.click(screen.getAllByTestId('piece-card')[0])
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
-  // 같은 자리에 나타난 진짜 뽑기 버튼에 두 번째 탭이 들어온다
-  fireEvent.click(screen.getByText('2번째 사람, 화면을 눌러 말을 뽑으세요'))
+  fireEvent.click(screen.getAllByTestId('piece-card')[1])
   expect(screen.queryByText(/내 말을 기억하세요/)).not.toBeInTheDocument()
-  expect(screen.getByText('2번째 사람, 화면을 눌러 말을 뽑으세요')).toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
   await advance(400)
-  fireEvent.click(screen.getByText('2번째 사람, 화면을 눌러 말을 뽑으세요'))
+  fireEvent.click(screen.getAllByTestId('piece-card')[1])
   expect(screen.getByText(/내 말을 기억하세요/)).toBeInTheDocument()
 })
 
@@ -201,7 +201,7 @@ test('인원수는 2 아래/10 위로 못 간다', async () => {
   expect(screen.getByTestId('player-count')).toHaveTextContent('10명')
   fireEvent.click(screen.getByText('말 뽑기 시작'))
   await drawAll(10)
-  expect(screen.queryByText('11번째 사람, 화면을 눌러 말을 뽑으세요')).not.toBeInTheDocument()
+  expect(screen.queryByText('11번째 사람, 내 말을 하나 골라요')).not.toBeInTheDocument()
   expect(screen.getByText('시작하기')).toBeInTheDocument()
 })
 

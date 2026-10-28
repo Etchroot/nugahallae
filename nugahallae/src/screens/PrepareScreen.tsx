@@ -34,9 +34,9 @@ function PlusIcon() {
 
 export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Props) {
   const [count, setCount] = useState(initialCount)
-  const [order, setOrder] = useState<Piece[] | null>(null) // 뽑기를 시작하면 채워진다
-  const [index, setIndex] = useState(0) // 뽑고 확인까지 마친 사람 수
-  const [revealed, setRevealed] = useState(false)
+  const [pieces, setPieces] = useState<Piece[] | null>(null) // 뽑기를 시작하면 채워진다(표시 순서)
+  const [picked, setPicked] = useState<Piece[]>([]) // 고른 순서 = 게임 차례
+  const [confirming, setConfirming] = useState<Piece | null>(null)
   const guard = useTapGuard()
 
   const header = (
@@ -46,7 +46,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
     </>
   )
 
-  if (order === null) {
+  if (pieces === null) {
     return (
       <div className="sc-page">
         {header}
@@ -80,7 +80,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
           fixed
           onClick={() => {
             onCountChosen(count)
-            setOrder(drawPieces(count))
+            setPieces(drawPieces(count))
           }}
         >
           말 뽑기 시작
@@ -89,42 +89,81 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
     )
   }
 
-  const done = index >= order.length
-  const piece = order[index]
+  const done = picked.length >= pieces.length
 
   return (
     <div className="sc-page">
       {header}
 
-      {done ? (
-        <div className="sc-draw sc-draw-ready" role="status">
-          모두 뽑았어요! 시작하기를 눌러주세요.
-        </div>
-      ) : revealed ? (
+      {confirming ? (
         <div className="sc-draw sc-draw-ready">
-          <div className="sc-piece-tile" style={{ background: piece.color }}>
-            <span className="sc-piece">{piece.emoji}</span>
+          <div className="sc-piece-tile" style={{ background: confirming.color }}>
+            <span className="sc-piece">{confirming.emoji}</span>
           </div>
-          <div className="sc-piece-label">{pieceLabel(piece)} — 내 말을 기억하세요</div>
+          <div className="sc-piece-label">{pieceLabel(confirming)} — 내 말을 기억하세요</div>
           <button
             type="button"
             className="sc-confirm"
             onClick={guard(() => {
-              setRevealed(false)
-              setIndex(index + 1)
+              setPicked((p) => [...p, confirming])
+              setConfirming(null)
             })}
           >
             확인했어요
           </button>
         </div>
+      ) : done ? (
+        <p className="sc-pick-guide" role="status">
+          모두 골랐어요! 시작하기를 눌러주세요.
+        </p>
       ) : (
-        <button type="button" className="sc-draw" onClick={guard(() => setRevealed(true))}>
-          {index + 1}번째 사람, 화면을 눌러 말을 뽑으세요
+        <p className="sc-pick-guide" role="status">
+          {picked.length + 1}번째 사람, 내 말을 하나 골라요
+        </p>
+      )}
+
+      <div className="sc-pieces">
+        {pieces.map((p) => {
+          const taken = picked.some((q) => q.id === p.id)
+          return (
+            <button
+              key={p.id}
+              type="button"
+              className={`sc-pick${taken ? ' sc-pick-taken' : ''}`}
+              style={{ background: p.color }}
+              data-testid="piece-card"
+              data-piece-id={p.id}
+              disabled={taken || confirming !== null || done}
+              onClick={guard(() => {
+                if (taken || confirming !== null) return
+                setConfirming(p)
+              })}
+            >
+              <span className="sc-pick-emoji">{p.emoji}</span>
+              <span className="sc-pick-name">
+                {p.colorName} {p.animalName}
+              </span>
+              {taken && <span className="sc-pick-badge">선택됨</span>}
+            </button>
+          )
+        })}
+      </div>
+
+      {picked.length > 0 && !confirming && (
+        <button
+          type="button"
+          className="sc-reset"
+          onClick={guard(() => {
+            setPicked([])
+            setConfirming(null)
+          })}
+        >
+          다시 고르기
         </button>
       )}
 
-      {done && (
-        <BottomCTA fixed onClick={guard(() => onStart(order))}>
+      {done && !confirming && (
+        <BottomCTA fixed onClick={guard(() => onStart(picked))}>
           시작하기
         </BottomCTA>
       )}
