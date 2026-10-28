@@ -9,7 +9,6 @@ import type { CrocState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
 import './croc.css'
 
-
 export function CrocGame({
   order,
   onFinish,

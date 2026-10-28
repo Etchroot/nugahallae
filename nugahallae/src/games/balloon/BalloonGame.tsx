@@ -10,7 +10,6 @@ import type { BalloonState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
 import './balloon.css'
 
-
 export function BalloonGame({
   order,
   onFinish,

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { BottomCTA } from '@toss/tds-mobile'
 import { useTapGuard } from '../app/useTapGuard'
 import { drawPieces, pieceLabel } from '../domain/pieces'
@@ -130,7 +131,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
               key={p.id}
               type="button"
               className={`sc-pick${taken ? ' sc-pick-taken' : ''}`}
-              style={{ background: p.color }}
+              style={{ '--pc': p.color } as CSSProperties}
               data-testid="piece-card"
               data-piece-id={p.id}
               disabled={taken || confirming !== null || done}

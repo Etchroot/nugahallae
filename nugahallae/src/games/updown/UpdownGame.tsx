@@ -10,7 +10,6 @@ import type { UpdownState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
 import './updown.css'
 
-
 function Arrow({ up }: { up: boolean }) {
   return (
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">

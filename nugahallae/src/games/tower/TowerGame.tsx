@@ -10,7 +10,6 @@ import type { TowerState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
 import './tower.css'
 
-
 const MESSAGES = {
   top: '맨 윗줄은 뺄 수 없어요',
   last: '이 줄의 마지막 블록은 못 빼요',

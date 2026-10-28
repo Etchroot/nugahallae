@@ -4,7 +4,6 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { settleWorst } from './settle'
-
 import { RECORD_END_MS } from './timing'
 
 export const TIE_SUFFIX = ' (동점자 중 랜덤)'

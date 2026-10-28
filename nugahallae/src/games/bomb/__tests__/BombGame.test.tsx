@@ -64,13 +64,13 @@ test('터지면 연출 후 onFinish가 들고 있던 말로 1회, haptic error 1
   advance(100) // 이 틱에서 터진다
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
+  expect(screen.getByText(`${pieceLabel(order[1])} 펑!`)).toBeTruthy()
   fireEvent.pointerDown(screen.getByRole('button', { name: /^탭탭! 넘기기/ })) // 끝난 뒤 무시
   advance(END_EFFECT_MS - 1)
   expect(onFinish).not.toHaveBeenCalled()
   advance(1)
   expect(onFinish).toHaveBeenCalledTimes(1)
   advance(5000)
-  expect(screen.getByText(`${pieceLabel(order[1])} 펑!`)).toBeTruthy()
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[1])
 })
