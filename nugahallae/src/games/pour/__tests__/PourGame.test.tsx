@@ -44,20 +44,89 @@ test('짧은 탭 한 번이면 넘기기가 켜진다', () => {
   expect(passBtn().disabled).toBe(false)
 })
 
-test('1초 이상 누르면 부어져서 넘기기가 켜진다', () => {
+const volume = () => Number(cup().getAttribute('data-volume'))
+
+test('1초 누르면 그만큼 부어진다(약 11.8)', () => {
   render(<PourGame order={order} onFinish={() => {}} />)
   press(1000)
   expect(passBtn().disabled).toBe(false)
+  expect(volume()).toBeGreaterThanOrEqual(11)
+  expect(volume()).toBeLessThanOrEqual(13)
 })
 
-test('넘기기 연타해도 차례는 한 번만 넘어간다', () => {
+test('7.5초 이상 누르면 잔 위로 물이 볼록해진다', () => {
+  const { container } = render(<PourGame order={order} onFinish={() => {}} rng={() => 0.999} />)
+  expect(container.querySelector('.pr-dome')).toBeNull()
+  fireEvent.pointerDown(cup())
+  advance(7000)
+  expect(container.querySelector('.pr-dome')).toBeNull()
+  advance(500)
+  expect(container.querySelector('.pr-dome')).not.toBeNull()
+  fireEvent.pointerUp(cup())
+})
+
+test('한 프레임에 시계가 10초 점프해도 한 걸음(100ms)만큼만 붓는다', () => {
+  render(<PourGame order={order} onFinish={() => {}} />)
+  fireEvent.pointerDown(cup())
+  advance(500)
+  const before = volume()
+  // 다음 프레임까지 10초가 한 번에 지난 상황
+  act(() => { vi.setSystemTime(Date.now()); vi.advanceTimersByTime(16) })
+  const perf = vi.spyOn(performance, 'now')
+  perf.mockReturnValue(performance.now() + 10000)
+  advance(16)
+  perf.mockRestore()
+  fireEvent.pointerUp(cup())
+  expect(volume() - before).toBeLessThanOrEqual(3)
+})
+
+test('백그라운드(blur)로 가면 붓기가 멈춘다', () => {
+  render(<PourGame order={order} onFinish={() => {}} />)
+  fireEvent.pointerDown(cup())
+  advance(500)
+  act(() => { window.dispatchEvent(new Event('blur')) })
+  const v = volume()
+  advance(3000)
+  expect(volume()).toBe(v)
+})
+
+test('160ms 직후 다음 프레임 전에 떼도 한 방울은 붓는다', () => {
+  render(<PourGame order={order} onFinish={() => {}} />)
+  fireEvent.pointerDown(cup())
+  advance(162)
+  fireEvent.pointerUp(cup())
+  expect(passBtn().disabled).toBe(false)
+  expect(volume()).toBeGreaterThanOrEqual(1) // 0.6 -> 반올림 1
+})
+
+test('누르는 중에 넘기기를 누르면 붓기가 끝나고 다음 사람에게 이어지지 않는다', () => {
+  render(<PourGame order={order} onFinish={() => {}} />)
+  press(100)
+  fireEvent.pointerDown(cup())
+  advance(300)
+  fireEvent.click(passBtn())
+  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+  const v = volume()
+  advance(2000)
+  expect(volume()).toBe(v)
+  expect(passBtn().disabled).toBe(true)
+})
+
+test('넘기기 연타해도 차례는 한 번만 넘어가고, 400ms 안에는 다시 붓거나 넘길 수 없다', () => {
   render(<PourGame order={order} onFinish={() => {}} />)
   press(100)
   fireEvent.click(passBtn())
   fireEvent.click(passBtn())
+  advance(399)
+  press(100) // 잠금 중이라 무시됨
+  fireEvent.click(passBtn())
   expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
-  advance(1000)
-  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+  expect(passBtn().disabled).toBe(true)
+  advance(1)
+  press(100)
+  expect(passBtn().disabled).toBe(false)
+  fireEvent.click(passBtn())
+  expect(screen.getByText(`👉 ${pieceLabel(order[2])} 차례예요`)).toBeTruthy()
 })
 
 test('넘긴 직후 400ms 안의 잔 누르기는 무시된다', () => {
@@ -126,11 +195,18 @@ test('넘침 연출 중 언마운트하면 onFinish가 호출되지 않는다', 
   expect(onFinish).not.toHaveBeenCalled()
 })
 
-test('화면에 limit 수치나 디버그 텍스트가 없다', () => {
+test('화면에 limit 수치나 디버그 텍스트가 없다(넘침 연출 후에도)', () => {
   const { container } = render(<PourGame order={order} onFinish={() => {}} rng={() => 0} />)
+  const check = () => {
+    expect(container.textContent).not.toMatch(/\d/)
+    expect(container.textContent).not.toContain('넘침')
+  }
+  check()
   fireEvent.pointerDown(cup())
   advance(7800)
   fireEvent.pointerUp(cup())
-  expect(container.textContent).not.toMatch(/\d/)
-  expect(container.textContent).not.toContain('넘침')
+  check()
+  advance(550)
+  expect(screen.getByText(/넘쳤다!$/)).toBeTruthy()
+  check()
 })

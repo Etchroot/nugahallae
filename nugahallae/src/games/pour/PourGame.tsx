@@ -24,6 +24,8 @@ import './pour.css'
 const SPILL_DELAY_MS = 500
 const OVERLAY_MS = 1500
 const PASS_LOCK_MS = 400
+// 한 프레임에 부을 수 있는 최대 시간(앱이 백그라운드에 갔다 와도 한꺼번에 붓지 않게)
+const MAX_STEP_MS = 100
 
 // 잔 모양(viewBox 200x260): 입구 y=50, 바닥 y=230
 const RIM_Y = 50
@@ -34,6 +36,7 @@ interface Press {
   start: number
   last: number
   domed: boolean
+  poured: number
 }
 
 export function PourGame({
@@ -104,15 +107,19 @@ export function PourGame({
     }
   }
 
+  const accrue = (press: Press, now: number) => {
+    const from = Math.max(press.last, press.start + TAP_MS)
+    if (now <= from) return
+    press.last = now
+    const amount = (Math.min(now - from, MAX_STEP_MS) / 1000) * POUR_RATE
+    press.poured += amount
+    apply(amount)
+  }
+
   const tick = () => {
     const press = pressRef.current
     if (!press) return
-    const now = performance.now()
-    const from = Math.max(press.last, press.start + TAP_MS)
-    if (now > from) {
-      press.last = now
-      apply(((now - from) / 1000) * POUR_RATE)
-    }
+    accrue(press, performance.now())
     if (pressRef.current) rafRef.current = requestAnimationFrame(tick)
   }
 
@@ -121,20 +128,35 @@ export function PourGame({
     if (stateRef.current.phase !== 'playing') return
     const now = performance.now()
     if (now < lockUntil.current) return
-    pressRef.current = { start: now, last: now, domed: false }
+    pressRef.current = { start: now, last: now, domed: false, poured: 0 }
     setPouring(true)
     const up = () => {
       const press = pressRef.current
       if (!press) return
-      if (performance.now() - press.start <= TAP_MS) apply(DROP)
+      const t = performance.now()
+      if (t - press.start > TAP_MS) accrue(press, t)
+      // 짧은 탭이거나, 첫 프레임 전에 뗀 경우에도 한 방울은 붓는다.
+      if (pressRef.current && press.poured < DROP) apply(DROP)
+      endPress()
+      setPouring(false)
+    }
+    const hidden = () => {
+      if (document.visibilityState === 'hidden') cancel()
+    }
+    // 백그라운드/포커스 이탈: 붓던 것을 멈춘다(추가로 붓지 않음).
+    const cancel = () => {
       endPress()
       setPouring(false)
     }
     window.addEventListener('pointerup', up)
     window.addEventListener('pointercancel', up)
+    window.addEventListener('blur', cancel)
+    document.addEventListener('visibilitychange', hidden)
     stopListen.current = () => {
       window.removeEventListener('pointerup', up)
       window.removeEventListener('pointercancel', up)
+      window.removeEventListener('blur', cancel)
+      document.removeEventListener('visibilitychange', hidden)
     }
     rafRef.current = requestAnimationFrame(tick)
   }
@@ -142,6 +164,9 @@ export function PourGame({
   const pass = () => {
     const cur = stateRef.current
     if (!canPass(cur)) return
+    // 두 번째 손가락 등으로 누르는 중에 넘기면 붓기를 끝내고 넘긴다(다음 사람에게 이어지지 않게).
+    endPress()
+    setPouring(false)
     lockUntil.current = performance.now() + PASS_LOCK_MS
     commit(passTurn(cur))
   }
@@ -164,6 +189,7 @@ export function PourGame({
           className="pr-cup"
           aria-label="잔, 꾹 눌러서 붓기"
           disabled={spilled}
+          data-volume={Math.round(state.volume)}
           onPointerDown={onDown}
           onContextMenu={(e) => e.preventDefault()}
         >
