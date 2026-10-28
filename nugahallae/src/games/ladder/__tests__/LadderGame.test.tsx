@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { LadderGame } from '../LadderGame'
 import { TRACE_MS, createLadder, traceLadder } from '../logic'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -69,11 +70,13 @@ test('끝까지 진행하면 벌칙 도착 말로 onFinish 1회, 햅틱 정확�
   for (let i = 0; i <= loserIdx; i++) {
     fireEvent.click(pieceBtn(i))
     advance(TRACE_MS)
-    advance(500) // 탭 가드(400ms) 지나기
+    if (i < loserIdx) advance(500) // 탭 가드(400ms) 지나기
   }
   expect(screen.getByText(`${pieceLabel(order[loserIdx])} 벌칙!`)).toBeTruthy()
   expect(onFinish).not.toHaveBeenCalled()
-  advance(1200)
+  advance(END_EFFECT_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[loserIdx])
   advance(5000)

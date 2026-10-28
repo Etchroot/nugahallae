@@ -4,6 +4,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { BombGame } from '../BombGame'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -58,10 +59,16 @@ test('터지면 연출 후 onFinish가 들고 있던 말로 1회, haptic error 1
   ignite()
   tapN(7)
   vi.mocked(haptic).mockClear()
-  advance(FUSE + 200)
+  advance(FUSE - 100)
+  expect(haptic).not.toHaveBeenCalled()
+  advance(100) // 이 틱에서 터진다
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
   fireEvent.pointerDown(screen.getByRole('button', { name: /^탭탭! 넘기기/ })) // 끝난 뒤 무시
+  advance(END_EFFECT_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   advance(5000)
   expect(screen.getByText(`${pieceLabel(order[1])} 펑!`)).toBeTruthy()
   expect(onFinish).toHaveBeenCalledTimes(1)

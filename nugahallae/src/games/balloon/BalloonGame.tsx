@@ -7,10 +7,9 @@ import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { MAX_PUMP, balloonScale, canPass, canPump, initBalloon, passTurn, pump } from './logic'
 import type { BalloonState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './balloon.css'
 
-const POP_MS = 700
-const OVERLAY_MS = 1200
 
 export function BalloonGame({
   order,
@@ -46,12 +45,8 @@ export function BalloonGame({
     if (next.phase === 'popped' && next.loser) {
       const loser = next.loser
       void haptic('error')
-      timers.current.push(
-        setTimeout(() => {
-          setOverlay(`${pieceLabel(loser)} 펑!`)
-          timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
-        }, POP_MS),
-      )
+      setOverlay(`${pieceLabel(loser)} 펑!`)
+      timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     }
   }
 

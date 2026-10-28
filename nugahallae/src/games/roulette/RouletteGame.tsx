@@ -14,11 +14,11 @@ import {
   startSpin,
 } from './logic'
 import type { RouletteState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './roulette.css'
 
 const R = 96
 const PASS_OVERLAY_MS = 1200
-const FINISH_DELAY_MS = 1000
 
 const point = (deg: number, r: number) => {
   const t = (deg * Math.PI) / 180
@@ -122,6 +122,12 @@ export function RouletteGame({
       const next = resolveSpin(spinning, plan.landedIndex)
       setPassed(next.lastPassed)
       void haptic('tap')
+      if (next.phase === 'done' && next.loser) {
+        // 마지막 스핀: 통과 오버레이를 바로 보여주고 END_EFFECT_MS 뒤 종료
+        const loser = next.loser
+        later(() => onFinishRef.current(loser), END_EFFECT_MS)
+        return
+      }
       later(() => {
         commit(next)
         setPassed(null)
@@ -129,10 +135,6 @@ export function RouletteGame({
         rotationRef.current = folded
         setDurationMs(0)
         setRotation(folded)
-        if (next.phase === 'done' && next.loser) {
-          const loser = next.loser
-          later(() => onFinishRef.current(loser), FINISH_DELAY_MS)
-        }
       }, PASS_OVERLAY_MS)
     }, plan.durationMs)
   }

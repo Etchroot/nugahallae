@@ -4,6 +4,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { CrocGame } from '../CrocGame'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -42,6 +43,10 @@ test('함정을 누르면 연출 후 onFinish가 올바른 말로 1회, haptic e
   fireEvent.click(tooth(0))
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
+  advance(END_EFFECT_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   fireEvent.click(tooth(1)) // 끝난 뒤 입력 무시
   advance(5000)
   expect(screen.getByText(`${pieceLabel(order[1])} 콱!`)).toBeTruthy()

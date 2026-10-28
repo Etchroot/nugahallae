@@ -65,13 +65,13 @@
 .pr-stream {
   stroke-dasharray: 160;
   stroke-dashoffset: 160;
-  animation: pr-flow 600ms ease-in forwards;
+  animation: pr-flow 300ms ease-in forwards;
 }
 @keyframes pr-flow { to { stroke-dashoffset: 0; } }
 .pr-puddle {
   transform-box: fill-box;
   transform-origin: 50% 50%;
-  animation: pr-spread 800ms ease-out forwards;
+  animation: pr-spread 450ms ease-out forwards;
 }
 @keyframes pr-spread { from { transform: scaleX(0.2); } to { transform: scaleX(1); } }
 .pr-overlay {

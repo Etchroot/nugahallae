@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { PourGame } from '../PourGame'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -141,7 +142,7 @@ test('넘긴 직후 400ms 안의 잔 누르기는 무시된다', () => {
   expect(passBtn().disabled).toBe(false)
 })
 
-test('limit 고정 후 계속 부으면 넘치고 2000ms 뒤 onFinish가 그 차례 말로 1회', () => {
+test('limit 고정 후 계속 부으면 넘치고 END_EFFECT_MS 뒤 onFinish가 그 차례 말로 1회', () => {
   const onFinish = vi.fn()
   // limit = 6 -> 106에서 넘침. 14/s, 160ms 뒤부터 -> 약 7.73초에 넘침
   render(<PourGame order={order} onFinish={onFinish} rng={() => 0} />)
@@ -150,12 +151,11 @@ test('limit 고정 후 계속 부으면 넘치고 2000ms 뒤 onFinish가 그 차
   fireEvent.pointerUp(cup())
   expect(haptic).toHaveBeenCalledWith('error')
   expect(vi.mocked(haptic).mock.calls.filter((c) => c[0] === 'error')).toHaveLength(1)
+  expect(screen.getByText(`${pieceLabel(order[0])} 넘쳤다!`)).toBeTruthy() // 넘친 즉시 표시
   expect(onFinish).not.toHaveBeenCalled()
-  advance(400)
-  expect(screen.queryByText(`${pieceLabel(order[0])} 넘쳤다!`)).toBeNull()
-  advance(150)
-  expect(screen.getByText(`${pieceLabel(order[0])} 넘쳤다!`)).toBeTruthy()
-  advance(1500)
+  advance(END_EFFECT_MS - 100) // 넘침은 7800ms 안 어딘가(<=~70ms 전)라 여유를 둔다
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(100)
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[0])
   advance(10000)
@@ -189,7 +189,7 @@ test('넘침 연출 중 언마운트하면 onFinish가 호출되지 않는다', 
   fireEvent.pointerDown(cup())
   advance(7800)
   fireEvent.pointerUp(cup())
-  advance(800)
+  advance(200)
   unmount()
   advance(20000)
   expect(onFinish).not.toHaveBeenCalled()
@@ -206,7 +206,6 @@ test('화면에 limit 수치나 디버그 텍스트가 없다(넘침 연출 후�
   advance(7800)
   fireEvent.pointerUp(cup())
   check()
-  advance(550)
   expect(screen.getByText(/넘쳤다!$/)).toBeTruthy()
   check()
 })

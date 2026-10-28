@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { BalloonGame } from '../BalloonGame'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -68,6 +69,10 @@ test('터지면 연출 후 onFinish가 터뜨린 말로 1회, haptic error 1회,
   doPump(1) // total 4 -> pop (order[1])
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
+  advance(END_EFFECT_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   advance(5000)
   expect(screen.getByText(`${pieceLabel(order[1])} 펑!`)).toBeTruthy()
   expect(onFinish).toHaveBeenCalledTimes(1)

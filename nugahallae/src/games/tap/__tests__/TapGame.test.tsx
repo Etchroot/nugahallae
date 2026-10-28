@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { TapGame } from '../TapGame'
+import { RECORD_END_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -97,11 +98,13 @@ test('가장 적게 누른 사람이 onFinish로 1회, haptic error 1회, 마지
   const items = screen.getAllByRole('listitem')
   expect(items.map((l) => l.querySelector('b')?.textContent)).toEqual(['20회', '12회', '5회'])
   expect(items[2].className).toContain('rg-lose')
-  advance(900)
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
   expect(screen.getByText(`${pieceLabel(order[1])} 5초 동안 5번밖에 못 눌렀어요 🐌`)).toBeTruthy()
-  advance(1200)
+  advance(RECORD_END_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   advance(5000)
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[1])
@@ -115,9 +118,8 @@ test('최소 동점이면 동점자 중 랜덤 문구', () => {
   next()
   round(5)
   next()
-  advance(900)
   expect(screen.getByText(`${pieceLabel(order[0])} 5초 동안 5번밖에 못 눌렀어요 🐌 (동점자 중 랜덤)`)).toBeTruthy()
-  advance(1200)
+  advance(RECORD_END_MS)
   expect(onFinish).toHaveBeenCalledWith(order[0])
 })
 

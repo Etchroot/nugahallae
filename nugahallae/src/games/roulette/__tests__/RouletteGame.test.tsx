@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces } from '../../../domain/pieces'
 import { RouletteGame } from '../RouletteGame'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -57,7 +58,11 @@ test('3명이면 통과 2번 후 onFinish가 남은 말로 1번 호출된다', (
   act(() => { vi.advanceTimersByTime(1200) })
   expect(haptic).toHaveBeenCalledTimes(1)
   fireEvent.click(screen.getByRole('button', { name: '돌리기' }))
-  act(() => { vi.advanceTimersByTime(7000 + 1200 + 1000) })
+  act(() => { vi.advanceTimersByTime(7000) })
+  expect(screen.getByText(/통과!$/)).toBeTruthy() // 마지막 스핀은 1200ms 대기 없이 바로
+  act(() => { vi.advanceTimersByTime(END_EFFECT_MS - 1) })
+  expect(onFinish).not.toHaveBeenCalled()
+  act(() => { vi.advanceTimersByTime(1) })
   expect(onFinish).toHaveBeenCalledTimes(1)
   // rng 0.1 -> 첫 칸 통과(여행 순서 0), 다음에도 첫 칸 -> 마지막은 order[2]
   expect(onFinish).toHaveBeenCalledWith(order[2])

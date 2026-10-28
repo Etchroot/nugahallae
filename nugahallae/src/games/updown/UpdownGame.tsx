@@ -7,10 +7,9 @@ import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { initUpdown, submitGuess } from './logic'
 import type { UpdownState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './updown.css'
 
-const BOOM_MS = 900
-const OVERLAY_MS = 1200
 
 function Arrow({ up }: { up: boolean }) {
   return (
@@ -67,12 +66,8 @@ export function UpdownGame({
     if (r.state.phase === 'boom' && r.state.loser) {
       const loser = r.state.loser
       void haptic('error')
-      timers.current.push(
-        setTimeout(() => {
-          setOverlay(`${pieceLabel(loser)} 펑!`)
-          timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
-        }, BOOM_MS),
-      )
+      setOverlay(`${pieceLabel(loser)} 펑!`)
+      timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     }
   }
 

@@ -17,9 +17,9 @@ import {
   traceLadder,
 } from './logic'
 import type { Ladder, LadderState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './ladder.css'
 
-const OVERLAY_MS = 1200
 // SVG 좌표: 세로줄 간격 100, 한 단계 높이 100
 const U = 100
 
@@ -68,7 +68,7 @@ export function LadderGame({
       const loser = next.loser
       void haptic('error')
       setOverlay(`${pieceLabel(loser)} 벌칙!`)
-      timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
+      timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     } else {
       void haptic('tap')
     }

@@ -6,10 +6,9 @@ import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { TEETH, currentPlayer, initCroc, pressTooth } from './logic'
 import type { CrocState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './croc.css'
 
-const CLOSE_MS = 700
-const OVERLAY_MS = 1200
 
 export function CrocGame({
   order,
@@ -40,12 +39,8 @@ export function CrocGame({
     if (next.phase === 'bitten' && next.loser) {
       const loser = next.loser
       void haptic('error')
-      timers.current.push(
-        setTimeout(() => {
-          setOverlay(`${pieceLabel(loser)} 콱!`)
-          timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
-        }, CLOSE_MS),
-      )
+      setOverlay(`${pieceLabel(loser)} 콱!`)
+      timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     }
   }
 

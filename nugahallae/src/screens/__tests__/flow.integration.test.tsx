@@ -40,6 +40,7 @@ vi.mock('../../components/ConfirmDialog', () => ({
 
 import App from '../../App'
 import { haptic } from '../../platform/sdk'
+import { END_EFFECT_MS } from '../../games/shared/timing'
 
 function renderApp() {
   return render(
@@ -80,7 +81,7 @@ async function drawAll(n: number) {
 async function playRoulette(n: number) {
   for (let r = 0; r < n - 1; r++) {
     fireEvent.click(screen.getByRole('button', { name: '돌리기' }))
-    await advance(7000 + 1200 + 100)
+    await advance(7000 + END_EFFECT_MS + 100)
   }
   await advance(10000)
 }
@@ -146,7 +147,7 @@ test('마지막 돌림 중 뒤로가기 → 끝나도 결과로 가지 않고 �
   await advance(500)
   act(() => backHandler!())
   expect(screen.getByText('게임을 그만할까요?')).toBeInTheDocument()
-  await advance(7000 + 1200 + 1000 + 500)
+  await advance(7000 + END_EFFECT_MS + 500)
   expect(screen.getByText('게임을 그만할까요?')).toBeInTheDocument()
   expect(screen.queryByText(/걸렸다!/)).not.toBeInTheDocument()
   expect(screen.queryByText('두구두구…')).not.toBeInTheDocument()
@@ -166,7 +167,7 @@ test('마지막 돌림 중 뒤로가기 → 그만하기는 홈으로 가고 결
   fireEvent.click(screen.getByRole('button', { name: '돌리기' }))
   await advance(500)
   act(() => backHandler!())
-  await advance(7000 + 1200 + 1000 + 500)
+  await advance(7000 + END_EFFECT_MS + 500)
   fireEvent.click(screen.getByText('그만하기'))
   await advance(3000)
   expect(screen.getByText('게임 고르기')).toBeInTheDocument()

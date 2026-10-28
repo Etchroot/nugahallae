@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { UpdownGame } from '../UpdownGame'
+import { END_EFFECT_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -71,6 +72,10 @@ test('폭탄 숫자를 부르면 연출 후 onFinish 1회(그 말), haptic error
   submit('60')
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
+  advance(END_EFFECT_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   fireEvent.click(screen.getByRole('button', { name: '확인' })) // 끝난 뒤 무시
   advance(5000)
   expect(screen.getByText(`${pieceLabel(order[1])} 펑!`)).toBeTruthy()

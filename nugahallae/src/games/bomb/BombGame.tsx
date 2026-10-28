@@ -6,11 +6,10 @@ import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { NEED, explode, ignite, initBomb, shakeSeconds, tapBomb } from './logic'
 import type { BombState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './bomb.css'
 
 const TICK_MS = 100
-const BOOM_MS = 800
-const OVERLAY_MS = 1200
 
 export function BombGame({
   order,
@@ -59,13 +58,10 @@ export function BombGame({
       commit(next)
       void haptic('error')
       const loser = next.loser
-      timers.current.push(
-        setTimeout(() => {
-          if (!loser) return
-          setOverlay(`${pieceLabel(loser)} 펑!`)
-          timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
-        }, BOOM_MS),
-      )
+      if (loser) {
+        setOverlay(`${pieceLabel(loser)} 펑!`)
+        timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
+      }
       return
     }
     setShake(shakeSeconds(elapsed, cur.fuse))

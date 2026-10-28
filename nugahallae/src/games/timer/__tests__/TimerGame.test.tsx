@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { TimerGame } from '../TimerGame'
+import { RECORD_END_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -74,11 +75,13 @@ test('마지막 사람 버튼은 결과 보기, 가장 먼 사람이 onFinish로
   expect(items[2].textContent).toContain(pieceLabel(order[1]))
   expect(items[2].className).toContain('rg-lose')
   expect(onFinish).not.toHaveBeenCalled()
-  advance(900)
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
   expect(screen.getByText(`${pieceLabel(order[1])} 목표에서 1.50초 벗어났어요`)).toBeTruthy()
-  advance(1200)
+  advance(RECORD_END_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   advance(5000)
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[1])
@@ -92,9 +95,8 @@ test('가장 나쁜 기록이 동점이면 (동점자 중 랜덤) 문구', () =>
   next()
   play(6000) // d 1.5 (동점)
   next()
-  advance(900)
   expect(screen.getByText(/목표에서 1\.50초 벗어났어요 \(동점자 중 랜덤\)$/)).toBeTruthy()
-  advance(1200)
+  advance(RECORD_END_MS)
   expect(onFinish).toHaveBeenCalledTimes(1)
 })
 
@@ -107,7 +109,7 @@ test('멈춘 뒤 멈춤 입력은 중복 기록되지 않는다', () => {
   next()
   play(7500)
   next()
-  advance(900 + 1200)
+  advance(RECORD_END_MS)
   expect(onFinish).toHaveBeenCalledTimes(1)
 })
 
@@ -167,6 +169,5 @@ test('같은 반올림 값은 동점: 목표 7.5초에서 ±0.19로 같은 두 �
   next()
   play(7500) // d 0
   next()
-  advance(900)
   expect(screen.getByText(/목표에서 0\.19초 벗어났어요 \(동점자 중 랜덤\)$/)).toBeTruthy()
 })

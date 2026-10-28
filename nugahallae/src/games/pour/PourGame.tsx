@@ -19,10 +19,9 @@ import {
   passTurn,
 } from './logic'
 import type { PourState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './pour.css'
 
-const SPILL_DELAY_MS = 500
-const OVERLAY_MS = 1500
 const PASS_LOCK_MS = 400
 // 한 프레임에 부을 수 있는 최대 시간(앱이 백그라운드에 갔다 와도 한꺼번에 붓지 않게)
 const MAX_STEP_MS = 100
@@ -91,13 +90,10 @@ export function PourGame({
       setPouring(false)
       void haptic('error')
       const loser = next.loser
-      timers.current.push(
-        setTimeout(() => {
-          if (!loser) return
-          setOverlay(`${pieceLabel(loser)} 넘쳤다!`)
-          timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
-        }, SPILL_DELAY_MS),
-      )
+      if (loser) {
+        setOverlay(`${pieceLabel(loser)} 넘쳤다!`)
+        timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
+      }
       return
     }
     const press = pressRef.current

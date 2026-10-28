@@ -7,10 +7,9 @@ import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { COLS, ROWS, TOP, initTower, pullBlock } from './logic'
 import type { TowerState } from './logic'
+import { END_EFFECT_MS } from '../shared/timing'
 import './tower.css'
 
-const COLLAPSE_MS = 900
-const OVERLAY_MS = 1200
 
 const MESSAGES = {
   top: '맨 윗줄은 뺄 수 없어요',
@@ -76,12 +75,8 @@ export function TowerGame({
     if (!loser) return
     void haptic('error')
     setFlying(scatter(rng))
-    timers.current.push(
-      setTimeout(() => {
-        setOverlay(`${pieceLabel(loser)} 와르르!`)
-        timers.current.push(setTimeout(() => onFinishRef.current(loser), OVERLAY_MS))
-      }, COLLAPSE_MS),
-    )
+    setOverlay(`${pieceLabel(loser)} 와르르!`)
+    timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
   }
 
   const over = state.phase === 'collapsed'

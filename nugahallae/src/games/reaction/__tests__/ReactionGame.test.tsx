@@ -2,6 +2,7 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
 import { ReactionGame } from '../ReactionGame'
+import { RECORD_END_MS } from '../../shared/timing'
 import { haptic } from '../../../platform/sdk'
 
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
@@ -99,11 +100,13 @@ test('가장 느린 사람이 onFinish로 1회, haptic error 1회, 마지막 버
   const items = screen.getAllByRole('listitem')
   expect(items.map((l) => l.querySelector('b')?.textContent)).toEqual(['250 ms', '300 ms', '520 ms'])
   expect(items[2].className).toContain('rg-lose')
-  advance(900)
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('error')
   expect(screen.getByText(`${pieceLabel(order[1])} 520ms로 제일 느렸어요 🐢`)).toBeTruthy()
-  advance(1200)
+  advance(RECORD_END_MS - 1)
+  expect(onFinish).not.toHaveBeenCalled()
+  advance(1)
+  expect(onFinish).toHaveBeenCalledTimes(1)
   advance(5000)
   expect(onFinish).toHaveBeenCalledTimes(1)
   expect(onFinish).toHaveBeenCalledWith(order[1])
@@ -119,10 +122,9 @@ test('부정출발은 최악 기록, 동점이면 동점자 중 랜덤 문구', 
   next()
   const items = screen.getAllByRole('listitem')
   expect(items.map((l) => l.querySelector('b')?.textContent)).toEqual(['300 ms', '부정출발 🚫', '부정출발 🚫'])
-  advance(900)
   // rng=0 → 동점 후보 중 첫 번째(order[0])
   expect(screen.getByText(`${pieceLabel(order[0])} 부정출발로 탈락했어요 🚫 (동점자 중 랜덤)`)).toBeTruthy()
-  advance(1200)
+  advance(RECORD_END_MS)
   expect(onFinish).toHaveBeenCalledWith(order[0])
   expect(onFinish).toHaveBeenCalledTimes(1)
 })

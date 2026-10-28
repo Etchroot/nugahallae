@@ -5,8 +5,8 @@ import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
 import { settleWorst } from './settle'
 
-export const RANK_MS = 900
-export const OVERLAY_MS = 1200
+import { RECORD_END_MS } from './timing'
+
 export const TIE_SUFFIX = ' (동점자 중 랜덤)'
 
 interface Options<T extends { piece: Piece }> {
@@ -20,7 +20,7 @@ interface Options<T extends { piece: Piece }> {
 
 /**
  * 순서 기록형 게임(타이머·반응속도·연타)의 마무리 흐름.
- * finish(rows) → 순위 목록 → 900ms → 오버레이(+haptic error) → 1200ms → onFinish 1회.
+ * finish(rows) → 순위 목록 + 오버레이(+haptic error) 동시 → RECORD_END_MS → onFinish 1회.
  * 언마운트하면 남은 타이머를 모두 정리한다.
  */
 export function useRecordFinish<T extends { piece: Piece }>(opts: Options<T>) {
@@ -44,15 +44,12 @@ export function useRecordFinish<T extends { piece: Piece }>(opts: Options<T>) {
     done.current = true
     const o = optsRef.current
     const s = settleWorst(rows, o.score, o.worse, o.rng)
+    const loser = s.loser
     setRanked(s.ranked)
+    void haptic('error')
+    setOverlay(`${pieceLabel(loser.piece)} ${o.why(loser)}${s.tie ? TIE_SUFFIX : ''}`)
     timers.current.push(
-      setTimeout(() => {
-        void haptic('error')
-        setOverlay(`${pieceLabel(s.loser.piece)} ${o.why(s.loser)}${s.tie ? TIE_SUFFIX : ''}`)
-        timers.current.push(
-          setTimeout(() => optsRef.current.onFinish(s.loser.piece), OVERLAY_MS),
-        )
-      }, RANK_MS),
+      setTimeout(() => optsRef.current.onFinish(loser.piece), RECORD_END_MS),
     )
   }
 

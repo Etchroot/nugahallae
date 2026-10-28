@@ -49,7 +49,7 @@
 .cr-jaw {
   background: #4caf50;
   padding: 12px 10px;
-  transition: transform 500ms ease-in;
+  transition: transform 400ms ease-in;
 }
 .cr-top { border-radius: 28px 28px 8px 8px; }
 .cr-bottom { border-radius: 8px 8px 28px 28px; }
@@ -57,7 +57,7 @@
 .cr-mouth {
   height: 64px;
   background: #7a1f2b;
-  transition: height 500ms ease-in;
+  transition: height 400ms ease-in;
 }
 .cr-teeth {
   display: grid;
