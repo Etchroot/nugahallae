@@ -3,6 +3,7 @@ import { RouletteGame } from './roulette/RouletteGame'
 import { PourGame } from './pour/PourGame'
 import { LadderGame } from './ladder/LadderGame'
 import { CrocGame } from './croc/CrocGame'
+import { BombGame } from './bomb/BombGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -42,6 +43,15 @@ export const GAMES: GameDefinition[] = [
     rule: '돌아가며 악어 이빨을 하나씩 눌러요. 숨겨진 아픈 이빨을 누르면 악어가 콱! 물린 사람이 벌칙이에요.',
     tint: '#e6f6e6',
     Component: CrocGame,
+  },
+  {
+    id: 'bomb',
+    icon: '💣',
+    title: '폭탄 돌리기',
+    summary: '언제 터질지 몰라요',
+    rule: '불을 붙이면 폭탄이 돌아가요. 내 차례에 7번 연타해야 다음 사람에게 넘어가요. 손에서 터지면 벌칙이에요.',
+    tint: '#ffe8ec',
+    Component: BombGame,
   },
 ]
 

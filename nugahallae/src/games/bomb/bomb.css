@@ -1,0 +1,97 @@
+.bm-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #191f28;
+  color: #fff;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  box-sizing: border-box;
+  overflow: hidden;
+  word-break: keep-all;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.bm-bar {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  background: #333d4b;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.bm-turn {
+  margin-top: 20px;
+  padding: 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.bm-stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bm-bomb {
+  font-size: min(40vw, 30vh, 160px);
+  line-height: 1;
+}
+.bm-shake { animation: bm-shake 0.5s linear infinite alternate; }
+.bm-boom { animation: bm-boom 500ms ease-out forwards; }
+@keyframes bm-shake {
+  from { transform: rotate(-6deg) translateX(-3px); }
+  to { transform: rotate(6deg) translateX(3px); }
+}
+@keyframes bm-boom {
+  from { transform: scale(0.8); }
+  to { transform: scale(1.4); }
+}
+.bm-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 88%;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.82);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 3;
+}
+.bm-hint {
+  margin: 0 16px 8px;
+  font-size: 15px;
+  color: #b0b8c1;
+  text-align: center;
+}
+.bm-tap {
+  margin: 0 16px 34px;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  min-height: 120px;
+  border: 0;
+  border-radius: 20px;
+  background: #f04452;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  word-break: keep-all;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.bm-tap:active { background: #d9333f; }
+.bm-tap:disabled { background: #4e5968; color: #8b95a1; }
+@media (prefers-reduced-motion: reduce) {
+  .bm-shake, .bm-boom { animation: none; }
+}
