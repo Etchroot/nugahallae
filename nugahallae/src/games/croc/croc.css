@@ -61,11 +61,11 @@
 }
 .cr-teeth {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
 }
 .cr-tooth {
-  min-width: 44px;
+  min-width: 0;
   min-height: 56px;
   padding: 0;
   border: 0;

@@ -16,13 +16,14 @@ export function BombGame({
   order,
   onFinish,
   rng = defaultRng,
-}: GameProps & { rng?: Rng }) {
+  now = () => performance.now(),
+}: GameProps & { rng?: Rng; now?: () => number }) {
   const [state, setState] = useState<BombState>(() => initBomb(rng))
   const [shake, setShake] = useState(0.5)
   const [passKey, setPassKey] = useState(0)
   const [overlay, setOverlay] = useState<string | null>(null)
   const stateRef = useRef(state)
-  const elapsed = useRef(0)
+  const t0 = useRef(0)
   const interval = useRef<ReturnType<typeof setInterval> | null>(null)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const onFinishRef = useRef(onFinish)
@@ -50,8 +51,9 @@ export function BombGame({
   const tick = () => {
     const cur = stateRef.current
     if (cur.phase !== 'lit') return
-    elapsed.current += TICK_MS
-    if (elapsed.current >= cur.fuse) {
+    // 틱 횟수가 아니라 실제 경과 시간으로 센다(백그라운드에서 타이머가 늦어도 심지가 늘어나지 않게)
+    const elapsed = now() - t0.current
+    if (elapsed >= cur.fuse) {
       stopTick()
       const next = explode(cur, order)
       commit(next)
@@ -66,7 +68,7 @@ export function BombGame({
       )
       return
     }
-    setShake(shakeSeconds(elapsed.current, cur.fuse))
+    setShake(shakeSeconds(elapsed, cur.fuse))
   }
 
   const light = () => {
@@ -74,10 +76,12 @@ export function BombGame({
     const next = ignite(cur)
     if (next === cur) return
     commit(next)
+    t0.current = now()
     interval.current = setInterval(tick, TICK_MS)
   }
 
-  const tap = () => {
+  const tap = (e: { button: number }) => {
+    if (e.button !== 0) return // 마우스 보조 버튼 무시(터치·펜은 button 0)
     const r = tapBomb(stateRef.current, order)
     if (r.state === stateRef.current) return
     commit(r.state)
@@ -124,7 +128,7 @@ export function BombGame({
           onKeyDown={(e) => {
             if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
               e.preventDefault()
-              tap()
+              tap({ button: 0 })
             }
           }}
           onContextMenu={(e) => e.preventDefault()}

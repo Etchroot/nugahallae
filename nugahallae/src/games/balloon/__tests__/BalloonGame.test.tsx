@@ -35,14 +35,25 @@ test('펌프 전엔 넘기기 비활성, 3번 하면 펌프 비활성', () => {
   expect(passBtn().disabled).toBe(false)
 })
 
-test('넘기기 연타해도 차례는 한 번만 넘어간다', () => {
+test('넘기기를 누르면 차례가 한 번 넘어가고 넘기기는 다시 비활성', () => {
   render(<BalloonGame order={order} onFinish={() => {}} rng={() => 0.999} />)
   doPump()
   fireEvent.click(passBtn())
-  fireEvent.click(passBtn())
   expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+  expect(passBtn().disabled).toBe(true)
   expect(haptic).toHaveBeenCalledTimes(1)
   expect(haptic).toHaveBeenCalledWith('tap')
+})
+
+test('탭 가드: 넘긴 직후 다음 사람이 펌프하고 곧바로 넘기기를 눌러도(더블탭) 무시', () => {
+  render(<BalloonGame order={order} onFinish={() => {}} rng={() => 0.999} />)
+  doPump()
+  fireEvent.click(passBtn()) // order[1]에게 넘어감
+  doPump() // 가드는 넘기기 탭만 보호: 펌프는 가드 없음
+  expect(passBtn().disabled).toBe(false)
+  fireEvent.click(passBtn()) // 400ms 안 → 가드가 막는다
+  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+  expect(haptic).toHaveBeenCalledTimes(1)
 })
 
 test('터지면 연출 후 onFinish가 터뜨린 말로 1회, haptic error 1회, 펌프에는 햅틱 없음', () => {

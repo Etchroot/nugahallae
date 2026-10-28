@@ -124,7 +124,10 @@ export function UpdownGame({
             maxLength={3}
             value={text}
             disabled={boom}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value)
+              setError(false)
+            }}
           />
           <button type="submit" className="ud-ok" disabled={boom}>
             확인

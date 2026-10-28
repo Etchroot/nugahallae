@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
@@ -65,4 +67,12 @@ test('연출 중 언마운트하면 onFinish 미호출', () => {
   unmount()
   advance(5000)
   expect(onFinish).not.toHaveBeenCalled()
+})
+
+test('이빨 격자는 minmax(0,1fr) 열이라 320px 폭에서도 넘치지 않고 높이는 44px 이상(css)', () => {
+  const css = readFileSync(join(__dirname, '..', 'croc.css'), 'utf8')
+  expect(css).toMatch(/grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/)
+  const tooth = css.match(/\.cr-tooth\s*\{([^}]*)\}/)?.[1] ?? ''
+  expect(tooth).not.toMatch(/min-width:\s*44px/)
+  expect(Number(tooth.match(/min-height:\s*(\d+)px/)?.[1])).toBeGreaterThanOrEqual(44)
 })

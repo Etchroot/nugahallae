@@ -41,6 +41,14 @@ test('범위 밖·빈 값은 인라인 안내, 차례 안 넘어감', () => {
   expect(screen.getByText(`👉 ${pieceLabel(order[0])} 차례예요`)).toBeTruthy()
 })
 
+test('입력을 고치면 인라인 안내가 사라진다', () => {
+  render(<UpdownGame order={order} onFinish={() => {}} rng={RNG} />)
+  submit('101')
+  expect(screen.getByText('1~100 사이 숫자를 입력해요')).toBeTruthy()
+  fireEvent.change(input(), { target: { value: '5' } })
+  expect(screen.queryByText('1~100 사이 숫자를 입력해요')).toBeNull()
+})
+
 test('UP/DOWN으로 범위가 좁혀지고 기록 칩이 남고 입력이 비워지고 포커스 유지', () => {
   render(<UpdownGame order={order} onFinish={() => {}} rng={RNG} />)
   input().focus()
