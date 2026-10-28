@@ -9,6 +9,7 @@ import { UpdownGame } from './updown/UpdownGame'
 import { TowerGame } from './tower/TowerGame'
 import { TimerGame } from './timer/TimerGame'
 import { ReactionGame } from './reaction/ReactionGame'
+import { TapGame } from './tap/TapGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -102,6 +103,15 @@ export const GAMES: GameDefinition[] = [
     rule: '화면을 누르면 빨간색으로 바뀌어요. 초록색이 되는 순간 최대한 빨리 탭! 빨간색일 때 누르면 부정출발이에요. 가장 느린 사람이 벌칙이에요.',
     tint: '#e5effa',
     Component: ReactionGame,
+  },
+  {
+    id: 'tap',
+    icon: '👆',
+    title: '연타 대결',
+    summary: '5초 동안 가장 적게 누른 사람',
+    rule: '내 차례에 버튼을 누르면 3초 카운트다운 후 5초 동안 연타! 가장 적게 누른 사람이 벌칙이에요.',
+    tint: '#fff0e3',
+    Component: TapGame,
   },
 ]
 

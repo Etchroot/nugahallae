@@ -1,0 +1,43 @@
+.tp-pad {
+  flex: 1;
+  width: 100%;
+  max-width: 420px;
+  min-height: 220px;
+  border: 0;
+  border-radius: 24px;
+  background: #4e5968;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  word-break: keep-all;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.tp-count { font-size: 72px; background: #3182f6; }
+.tp-go { font-size: 72px; background: #ff7a2f; }
+.tp-go:active { background: #e8641a; }
+.tp-bar {
+  flex: none;
+  width: 100%;
+  max-width: 420px;
+  height: 12px;
+  border-radius: 6px;
+  background: #333d4b;
+  overflow: hidden;
+}
+.tp-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #ffc342;
+}
+.tp-bar i.tp-run { animation: tp-fill linear forwards; }
+.tp-bar i.tp-full { width: 100%; }
+@keyframes tp-fill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-bar i.tp-run { animation: none; width: 100%; }
+}
