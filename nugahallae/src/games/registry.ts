@@ -5,6 +5,7 @@ import { LadderGame } from './ladder/LadderGame'
 import { CrocGame } from './croc/CrocGame'
 import { BombGame } from './bomb/BombGame'
 import { BalloonGame } from './balloon/BalloonGame'
+import { UpdownGame } from './updown/UpdownGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -62,6 +63,15 @@ export const GAMES: GameDefinition[] = [
     rule: '내 차례에 펌프를 1~3번 누르고 넘겨요(최소 1번). 풍선은 언제 터질지 몰라요. 터뜨린 사람이 벌칙이에요.',
     tint: '#ffeaf6',
     Component: BalloonGame,
+  },
+  {
+    id: 'updown',
+    icon: '🔢',
+    title: '숫자 폭탄',
+    summary: '업다운! 폭탄 숫자를 피해라',
+    rule: '1~100 사이에 폭탄 숫자가 숨어 있어요. 돌아가며 범위 안의 숫자를 부르면 UP/DOWN으로 범위가 좁혀져요. 폭탄 숫자를 부른 사람이 벌칙이에요.',
+    tint: '#efe8ff',
+    Component: UpdownGame,
   },
 ]
 

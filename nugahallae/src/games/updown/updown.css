@@ -1,0 +1,120 @@
+.ud-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #191f28;
+  color: #fff;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  box-sizing: border-box;
+  overflow: hidden;
+  word-break: keep-all;
+}
+.ud-bar {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  background: #333d4b;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.ud-turn {
+  margin-top: 20px;
+  padding: 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.ud-range {
+  margin-top: 16px;
+  font-size: 48px;
+  font-weight: 700;
+  color: #b197fc;
+}
+.ud-hint {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+.ud-up, .ud-down { display: inline-flex; align-items: center; gap: 6px; }
+.ud-up { color: #ff8a8a; }
+.ud-down { color: #74c0fc; }
+.ud-hist {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+  align-content: flex-start;
+}
+.ud-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #333d4b;
+  font-size: 15px;
+  font-weight: 600;
+}
+.ud-spacer { flex: 0 0 0; }
+.ud-overlay {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  max-width: 88%;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.88);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 3;
+}
+.ud-form {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 16px 34px;
+  max-width: 452px;
+}
+.ud-row { display: flex; gap: 8px; }
+.ud-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: 2px solid #4e5968;
+  border-radius: 16px;
+  background: #2b3340;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+}
+.ud-input:focus { outline: none; border-color: #b197fc; }
+.ud-ok {
+  min-width: 88px;
+  min-height: 56px;
+  border: 0;
+  border-radius: 16px;
+  background: #3182f6;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+.ud-ok:disabled { background: #4e5968; color: #8b95a1; }
+.ud-error {
+  margin: 8px 0 0;
+  min-height: 22px;
+  font-size: 15px;
+  color: #ff8a8a;
+}
