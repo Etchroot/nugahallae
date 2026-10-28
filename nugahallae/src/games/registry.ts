@@ -13,6 +13,7 @@ import { TapGame } from './tap/TapGame'
 import { FingerGame } from './finger/FingerGame'
 import { TraceGame } from './trace/TraceGame'
 import { GaugeGame } from './gauge/GaugeGame'
+import { RulerGame } from './ruler/RulerGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -143,6 +144,15 @@ export const GAMES: GameDefinition[] = [
     rule: '좌우로 오가는 막대를 정중앙에서 멈춰요. 모두 같은 속도예요. 중앙에서 가장 먼 사람이 벌칙이에요.',
     tint: '#ffe9e3',
     Component: GaugeGame,
+  },
+  {
+    id: 'ruler',
+    icon: '📏',
+    title: '감으로 길이 그리기',
+    summary: '자 없이 감으로, 가장 많이 틀리면 벌칙',
+    rule: '제시된 길이만큼 손가락으로 가로선을 그어요. 자는 없어요, 감으로! 정답과 가장 많이 차이 난 사람이 벌칙이에요.',
+    tint: '#fff4e0',
+    Component: RulerGame,
   },
 ]
 
