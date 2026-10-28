@@ -13,7 +13,7 @@ interface ButtonProps {
 }
 
 export function Button({ children, onClick, color = 'primary', variant = 'fill', display }: ButtonProps) {
-  const cls = ['tw-btn', `tw-btn--${color}-${variant}`, display === 'full' ? 'tw-btn--full' : '']
+  const cls = ['wb-btn', `wb-btn--${color}-${variant}`, display === 'full' ? 'wb-btn--full' : '']
   return (
     <button type="button" className={cls.join(' ')} onClick={onClick}>
       {children}
@@ -29,7 +29,7 @@ interface BottomCTAProps {
 
 function BottomCTABase({ children, onClick }: BottomCTAProps) {
   return (
-    <div className="tw-cta">
+    <div className="wb-cta">
       <Button display="full" onClick={onClick}>
         {children}
       </Button>
@@ -39,7 +39,7 @@ function BottomCTABase({ children, onClick }: BottomCTAProps) {
 
 function BottomCTADouble({ leftButton, rightButton }: { leftButton: ReactNode; rightButton: ReactNode; fixed?: boolean }) {
   return (
-    <div className="tw-cta tw-cta--double">
+    <div className="wb-cta wb-cta--double">
       {leftButton}
       {rightButton}
     </div>
@@ -58,11 +58,11 @@ interface ListRowProps {
 function ListRowBase({ left, contents, withArrow, onClick }: ListRowProps) {
   return (
     <li>
-      <button type="button" className="tw-row" onClick={onClick}>
+      <button type="button" className="wb-row" onClick={onClick}>
         {left}
-        <span className="tw-row__contents">{contents}</span>
+        <span className="wb-row__contents">{contents}</span>
         {withArrow && (
-          <svg className="tw-row__arrow" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+          <svg className="wb-row__arrow" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
@@ -74,8 +74,8 @@ function ListRowBase({ left, contents, withArrow, onClick }: ListRowProps) {
 function ListRowTexts({ top, bottom }: { top: ReactNode; bottom?: ReactNode; type?: string }) {
   return (
     <>
-      <span className="tw-row__top">{top}</span>
-      {bottom && <span className="tw-row__bottom">{bottom}</span>}
+      <span className="wb-row__top">{top}</span>
+      {bottom && <span className="wb-row__bottom">{bottom}</span>}
     </>
   )
 }
@@ -93,7 +93,7 @@ interface NumericSpinnerProps {
 
 export function NumericSpinner({ number, minNumber, maxNumber, onNumberChange, a11yProps }: NumericSpinnerProps) {
   return (
-    <div className="tw-spinner">
+    <div className="wb-spinner">
       <button
         type="button"
         aria-label={a11yProps?.minusButtonAriaLabel}
@@ -102,7 +102,7 @@ export function NumericSpinner({ number, minNumber, maxNumber, onNumberChange, a
       >
         −
       </button>
-      <span className="tw-spinner__value">{number}</span>
+      <span className="wb-spinner__value">{number}</span>
       <button
         type="button"
         aria-label={a11yProps?.plusButtonAriaLabel}
@@ -127,8 +127,8 @@ interface TextFieldProps {
 
 export function TextField({ label, placeholder, maxLength, value, onChange }: TextFieldProps) {
   return (
-    <label className="tw-field">
-      {label && <span className="tw-field__label">{label}</span>}
+    <label className="wb-field">
+      {label && <span className="wb-field__label">{label}</span>}
       <input placeholder={placeholder} maxLength={maxLength} value={value} onChange={onChange} />
     </label>
   )
@@ -146,10 +146,10 @@ interface ConfirmDialogProps {
 function ConfirmDialogBase({ open, title, onClose, cancelButton, confirmButton }: ConfirmDialogProps) {
   if (!open) return null
   return (
-    <div className="tw-dim" onClick={onClose}>
-      <div className="tw-dialog" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <p className="tw-dialog__title">{title}</p>
-        <div className="tw-dialog__buttons">
+    <div className="wb-dim" onClick={onClose}>
+      <div className="wb-dialog" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <p className="wb-dialog__title">{title}</p>
+        <div className="wb-dialog__buttons">
           {cancelButton}
           {confirmButton}
         </div>
