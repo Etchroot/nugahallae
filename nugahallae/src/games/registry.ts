@@ -11,6 +11,8 @@ import { TimerGame } from './timer/TimerGame'
 import { ReactionGame } from './reaction/ReactionGame'
 import { TapGame } from './tap/TapGame'
 import { FingerGame } from './finger/FingerGame'
+import { TraceGame } from './trace/TraceGame'
+import { GaugeGame } from './gauge/GaugeGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -123,6 +125,24 @@ export const GAMES: GameDefinition[] = [
     badge: 'NEW',
     pieceMode: 'auto',
     Component: FingerGame,
+  },
+  {
+    id: 'trace',
+    icon: '〰️',
+    title: '선 따라 그리기',
+    summary: '벽에 닿으면 끝, 가장 짧게 간 사람이 벌칙',
+    rule: '꾸불꾸불한 길을 손가락으로 따라 그려요. 벽에 닿거나 손을 떼면 거기서 끝! 가장 짧게 간 사람이 벌칙이에요. 모두 같은 길이에요.',
+    tint: '#e8f0ff',
+    Component: TraceGame,
+  },
+  {
+    id: 'gauge',
+    icon: '🎯',
+    title: '게이지 멈추기',
+    summary: '정중앙에서 가장 먼 사람이 벌칙',
+    rule: '좌우로 오가는 막대를 정중앙에서 멈춰요. 모두 같은 속도예요. 중앙에서 가장 먼 사람이 벌칙이에요.',
+    tint: '#ffe9e3',
+    Component: GaugeGame,
   },
 ]
 
