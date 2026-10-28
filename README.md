@@ -46,6 +46,12 @@ npx tsc -b   # 타입 검사
 
 https://etchroot.github.io/nugahallae/ (휴대폰 브라우저로 여는 것을 권장합니다)
 
+## 문서
+
+- [설계 문서](docs/superpowers/specs/2026-10-28-nugahallae-design.md)
+- [구현 계획](docs/superpowers/plans/2026-10-28-nugahallae-skeleton.md)
+- [AI 활용 과정 기록](docs/ai-usage.md) — 작업 방식, 사용한 스킬·도구, AI 실수를 잡아 고친 사례, 프롬프트 변경 기록
+
 ## 폴더 구조
 
 ```
