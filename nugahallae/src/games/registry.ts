@@ -10,6 +10,7 @@ import { TowerGame } from './tower/TowerGame'
 import { TimerGame } from './timer/TimerGame'
 import { ReactionGame } from './reaction/ReactionGame'
 import { TapGame } from './tap/TapGame'
+import { TraceGame } from './trace/TraceGame'
 
 export const GAMES: GameDefinition[] = [
   {
@@ -112,6 +113,15 @@ export const GAMES: GameDefinition[] = [
     rule: '내 차례에 버튼을 누르면 3초 카운트다운 후 5초 동안 연타! 가장 적게 누른 사람이 벌칙이에요.',
     tint: '#fff0e3',
     Component: TapGame,
+  },
+  {
+    id: 'trace',
+    icon: '〰️',
+    title: '선 따라 그리기',
+    summary: '벽에 닿으면 끝, 가장 짧게 간 사람이 벌칙',
+    rule: '꾸불꾸불한 길을 손가락으로 따라 그려요. 벽에 닿거나 손을 떼면 거기서 끝! 가장 짧게 간 사람이 벌칙이에요. 모두 같은 길이에요.',
+    tint: '#e8f0ff',
+    Component: TraceGame,
   },
 ]
 
