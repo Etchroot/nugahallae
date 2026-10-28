@@ -12,5 +12,8 @@ export interface GameDefinition {
   title: string
   summary: string
   rule: string
+  /** 홈 카드 아이콘 타일 배경색 (없으면 연회색) */
+  tint?: string
+  badge?: '인기' | 'NEW'
   Component: ComponentType<GameProps>
 }

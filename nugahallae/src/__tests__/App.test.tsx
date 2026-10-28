@@ -57,7 +57,7 @@ beforeEach(() => {
 
 test('홈 화면이 보인다', () => {
   renderApp()
-  expect(screen.getByText('인원수')).toBeInTheDocument()
+  expect(screen.getByText('게임 고르기')).toBeInTheDocument()
 })
 
 test('홈에서 뒤로가기 → 종료 확인, 닫기 누르면 closeApp', async () => {
@@ -79,6 +79,7 @@ test('언마운트 시 onBack 해제', () => {
 function goToPlay() {
   renderApp()
   fireEvent.click(screen.getByText('돌림판'))
+  fireEvent.click(screen.getByText('말 뽑기 시작'))
   for (let i = 1; i <= 4; i++) {
     fireEvent.click(screen.getByText(`${i}번째 사람, 화면을 눌러 말을 뽑으세요`))
     fireEvent.click(screen.getByText('확인했어요'))
@@ -100,7 +101,7 @@ test('그만하기는 홈으로 간다', () => {
   goToPlay()
   act(() => backHandler!())
   fireEvent.click(screen.getByText('그만하기'))
-  expect(screen.getByText('인원수')).toBeInTheDocument()
+  expect(screen.getByText('게임 고르기')).toBeInTheDocument()
 })
 
 test('다이얼로그가 열린 상태에서 뒤로가기는 다이얼로그를 닫는다', () => {

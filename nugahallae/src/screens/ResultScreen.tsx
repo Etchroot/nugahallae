@@ -9,12 +9,11 @@ const SUSPENSE_MS = 1500
 
 interface Props {
   loser: Piece
-  penalty: string
   onAgain: () => void
   onOtherGame: () => void
 }
 
-export function ResultScreen({ loser, penalty, onAgain, onOtherGame }: Props) {
+export function ResultScreen({ loser, onAgain, onOtherGame }: Props) {
   const [shown, setShown] = useState(false)
 
   useEffect(() => {
@@ -42,7 +41,6 @@ export function ResultScreen({ loser, penalty, onAgain, onOtherGame }: Props) {
         {loser.emoji}
       </div>
       <div className="rs-loser">{pieceLabel(loser)} 걸렸다!</div>
-      {penalty && <div className="rs-penalty">벌칙: {penalty}</div>}
       <BottomCTA.Double
         fixed
         leftButton={

@@ -6,25 +6,95 @@ import type { Piece } from '../domain/pieces'
 import type { GameDefinition } from '../games/types'
 import './screens.css'
 
+const MIN_PLAYERS = 2
+const MAX_PLAYERS = 10
+
 interface Props {
   game: GameDefinition
-  playerCount: number
+  initialCount: number
+  onCountChosen: (count: number) => void
   onStart: (order: Piece[]) => void
 }
 
-export function PrepareScreen({ game, playerCount, onStart }: Props) {
-  const [order] = useState(() => drawPieces(playerCount))
+function MinusIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 12h14M12 5v14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Props) {
+  const [count, setCount] = useState(initialCount)
+  const [order, setOrder] = useState<Piece[] | null>(null) // 뽑기를 시작하면 채워진다
   const [index, setIndex] = useState(0) // 뽑고 확인까지 마친 사람 수
   const [revealed, setRevealed] = useState(false)
   const guard = useTapGuard()
+
+  const header = (
+    <>
+      <h1 className="sc-title">{game.title}</h1>
+      <p className="sc-rule">{game.rule}</p>
+    </>
+  )
+
+  if (order === null) {
+    return (
+      <div className="sc-page">
+        {header}
+        <div className="sc-row">
+          <span className="sc-row-label">인원수</span>
+          <div className="sc-stepper">
+            <button
+              type="button"
+              className="sc-step"
+              aria-label="인원 줄이기"
+              disabled={count <= MIN_PLAYERS}
+              onClick={() => setCount((c) => Math.max(MIN_PLAYERS, c - 1))}
+            >
+              <MinusIcon />
+            </button>
+            <span className="sc-count" data-testid="player-count" aria-live="polite">
+              {count}명
+            </span>
+            <button
+              type="button"
+              className="sc-step"
+              aria-label="인원 늘리기"
+              disabled={count >= MAX_PLAYERS}
+              onClick={() => setCount((c) => Math.min(MAX_PLAYERS, c + 1))}
+            >
+              <PlusIcon />
+            </button>
+          </div>
+        </div>
+        <BottomCTA
+          fixed
+          onClick={() => {
+            onCountChosen(count)
+            setOrder(drawPieces(count))
+          }}
+        >
+          말 뽑기 시작
+        </BottomCTA>
+      </div>
+    )
+  }
+
   const done = index >= order.length
   const piece = order[index]
 
   return (
     <div className="sc-page">
-      <h1 className="sc-title">{game.title}</h1>
-      <p className="sc-rule">{game.rule}</p>
-      <p className="sc-rule-fixed">걸리면 통과! 마지막까지 남으면 벌칙</p>
+      {header}
 
       {done ? (
         <div className="sc-draw sc-draw-ready" role="status">

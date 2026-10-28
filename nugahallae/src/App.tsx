@@ -3,7 +3,7 @@ import { backActionFor } from './app/flow'
 import type { Screen } from './app/flow'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { closeApp, onBack } from './platform/sdk'
-import { DEFAULT_SETTINGS, loadSettings, normalizePenalty, saveSettings } from './domain/settings'
+import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './domain/settings'
 import type { Settings } from './domain/settings'
 import type { Piece } from './domain/pieces'
 import { findGame } from './games/registry'
@@ -85,8 +85,6 @@ function App() {
   if (screen.name === 'home' || !game) {
     body = (
       <HomeScreen
-        settings={settings}
-        onChange={changeSettings}
         onPickGame={(gameId) => {
           touchedRef.current = true
           setScreen({ name: 'prepare', gameId })
@@ -96,9 +94,10 @@ function App() {
   } else if (screen.name === 'prepare') {
     body = (
       <PrepareScreen
-        key={screen.gameId + ':' + settings.playerCount}
+        key={screen.gameId}
         game={game}
-        playerCount={settings.playerCount}
+        initialCount={settings.playerCount}
+        onCountChosen={(playerCount) => changeSettings({ ...settings, playerCount })}
         onStart={(order) => setScreen({ name: 'play', gameId: screen.gameId, order })}
       />
     )
@@ -114,7 +113,6 @@ function App() {
     body = (
       <ResultScreen
         loser={screen.loser}
-        penalty={normalizePenalty(settings.penalty)}
         onAgain={() => setScreen({ name: 'prepare', gameId: screen.gameId })}
         onOtherGame={goHome}
       />

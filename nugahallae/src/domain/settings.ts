@@ -2,17 +2,12 @@ import { storageGet, storageSet } from '../platform/sdk'
 
 export interface Settings {
   playerCount: number
-  penalty: string
 }
 
-export const DEFAULT_SETTINGS: Settings = { playerCount: 4, penalty: '' }
-export const PENALTY_MAX = 20
+export const DEFAULT_SETTINGS: Settings = { playerCount: 4 }
 const SETTINGS_KEY = 'nugahallae:settings'
 
-export function normalizePenalty(raw: string): string {
-  return raw.trim().slice(0, PENALTY_MAX)
-}
-
+// 예전 저장값에 있던 penalty 같은 모르는 필드는 읽지 않고 버린다.
 export function parseSettings(raw: string | null): Settings {
   if (raw === null) return { ...DEFAULT_SETTINGS }
   let data: unknown
@@ -22,15 +17,12 @@ export function parseSettings(raw: string | null): Settings {
     return { ...DEFAULT_SETTINGS }
   }
   if (typeof data !== 'object' || data === null) return { ...DEFAULT_SETTINGS }
-  const o = data as Record<string, unknown>
-  const pc = o.playerCount
+  const pc = (data as Record<string, unknown>).playerCount
   const playerCount =
     typeof pc === 'number' && Number.isInteger(pc) && pc >= 2 && pc <= 10
       ? pc
       : DEFAULT_SETTINGS.playerCount
-  const penalty =
-    typeof o.penalty === 'string' ? normalizePenalty(o.penalty) : DEFAULT_SETTINGS.penalty
-  return { playerCount, penalty }
+  return { playerCount }
 }
 
 export async function loadSettings(): Promise<Settings> {
@@ -38,8 +30,5 @@ export async function loadSettings(): Promise<Settings> {
 }
 
 export async function saveSettings(s: Settings): Promise<void> {
-  await storageSet(
-    SETTINGS_KEY,
-    JSON.stringify({ playerCount: s.playerCount, penalty: normalizePenalty(s.penalty) }),
-  )
+  await storageSet(SETTINGS_KEY, JSON.stringify({ playerCount: s.playerCount }))
 }

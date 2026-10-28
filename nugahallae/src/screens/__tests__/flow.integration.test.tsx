@@ -1,5 +1,5 @@
 import { test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, cleanup } from '@testing-library/react'
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait'
 
 let backHandler: (() => void) | null = null
@@ -55,17 +55,17 @@ async function advance(ms: number) {
   for (let t = 0; t < ms; t += 100) await act(async () => { await vi.advanceTimersByTimeAsync(100) })
 }
 
-// TDS NumericSpinner는 framer-motion 탭(pointerdown → pointerup)으로 동작한다.
-function tap(el: HTMLElement) {
-  fireEvent.pointerDown(el, { pointerId: 1, isPrimary: true, button: 0 })
-  fireEvent.pointerUp(el, { pointerId: 1, isPrimary: true, button: 0 })
-}
-
 function setPlayers(n: number) {
   const plus = screen.getByLabelText('인원 늘리기')
   const minus = screen.getByLabelText('인원 줄이기')
-  for (let i = 0; i < 12; i++) tap(minus)
-  for (let i = 2; i < n; i++) tap(plus)
+  for (let i = 0; i < 12; i++) fireEvent.click(minus)
+  for (let i = 2; i < n; i++) fireEvent.click(plus)
+}
+
+function pickGame(title: string, players?: number) {
+  fireEvent.click(screen.getByText(title))
+  if (players !== undefined) setPlayers(players)
+  fireEvent.click(screen.getByText('말 뽑기 시작'))
 }
 
 async function drawAll(n: number) {
@@ -92,43 +92,23 @@ beforeEach(() => {
 })
 afterEach(() => vi.useRealTimers())
 
-test('홈 → 돌림판 → 3명 말 뽑기 → 시작 → 끝까지 → 결과에 "걸렸다!"와 "벌칙: 커피 사기"', async () => {
+test('홈 → 돌림판 → 3명 말 뽑기 → 시작 → 끝까지 → 결과에 "걸렸다!", 벌칙 줄은 없다', async () => {
   renderApp()
   await flush()
-  setPlayers(3)
-  fireEvent.change(screen.getByPlaceholderText('벌칙 (선택) 예: 커피 사기'), {
-    target: { value: '커피 사기' },
-  })
-  fireEvent.click(screen.getByText('돌림판'))
-  expect(screen.getByText('걸리면 통과! 마지막까지 남으면 벌칙')).toBeInTheDocument()
+  pickGame('돌림판', 3)
   await drawAll(3)
   fireEvent.click(screen.getByText('시작하기'))
   await playRoulette(3)
   expect(screen.getByText(/걸렸다!/)).toBeInTheDocument()
-  expect(screen.getByText('벌칙: 커피 사기')).toBeInTheDocument()
+  expect(screen.queryByText(/벌칙:/)).not.toBeInTheDocument()
   expect(haptic).toHaveBeenCalledWith('success')
   expect(vi.mocked(haptic).mock.calls.filter((c) => c[0] === 'success')).toHaveLength(1)
-})
-
-test('벌칙이 공백이면 결과에 "벌칙:" 줄이 없다', async () => {
-  renderApp()
-  await flush()
-  setPlayers(2)
-  fireEvent.change(screen.getByPlaceholderText('벌칙 (선택) 예: 커피 사기'), {
-    target: { value: '   ' },
-  })
-  fireEvent.click(screen.getByText('돌림판'))
-  await drawAll(2)
-  fireEvent.click(screen.getByText('시작하기'))
-  await playRoulette(2)
-  expect(screen.getByText(/걸렸다!/)).toBeInTheDocument()
-  expect(screen.queryByText(/벌칙:/)).not.toBeInTheDocument()
 })
 
 test('뽑은 직후 바로 확인했어요를 눌러도(더블탭) 말을 보여준 채로 남는다', async () => {
   renderApp()
   await flush()
-  fireEvent.click(screen.getByText('돌림판'))
+  pickGame('돌림판')
   fireEvent.click(screen.getByText('1번째 사람, 화면을 눌러 말을 뽑으세요'))
   // 같은 자리에 나타난 진짜 확인 버튼에 두 번째 탭이 들어온다
   fireEvent.click(screen.getByText('확인했어요'))
@@ -142,7 +122,7 @@ test('뽑은 직후 바로 확인했어요를 눌러도(더블탭) 말을 보여
 test('확인했어요 직후 바로 뽑기 자리를 눌러도(더블탭) 다음 사람 대기 상태가 유지된다', async () => {
   renderApp()
   await flush()
-  fireEvent.click(screen.getByText('돌림판'))
+  pickGame('돌림판')
   fireEvent.click(screen.getByText('1번째 사람, 화면을 눌러 말을 뽑으세요'))
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
@@ -158,8 +138,7 @@ test('확인했어요 직후 바로 뽑기 자리를 눌러도(더블탭) 다음
 test('마지막 돌림 중 뒤로가기 → 끝나도 결과로 가지 않고 그만할까요 유지, 계속하기 → 결과', async () => {
   renderApp()
   await flush()
-  setPlayers(2)
-  fireEvent.click(screen.getByText('돌림판'))
+  pickGame('돌림판', 2)
   await drawAll(2)
   fireEvent.click(screen.getByText('시작하기'))
   await advance(400)
@@ -180,8 +159,7 @@ test('마지막 돌림 중 뒤로가기 → 끝나도 결과로 가지 않고 �
 test('마지막 돌림 중 뒤로가기 → 그만하기는 홈으로 가고 결과는 버려진다', async () => {
   renderApp()
   await flush()
-  setPlayers(2)
-  fireEvent.click(screen.getByText('돌림판'))
+  pickGame('돌림판', 2)
   await drawAll(2)
   fireEvent.click(screen.getByText('시작하기'))
   await advance(400)
@@ -191,43 +169,75 @@ test('마지막 돌림 중 뒤로가기 → 그만하기는 홈으로 가고 결
   await advance(7000 + 1200 + 1000 + 500)
   fireEvent.click(screen.getByText('그만하기'))
   await advance(3000)
-  expect(screen.getByText('인원수')).toBeInTheDocument()
+  expect(screen.getByText('게임 고르기')).toBeInTheDocument()
   expect(screen.queryByText(/걸렸다!/)).not.toBeInTheDocument()
 })
 
 test('한 판 더 → 같은 게임 준비 화면, 다른 게임 → 홈', async () => {
   renderApp()
   await flush()
-  setPlayers(2)
-  fireEvent.click(screen.getByText('돌림판'))
+  pickGame('돌림판', 2)
   await drawAll(2)
   fireEvent.click(screen.getByText('시작하기'))
   await playRoulette(2)
   fireEvent.click(screen.getByText('한 판 더'))
-  expect(screen.getByText('1번째 사람, 화면을 눌러 말을 뽑으세요')).toBeInTheDocument()
+  expect(screen.getByText('말 뽑기 시작')).toBeInTheDocument()
+  fireEvent.click(screen.getByText('말 뽑기 시작'))
   await drawAll(2)
   fireEvent.click(screen.getByText('시작하기'))
   await playRoulette(2)
   fireEvent.click(screen.getByText('다른 게임'))
-  expect(screen.getByText('인원수')).toBeInTheDocument()
+  expect(screen.getByText('게임 고르기')).toBeInTheDocument()
 })
 
 test('인원수는 2 아래/10 위로 못 간다', async () => {
   renderApp()
   await flush()
-  for (let i = 0; i < 15; i++) tap(screen.getByLabelText('인원 줄이기'))
   fireEvent.click(screen.getByText('돌림판'))
-  await drawAll(2)
-  expect(screen.queryByText('3번째 사람, 화면을 눌러 말을 뽑으세요')).not.toBeInTheDocument()
-  expect(screen.getByText('시작하기')).toBeInTheDocument()
-})
-
-test('인원수 10명 위로는 못 간다', async () => {
-  renderApp()
-  await flush()
-  for (let i = 0; i < 15; i++) tap(screen.getByLabelText('인원 늘리기'))
-  fireEvent.click(screen.getByText('돌림판'))
+  for (let i = 0; i < 15; i++) fireEvent.click(screen.getByLabelText('인원 줄이기'))
+  expect(screen.getByTestId('player-count')).toHaveTextContent('2명')
+  for (let i = 0; i < 15; i++) fireEvent.click(screen.getByLabelText('인원 늘리기'))
+  expect(screen.getByTestId('player-count')).toHaveTextContent('10명')
+  fireEvent.click(screen.getByText('말 뽑기 시작'))
   await drawAll(10)
   expect(screen.queryByText('11번째 사람, 화면을 눌러 말을 뽑으세요')).not.toBeInTheDocument()
   expect(screen.getByText('시작하기')).toBeInTheDocument()
+})
+
+test('기본 인원수는 4, 저장값이 있으면 그 값', async () => {
+  renderApp()
+  await flush()
+  fireEvent.click(screen.getByText('돌림판'))
+  expect(screen.getByTestId('player-count')).toHaveTextContent('4명')
+  cleanup()
+  store.set('nugahallae:settings', JSON.stringify({ playerCount: 7 }))
+  renderApp()
+  await flush()
+  fireEvent.click(screen.getByText('돌림판'))
+  expect(screen.getByTestId('player-count')).toHaveTextContent('7명')
+})
+
+test('고른 인원수는 저장된다', async () => {
+  renderApp()
+  await flush()
+  pickGame('돌림판', 6)
+  await flush()
+  expect(JSON.parse(store.get('nugahallae:settings')!)).toEqual({ playerCount: 6 })
+})
+
+test('말 뽑기를 시작하면 인원수를 바꿀 수 없다', async () => {
+  renderApp()
+  await flush()
+  pickGame('돌림판', 3)
+  expect(screen.queryByLabelText('인원 늘리기')).not.toBeInTheDocument()
+  expect(screen.queryByLabelText('인원 줄이기')).not.toBeInTheDocument()
+  expect(screen.queryByText('말 뽑기 시작')).not.toBeInTheDocument()
+})
+
+test('준비 화면에 돌림판 전용 문구는 다른 게임에서 보이지 않는다', async () => {
+  renderApp()
+  await flush()
+  fireEvent.click(screen.getByText('잔 채우기'))
+  expect(screen.queryByText('걸리면 통과! 마지막까지 남으면 벌칙')).not.toBeInTheDocument()
+  expect(screen.getByText(/차례대로 잔에 물을 부어요/)).toBeInTheDocument()
 })
