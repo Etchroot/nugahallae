@@ -1,0 +1,140 @@
+.c3-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--pl-bg);
+  color: var(--pl-text);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  box-sizing: border-box;
+  overflow: hidden;
+  word-break: keep-all;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+.c3-bar {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  background: var(--pl-rule-bg);
+  color: var(--pl-rule-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+.c3-stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 16px 34px;
+  box-sizing: border-box;
+}
+.c3-turn {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.c3-retry {
+  margin: 0;
+  font-size: 15px;
+  color: var(--pl-danger-text);
+}
+.c3-ready {
+  min-height: 72px;
+  width: min(100%, 360px);
+  border: 0;
+  border-radius: 16px;
+  background: var(--pl-primary);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.c3-num {
+  font-size: 96px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.c3-limit {
+  width: min(100%, 360px);
+  height: 10px;
+  border-radius: 5px;
+  background: var(--pl-line);
+  overflow: hidden;
+}
+.c3-limit-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--pl-warn);
+  transform-origin: left center;
+  animation-name: c3-shrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes c3-shrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.c3-btns {
+  width: min(100%, 360px);
+  display: flex;
+  gap: 12px;
+}
+.c3-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 80px;
+  border: 0;
+  border-radius: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.c3-skip {
+  background: var(--pl-surface-2);
+  color: var(--pl-text);
+}
+.c3-clap {
+  background: var(--pl-primary);
+  color: #fff;
+}
+.c3-btn:disabled {
+  background: var(--pl-disabled-bg);
+  color: var(--pl-disabled-text);
+  cursor: default;
+}
+.c3-overlay {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  max-width: 88%;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: var(--pl-surface);
+  color: var(--pl-text);
+  box-shadow: var(--pl-card-shadow);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 움직임은 줄이되 남은 시간은 계단식으로 줄어들어 알 수 있게 한다 */
+  .c3-limit-fill { animation-timing-function: steps(8, end); }
+}
