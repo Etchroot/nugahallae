@@ -21,7 +21,8 @@ export interface InkColor {
 export const COLORS: InkColor[] = [
   { id: 'red', name: '빨강', hex: '#F04452' },
   { id: 'blue', name: '파랑', hex: '#3182F6' },
-  { id: 'yellow', name: '노랑', hex: '#FFC342' },
+  // 라이트 배경에서 큰 글자 대비 3:1 이상이 되도록 짙은 호박색을 쓴다(#FFC342는 1.6:1이라 안 보임).
+  { id: 'yellow', name: '노랑', hex: '#B7791F' },
   { id: 'purple', name: '보라', hex: '#8B5CF6' },
 ]
 

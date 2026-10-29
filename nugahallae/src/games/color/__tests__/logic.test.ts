@@ -14,9 +14,26 @@ test('색은 4가지, 초록 제외, 지정한 값', () => {
   expect(COLORS.map((c) => [c.name, c.hex])).toEqual([
     ['빨강', '#F04452'],
     ['파랑', '#3182F6'],
-    ['노랑', '#FFC342'],
+    ['노랑', '#B7791F'],
     ['보라', '#8B5CF6'],
   ])
+})
+
+function luminance(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+test('모든 글자 색은 라이트 배경(#f7f8fa)에서 큰 글자 대비 3:1 이상', () => {
+  const bg = luminance('#f7f8fa')
+  for (const c of COLORS) {
+    const l = luminance(c.hex)
+    const ratio = (bg + 0.05) / (l + 0.05)
+    expect(ratio, `${c.name} ${c.hex}`).toBeGreaterThanOrEqual(3)
+  }
 })
 
 test('10문제, 같은 시드면 같은 문제', () => {
