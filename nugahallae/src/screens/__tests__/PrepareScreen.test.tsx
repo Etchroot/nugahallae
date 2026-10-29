@@ -15,7 +15,7 @@ function setup(count = 4) {
       <PrepareScreen game={game} initialCount={count} onCountChosen={() => {}} onStart={onStart} />
     </TDSMobileAITProvider>,
   )
-  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  fireEvent.click(screen.getByText('동물 고르기 시작'))
   return { onStart }
 }
 
@@ -88,10 +88,10 @@ beforeEach(() => {
 })
 afterEach(() => vi.useRealTimers())
 
-test.each([2, 10])('말 뽑기 시작 후 %i명이면 카드 %i장이 한 번에 보인다', (n) => {
+test.each([2, 10])('동물 고르기 시작 후 %i명이면 카드 %i장이 한 번에 보인다', (n) => {
   setup(n)
   expect(cards()).toHaveLength(n)
-  expect(screen.getByText('1번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
+  expect(screen.getByText('1번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
   expect(screen.queryByText('시작하기')).not.toBeInTheDocument()
   expect(screen.queryByText('다시 고르기')).not.toBeInTheDocument()
 })
@@ -101,11 +101,11 @@ test('카드 탭 → 확인 상태 → 확인했어요 → 다음 사람 안내,
   const first = cards()[1]
   const label = first.textContent!
   fireEvent.click(first)
-  expect(screen.getByText(/— 내 말을 기억하세요/)).toBeInTheDocument()
+  expect(screen.getByText(/— 내 동물을 기억하세요/)).toBeInTheDocument()
   expect(screen.getByText('확인했어요')).toBeInTheDocument()
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
-  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
   expect(within(cards()[1]).getByText('선택됨')).toBeInTheDocument()
   expect(cards()[1]).toBeDisabled()
   expect(cards()[1].textContent).toContain(label.replace('선택됨', ''))
@@ -117,10 +117,10 @@ test('확인 상태에서 다른 카드 탭은 무시된다', async () => {
   fireEvent.click(cards()[0])
   await advance(1000)
   fireEvent.click(cards()[1])
-  expect(screen.getByText(/— 내 말을 기억하세요/)).toBeInTheDocument()
+  expect(screen.getByText(/— 내 동물을 기억하세요/)).toBeInTheDocument()
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
-  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
   expect(within(cards()[1]).queryByText('선택됨')).not.toBeInTheDocument()
 })
 
@@ -128,12 +128,12 @@ test('400ms 안 연타: 카드 탭 직후 확인했어요는 무시된다', asyn
   setup(3)
   fireEvent.click(cards()[0])
   fireEvent.click(screen.getByText('확인했어요'))
-  expect(screen.getByText(/— 내 말을 기억하세요/)).toBeInTheDocument()
+  expect(screen.getByText(/— 내 동물을 기억하세요/)).toBeInTheDocument()
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
   fireEvent.click(cards()[1]) // 확인 직후 카드 탭도 무시
-  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
-  expect(screen.queryByText(/— 내 말을 기억하세요/)).not.toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
+  expect(screen.queryByText(/— 내 동물을 기억하세요/)).not.toBeInTheDocument()
 })
 
 test('모두 고르면 시작하기 → onStart는 고른 순서의 말 배열', async () => {
@@ -142,7 +142,7 @@ test('모두 고르면 시작하기 → onStart는 고른 순서의 말 배열',
   await pick(2)
   await pick(0)
   await pick(1)
-  expect(screen.queryByText(/번째 사람, 내 말을 하나 골라요/)).not.toBeInTheDocument()
+  expect(screen.queryByText(/번째 사람, 내 동물을 하나 골라요/)).not.toBeInTheDocument()
   fireEvent.click(screen.getByText('시작하기'))
   expect(onStart).toHaveBeenCalledTimes(1)
   const got = onStart.mock.calls[0][0].map((p) => p.id)
@@ -156,7 +156,7 @@ test('다시 고르기: 하나 이상 고른 뒤 보이고, 선택 초기화·�
   await pick(1)
   await pick(0)
   fireEvent.click(screen.getByText('다시 고르기'))
-  expect(screen.getByText('1번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
+  expect(screen.getByText('1번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
   expect(screen.queryByText('선택됨')).not.toBeInTheDocument()
   expect(cards().map((c) => c.getAttribute('data-piece-id'))).toEqual(before)
   expect(screen.queryByText('다시 고르기')).not.toBeInTheDocument()
@@ -172,8 +172,8 @@ test("pieceMode 'auto' 게임은 말 카드 없이 시작하기만, onStart는 �
       <PrepareScreen game={auto} initialCount={4} onCountChosen={onCountChosen} onStart={onStart} />
     </TDSMobileAITProvider>,
   )
-  expect(screen.getByText('이 게임은 손가락을 올리는 순서대로 말이 정해져요')).toBeInTheDocument()
-  expect(screen.queryByText('말 뽑기 시작')).not.toBeInTheDocument()
+  expect(screen.getByText('이 게임은 손가락을 올리는 순서대로 차례가 정해져요')).toBeInTheDocument()
+  expect(screen.queryByText('동물 고르기 시작')).not.toBeInTheDocument()
   expect(screen.queryAllByTestId('piece-card')).toHaveLength(0)
   fireEvent.click(screen.getByLabelText('인원 늘리기'))
   await advance(400)
@@ -190,6 +190,6 @@ test('확인 상태 문구에 pieceLabel이 쓰인다', () => {
   fireEvent.click(cards()[0])
   const id = cards()[0].getAttribute('data-piece-id')
   expect(id).toBeTruthy()
-  expect(screen.getByText(/— 내 말을 기억하세요/).textContent).toMatch(/^(.+) — 내 말을 기억하세요$/)
+  expect(screen.getByText(/— 내 동물을 기억하세요/).textContent).toMatch(/^(.+) — 내 동물을 기억하세요$/)
   expect(typeof pieceLabel).toBe('function')
 })

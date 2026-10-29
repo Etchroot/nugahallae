@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>누가할래 발표자료</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/toss/tossface/dist/tossface.css">
+<style>
+:root {
+  --ink: #191f28;
+  --ink-2: #4e5968;
+  --ink-3: #6b7684;
+  --line: #e5e8eb;
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --blue: #3182f6;
+  --blue-soft: #e8f3ff;
+  --red: #e03131;
+  --red-soft: #ffe8e8;
+  --grad: linear-gradient(160deg, #ff8a3d 0%, #ff5f8d 52%, #a66cff 100%);
+  --font: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --emoji: 'Tossface', 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #0f1218; overflow: hidden; }
+body { font-family: var(--font); color: var(--ink); word-break: keep-all; -webkit-font-smoothing: antialiased; }
+
+/* 1920x1080 고정 무대를 화면에 맞춰 줄인다 */
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; }
+.slide { position: absolute; inset: 0; background: var(--bg); padding: 96px 120px 150px; opacity: 0; visibility: hidden; transition: opacity .25s ease; display: flex; flex-direction: column; }
+.slide.active { opacity: 1; visibility: visible; }
+.emoji { font-family: var(--emoji); }
+
+h1, h2 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.18; }
+h2 { font-size: 72px; }
+.lead { font-size: 36px; font-weight: 600; color: var(--ink-2); line-height: 1.5; margin-top: 28px; max-width: 1200px; }
+.body { font-size: 30px; line-height: 1.55; color: var(--ink-2); }
+.small { font-size: 26px; color: var(--ink-3); line-height: 1.5; }
+.blue { color: var(--blue); }
+
+/* 폰 목업: 캡처 비율(375x812) 그대로 */
+.phone { flex: none; border-radius: 44px; background: #fff; padding: 10px; box-shadow: 0 0 0 2px #d9dde2, 0 28px 60px rgba(25,31,40,.20); }
+.phone img { display: block; width: 100%; height: auto; border-radius: 36px; }
+.phone.h640 { width: 306px; }
+.phone.h780 { width: 372px; }
+.cap { font-size: 28px; font-weight: 700; margin-top: 26px; text-align: center; }
+.cap small { display: block; font-size: 24px; font-weight: 500; color: var(--ink-3); margin-top: 6px; }
+
+/* 1 표지 */
+.s-cover { background: var(--grad); color: #fff; padding: 0; }
+.s-cover .wrap { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 560px; align-items: center; padding: 0 140px 0 140px; gap: 80px; }
+.s-cover h1 { font-size: 220px; letter-spacing: -0.05em; line-height: 1; }
+.s-cover .tag { font-size: 48px; font-weight: 700; margin-top: 36px; line-height: 1.4; }
+.s-cover .who { position: absolute; left: 140px; bottom: 140px; font-size: 30px; font-weight: 600; opacity: .92; }
+.zoo { position: relative; height: 760px; }
+.zoo span { position: absolute; font-size: 190px; filter: drop-shadow(0 18px 24px rgba(0,0,0,.22)); line-height: 1; }
+
+/* 2 문제 */
+.s-problem { justify-content: center; }
+.problem-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 120px; align-items: center; margin-top: 10px; }
+.problem-grid h2 { font-size: 92px; line-height: 1.22; }
+.pain { display: grid; gap: 28px; }
+.pain div { background: var(--surface); border-radius: 28px; padding: 38px 44px; box-shadow: 0 2px 0 var(--line); }
+.pain b { display: block; font-size: 40px; margin-bottom: 10px; }
+.pain p { font-size: 29px; line-height: 1.5; color: var(--ink-2); }
+.answer { margin-top: 70px; font-size: 40px; font-weight: 700; }
+
+/* 3 사용법 */
+.flow { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 44px; }
+.flow .step { display: flex; flex-direction: column; align-items: center; }
+.arrow { width: 56px; align-self: flex-start; margin-top: 280px; color: #b0b8c1; flex: none; }
+.s-flow .phone { width: 262px; }
+.s-flow .head { display: flex; align-items: baseline; gap: 40px; }
+.s-flow .head p { font-size: 36px; font-weight: 600; color: var(--ink-2); }
+.s-flow { padding-bottom: 120px; }
+
+/* 4 세 가지 방식 */
+.kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 36px; justify-items: center; }
+.kinds .step { display: flex; flex-direction: column; align-items: center; }
+.s-kinds { padding-bottom: 110px; }
+.s-kinds h2 { font-size: 64px; }
+.s-kinds .phone { width: 274px; }
+
+/* 5 구조 */
+.arch { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 80px; margin-top: 28px; align-items: start; }
+.box { background: var(--surface); border: 3px solid var(--line); border-radius: 22px; padding: 14px 26px; }
+.box b { display: block; font-size: 28px; }
+.box span { font-size: 24px; color: var(--ink-3); }
+.box.hl { border-color: var(--blue); background: var(--blue-soft); }
+.col { display: grid; gap: 8px; }
+.mono { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 27px; font-weight: 700; }
+.link { text-align: center; color: #b0b8c1; font-size: 20px; line-height: 1; }
+.game-box { border: 3px dashed #b0b8c1; border-radius: 28px; padding: 18px 22px; display: grid; gap: 10px; }
+.game-box > .label { font-size: 24px; font-weight: 700; color: var(--ink-3); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.builds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.rules li { font-size: 30px; line-height: 1.5; color: var(--ink-2); margin-bottom: 20px; list-style: none; padding-left: 34px; position: relative; }
+.rules li::before { content: ''; position: absolute; left: 0; top: 17px; width: 14px; height: 14px; border-radius: 50%; background: var(--blue); }
+.rules b { color: var(--ink); }
+
+/* 6 맞바꾼 것 */
+.trade { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border-radius: 28px; overflow: hidden; background: var(--surface); box-shadow: 0 2px 0 var(--line); }
+.trade .h { padding: 26px 48px; font-size: 28px; font-weight: 700; background: var(--ink); color: #fff; }
+.trade .h.b { background: var(--blue); }
+.trade .c { padding: 28px 48px; font-size: 32px; font-weight: 600; border-top: 2px solid var(--line); line-height: 1.4; }
+.trade .c.b { color: var(--ink-2); font-weight: 500; }
+.note { margin-top: 36px; font-size: 28px; color: var(--ink-3); }
+
+/* 7 실패 대비 */
+.fail { margin-top: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.fcard { background: var(--surface); border-radius: 28px; padding: 36px 44px; box-shadow: 0 2px 0 var(--line); }
+.fcard .when { font-size: 28px; font-weight: 700; color: var(--red); }
+.fcard h3 { font-size: 40px; font-weight: 800; margin: 8px 0 12px; letter-spacing: -0.02em; }
+.fcard p { font-size: 28px; line-height: 1.5; color: var(--ink-2); }
+
+/* 8 숫자 */
+.s-num { background: var(--grad); color: #fff; }
+.s-num h2 { color: #fff; }
+.nums { margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 50px; }
+.num .lab { font-size: 30px; font-weight: 700; opacity: .95; }
+.num .big { font-size: 150px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-top: 8px; }
+.num .big s { font-size: 70px; font-weight: 600; opacity: .7; text-decoration-thickness: 5px; margin-right: 16px; letter-spacing: -0.03em; }
+.num .sub { font-size: 26px; opacity: .9; margin-top: 8px; line-height: 1.45; }
+.todo { margin-top: 56px; border: 4px dashed rgba(255,255,255,.75); border-radius: 28px; padding: 30px 44px; }
+.todo .t { font-size: 30px; font-weight: 800; margin-bottom: 14px; }
+.todo .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; }
+.todo .row div { font-size: 26px; line-height: 1.45; }
+.todo .row b { display: block; font-size: 28px; }
+
+/* 9 버그 헌트 */
+.bug { margin-top: 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 70px; align-items: start; }
+.bugrow { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 2px solid var(--line); }
+.bugrow:first-child { border-top: 0; padding-top: 0; }
+.bugrow b { font-size: 28px; }
+.bugrow p { font-size: 28px; line-height: 1.5; color: var(--ink-2); }
+.bugrow.miss b { color: var(--red); }
+.ruler { background: var(--surface); border-radius: 28px; padding: 40px 44px; box-shadow: 0 2px 0 var(--line); }
+.ruler .t { font-size: 28px; font-weight: 700; margin-bottom: 26px; }
+.bar { height: 74px; border-radius: 16px; display: flex; align-items: center; padding: 0 24px; font-size: 27px; font-weight: 700; margin-bottom: 18px; white-space: nowrap; }
+.bar.view { width: 375px; background: var(--blue-soft); color: #1b64da; }
+.bar.cont { width: 414px; background: linear-gradient(90deg, #d9e4f5 0, #d9e4f5 375px, var(--red) 375px); color: var(--ink-2); position: relative; }
+.bar.cont i { position: absolute; left: 375px; width: 39px; text-align: center; color: #fff; font-style: normal; font-size: 22px; }
+.ruler .after { font-size: 27px; color: var(--ink-2); line-height: 1.55; margin-top: 18px; }
+
+/* 10 AI와 회고 */
+.ai { margin-top: 40px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 80px; align-items: start; }
+.chain { display: grid; gap: 14px; }
+.chain .n { background: var(--surface); border-radius: 22px; padding: 22px 30px; box-shadow: 0 2px 0 var(--line); display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: baseline; }
+.chain b { font-size: 30px; }
+.chain span { font-size: 26px; color: var(--ink-2); line-height: 1.45; }
+.chain .back { background: var(--blue-soft); box-shadow: none; }
+.two-col h3 { font-size: 34px; font-weight: 800; margin-bottom: 14px; }
+.two-col ul { margin-bottom: 36px; }
+.two-col li { list-style: none; font-size: 29px; line-height: 1.5; color: var(--ink-2); margin-bottom: 10px; padding-left: 30px; position: relative; }
+.two-col li::before { content: ''; position: absolute; left: 0; top: 16px; width: 12px; height: 12px; border-radius: 50%; background: var(--ink-3); }
+
+/* 페이지 표시: 돌림판처럼 지나간 동물은 흐려진다 */
+#pager { position: absolute; left: 120px; right: 120px; bottom: 56px; display: flex; gap: 14px; align-items: center; z-index: 5; }
+#pager span { font-family: var(--emoji); font-size: 40px; line-height: 1; transition: opacity .3s, transform .3s; opacity: .22; filter: grayscale(1); }
+#pager span.now { opacity: 1; filter: none; transform: scale(1.35); }
+#pager span.next { opacity: 1; filter: none; }
+#pager .hint { margin-left: auto; font-size: 22px; color: var(--ink-3); font-weight: 600; }
+.dark-pager #pager .hint { color: rgba(255,255,255,.85); }
+
+@media print {
+  @page { size: 1920px 1080px; margin: 0 }
+  html, body { overflow: visible; height: auto; background: none; }
+  #stage { position: static; transform: none !important; width: 1920px; height: auto; }
+  .slide { position: relative; opacity: 1; visibility: visible; height: 1080px; break-after: page; page-break-after: always; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #pager { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 표지 -->
+<section class="slide s-cover" data-dark>
+  <div class="wrap">
+    <div>
+      <h1>누가할래</h1>
+      <div class="tag">폰 하나로 돌려 가며,<br>가입 없이 바로 정해요</div>
+    </div>
+    <div class="zoo emoji">
+      <span style="left:10px;top:20px;transform:rotate(-8deg)">🦊</span>
+      <span style="left:300px;top:140px;transform:rotate(10deg)">🐸</span>
+      <span style="left:30px;top:310px;transform:rotate(6deg)">🐥</span>
+      <span style="left:320px;top:430px;transform:rotate(-10deg)">🐧</span>
+      <span style="left:120px;top:560px;transform:rotate(4deg)">🐷</span>
+    </div>
+  </div>
+  <div class="who">AI NATIVE CAREER CAMP 2기 · 1차 프로젝트 · 개발</div>
+</section>
+
+<!-- 2 문제 -->
+<section class="slide s-problem">
+  <div class="problem-grid">
+    <div>
+      <h2>당번을 정할 때<br>가위바위보는<br>식상하다</h2>
+      <p class="answer">사소한 선택 하나에도 즐거움을 느끼고 싶다</p>
+    </div>
+    <div class="pain">
+      <div><b>식상하다</b><p>매번 가위바위보. 결과는 금방 나오지만 아무 재미가 없어요.</p></div>
+      <div><b>번거롭다</b><p>재미있는 방법을 쓰려면 게임을 준비해 다니고, 무엇을 할지부터 골라야 해요.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 사용법 -->
+<section class="slide s-flow">
+  <div class="head"><h2>폰 하나를 돌려 가며 5단계</h2><p>로그인도, 입력할 것도 없어요</p></div>
+  <div class="flow">
+    <div class="step"><div class="phone h640"><img src="img/c1-home.png" alt="홈 화면"></div><div class="cap">게임 고르기<small>30개 중 검색으로 찾기</small></div></div>
+    <svg class="arrow" viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h46M40 3l10 9-10 9"/></svg>
+    <div class="step"><div class="phone h640"><img src="img/c3-prepare.png" alt="준비 화면"></div><div class="cap">인원수 정하기<small>규칙은 한 줄로 안내</small></div></div>
+    <svg class="arrow" viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h46M40 3l10 9-10 9"/></svg>
+    <div class="step"><div class="phone h640"><img src="img/c4a-memorize.png" alt="동물 고르기"></div><div class="cap">각자 동물 고르기<small>고른 동물을 기억해요</small></div></div>
+    <svg class="arrow" viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h46M40 3l10 9-10 9"/></svg>
+    <div class="step"><div class="phone h640"><img src="img/c5b-roulette-spin.png" alt="게임 화면"></div><div class="cap">게임 한 판<small>동물 순서대로 진행</small></div></div>
+    <svg class="arrow" viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h46M40 3l10 9-10 9"/></svg>
+    <div class="step"><div class="phone h640"><img src="img/c6-result.png" alt="결과 화면"></div><div class="cap">결과 바로 확인<small>기다리는 연출 없이</small></div></div>
+  </div>
+</section>
+
+<!-- 4 세 가지 방식 -->
+<section class="slide s-kinds">
+  <h2>30개 게임, 노는 방식은 세 가지</h2>
+  <div class="kinds">
+    <div class="step"><div class="phone h640"><img src="img/c5b-roulette-spin.png" alt="돌림판"></div><div class="cap">차례대로 하기<small>돌림판 · 사다리 · 폭탄 돌리기</small></div></div>
+    <div class="step"><div class="phone h640"><img src="img/c8-pour.png" alt="잔 채우기"></div><div class="cap">기록으로 겨루기<small>잔 채우기 · 타이머 · 반응속도</small></div></div>
+    <div class="step"><div class="phone h640"><img src="img/c9c-liar-reveal.png" alt="라이어 게임"></div><div class="cap">비밀을 돌려 보기<small>라이어 게임 · 제시어 확인</small></div></div>
+  </div>
+</section>
+
+<!-- 5 구조 -->
+<section class="slide">
+  <h2>게임 하나는 폴더 하나</h2>
+  <p class="lead" style="margin-top:8px;font-size:32px">로직은 화면과 떼어 놓고, 플랫폼 호출은 실패해도 멈추지 않아요</p>
+  <div class="arch">
+    <div class="col">
+      <div class="game-box">
+        <div class="label">src/games/&lt;게임&gt;/</div>
+        <div class="two">
+          <div class="box hl"><b class="mono">logic.ts</b><span>순수 함수. 난수·시계는 밖에서 받아요</span></div>
+          <div class="box"><b class="mono">화면 컴포넌트</b><span>터치와 그리기만 맡아요</span></div>
+        </div>
+        <div class="box"><b class="mono">definition.ts</b><span>이름·규칙·인원 범위. 자동 등록</span></div>
+      </div>
+      <div class="link">▼</div>
+      <div class="box"><b>게임 목록 · 홈 · 준비 · 플레이 · 결과 화면</b><span>모든 게임이 같은 입력(순서)과 출력(벌칙자)을 써요</span></div>
+      <div class="link">▼</div>
+      <div class="box"><b class="mono">platform/sdk.ts</b><span>진동·저장·뒤로가기·사용자 키. 실패하면 기본값으로 계속</span></div>
+      <div class="builds" style="margin-top:4px">
+        <div class="box"><b>토스 빌드</b><span>앱인토스 .ait · TDS</span></div>
+        <div class="box"><b>웹 데모 빌드</b><span>TDS만 대체 부품으로 교체</span></div>
+      </div>
+    </div>
+    <ul class="rules">
+      <li><b>테스트하기 쉬워요.</b> 로직이 난수와 시계를 주입받아서 같은 상황을 그대로 다시 만들 수 있어요. 지금 테스트 861개가 이 덕분이에요.</li>
+      <li><b>게임 추가가 가벼워요.</b> 새 게임은 <span class="mono" style="font-size:26px">definition.ts</span>를 두면 목록에 자동으로 나타나요. 현재 13개가 이 방식이고, 나머지 17개는 옮기는 중이에요.</li>
+      <li><b>토스 안팎에서 같은 코드가 돌아요.</b> TDS는 앱인토스 안에서만 실행돼서, 웹 데모는 부품만 바꾼 빌드를 따로 두었어요. 검사를 우회한 게 아니에요.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 6 맞바꾼 것 -->
+<section class="slide">
+  <h2>단순함을 얻고, 이것을 내줬어요</h2>
+  <div class="trade">
+    <div class="h">얻은 것</div><div class="h b">내준 것</div>
+    <div class="c">가입·로그인 없음</div><div class="c b">친구 목록과 기록 공유 없음</div>
+    <div class="c">폰 하나로 모두 함께</div><div class="c b">멀티터치 게임은 실제 폰에서 확인이 필요</div>
+    <div class="c">결과를 바로 보여 줌</div><div class="c b">두구두구 하는 긴장 연출 없음</div>
+    <div class="c">사행성 없는 '당번·벌칙 정하기'</div><div class="c b">'밥값 내기' 같은 직관적인 콘셉트</div>
+  </div>
+  <p class="note">앱인토스가 사행성 콘텐츠를 허용하지 않아서, 기획 단계에서 콘셉트와 이름을 바꿨어요.</p>
+</section>
+
+<!-- 7 실패 대비 -->
+<section class="slide">
+  <h2>막아 둔 실패</h2>
+  <div class="fail">
+    <div class="fcard"><div class="when">버튼을 연달아 누르면</div><h3>한 번만 처리해요</h3><p>모든 게임 화면이 같은 탭 가드(0.4초)를 써서 연타해도 판이 꼬이지 않아요.</p></div>
+    <div class="fcard"><div class="when">터치가 끊기거나 앱이 가려지면</div><h3>그 순간의 입력을 취소해요</h3><p>누르고 있던 입력이 기록으로 남지 않게, 10개 게임이 터치 취소와 화면 전환을 감지해요.</p></div>
+    <div class="fcard"><div class="when">플랫폼 호출이 실패하면</div><h3>기본값으로 계속해요</h3><p>진동, 저장소, 사용자 키 호출이 예외를 던지지 않아요. 저장이 안 되면 브라우저 저장소로 대신해요.</p></div>
+    <div class="fcard"><div class="when">옆 사람이 화면을 보면</div><h3>손을 떼면 바로 가려요</h3><p>라이어 게임의 제시어는 누르고 있는 동안에만 보여요.</p></div>
+  </div>
+</section>
+
+<!-- 8 숫자 -->
+<section class="slide s-num" data-dark>
+  <h2>숫자로 확인했어요</h2>
+  <div class="nums">
+    <div class="num"><div class="lab">게임이 끝나고 결과까지</div><div class="big"><s>2.2초</s>0.5초</div><div class="sub">기록형 게임은 2.1초 → 1.2초</div></div>
+    <div class="num"><div class="lab">선 따라 그리기 꼼수</div><div class="big"><s>70%</s>0%</div><div class="sub">길의 70%를 건너뛸 수 있던 것을 막고, 공격 시뮬레이션으로 확인</div></div>
+    <div class="num"><div class="lab">자동 테스트</div><div class="big"><s>1개</s>861개</div><div class="sub">84개 파일. 화면 넘침·색 대비·CSS 규칙도 검사</div></div>
+  </div>
+  <div class="todo">
+    <div class="t">4일차 사용자 테스트에서 채울 칸 (4명, 2회)</div>
+    <div class="row">
+      <div><b>첫 게임까지</b>목표 60초 이내 · 측정 예정</div>
+      <div><b>탭 수</b>목표 16번 이내 · 측정 예정</div>
+      <div><b>과제 성공률</b>목표 80% 이상 · 측정 예정</div>
+      <div><b>발견한 버그</b>1차 → 2차 · 측정 예정</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 버그 헌트 -->
+<section class="slide">
+  <h2>테스트가 못 잡은 버그</h2>
+  <div class="bug">
+    <div>
+      <div class="bugrow"><b>어디서 찾았나</b><p>실제 브라우저에서 375px 폭으로 열어 봤을 때. 전선 자르기 게임의 2열 목록이 화면 밖으로 넘쳤어요.</p></div>
+      <div class="bugrow miss"><b>무엇이 놓쳤나</b><p>단위 테스트와 코드 리뷰가 모두 통과했어요.</p></div>
+      <div class="bugrow"><b>원인</b><p>CSS의 <span class="mono" style="font-size:26px">1fr</span>은 최소 폭이 내용 크기라서, 안의 그림이 칸을 밀어 냈어요.</p></div>
+      <div class="bugrow"><b>고친 방법</b><p>7곳을 <span class="mono" style="font-size:26px">minmax(0, 1fr)</span>로 바꾸고, 맨 <span class="mono" style="font-size:26px">1fr</span>을 쓰면 실패하는 검사 테스트를 남겼어요.</p></div>
+    </div>
+    <div class="ruler">
+      <div class="t">화면 폭 375px 기준</div>
+      <div class="bar view">보이는 화면 375px</div>
+      <div class="bar cont">목록 414px<i>39</i></div>
+      <p class="after">39px가 화면 밖으로 나갔어요.<br>AI가 만든 코드와 리뷰만으로는 못 찾았고, 실제 브라우저로 재서 찾았어요.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 AI 활용과 회고 -->
+<section class="slide">
+  <h2>AI와 일한 방식, 그리고 남은 일</h2>
+  <div class="ai">
+    <div class="chain">
+      <div class="n"><b>나</b><span>무엇을 만들지, 무엇이 맞는지 정해요</span></div>
+      <div class="n"><b>구현 AI</b><span>테스트부터 쓰고 구현해요</span></div>
+      <div class="n"><b>리뷰 AI</b><span>변경된 부분만 보고 평가해요</span></div>
+      <div class="n"><b>실제 브라우저</b><span>375px 화면에서 직접 재고 눌러 봐요</span></div>
+      <div class="n back"><b>가드 테스트</b><span>찾은 버그는 다시 안 나게 테스트로 남겨요</span></div>
+    </div>
+    <div class="two-col">
+      <h3>한계</h3>
+      <ul>
+        <li>손가락 룰렛 같은 멀티터치 게임은 실제 폰에서 아직 확인하지 못했어요</li>
+        <li>사용자 테스트 결과는 4일차에 채워요</li>
+        <li>앱인토스 심사가 3~7영업일이라 발표 뒤에 출시돼요</li>
+      </ul>
+      <h3>다음 단계</h3>
+      <ul>
+        <li>남은 17개 게임을 같은 구조로 옮기기</li>
+        <li>실제 폰 확인과 사용자 테스트 반영</li>
+        <li>앱인토스 등록과 출시</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+<div id="pager"></div>
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var pager = document.getElementById('pager');
+  var animals = ['🦊', '🐸', '🐥', '🐧', '🐷', '🐻', '🦄', '🐼', '🐰', '🐶'];
+  var dots = slides.map(function (_, i) { var s = document.createElement('span'); s.textContent = animals[i % animals.length]; pager.appendChild(s); return s; });
+  var hint = document.createElement('div'); hint.className = 'hint'; hint.textContent = '← → 키 또는 클릭'; pager.appendChild(hint);
+  var idx = 0;
+  function fit() {
+    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    stage.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+  }
+  function show(n, push) {
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
+    dots.forEach(function (d, i) { d.className = i === idx ? 'now' : (i > idx ? 'next' : ''); });
+    document.body.classList.toggle('dark-pager', slides[idx].hasAttribute('data-dark'));
+    if (push !== false) history.replaceState(null, '', '#' + (idx + 1));
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') { e.preventDefault(); show(idx + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') { e.preventDefault(); show(idx - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+  document.addEventListener('click', function (e) { show(e.clientX < window.innerWidth * 0.2 ? idx - 1 : idx + 1); });
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', function () { show((parseInt(location.hash.slice(1), 10) || 1) - 1, false); });
+  fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1, false);
+})();
+</script>
+</body>
+</html>

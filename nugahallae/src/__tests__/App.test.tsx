@@ -100,7 +100,7 @@ test('게임 플레이에 들어가면 기록이 저장되고, 홈에 최근 한
   renderApp()
   expect(screen.queryByText('최근 한 게임')).not.toBeInTheDocument()
   fireEvent.click(screen.getByText('돌림판'))
-  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  fireEvent.click(screen.getByText('동물 고르기 시작'))
   for (let i = 1; i <= 4; i++) {
     fireEvent.click(screen.getAllByTestId('piece-card').find((c) => !(c as HTMLButtonElement).disabled)!)
     fireEvent.click(screen.getByText('확인했어요'))
@@ -144,9 +144,9 @@ test('언마운트 시 onBack 해제', () => {
 function goToPlay() {
   renderApp()
   fireEvent.click(screen.getByText('돌림판'))
-  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  fireEvent.click(screen.getByText('동물 고르기 시작'))
   for (let i = 1; i <= 4; i++) {
-    expect(screen.getByText(`${i}번째 사람, 내 말을 하나 골라요`)).toBeInTheDocument()
+    expect(screen.getByText(`${i}번째 사람, 내 동물을 하나 골라요`)).toBeInTheDocument()
     fireEvent.click(screen.getAllByTestId('piece-card').find((c) => !(c as HTMLButtonElement).disabled)!)
     fireEvent.click(screen.getByText('확인했어요'))
   }

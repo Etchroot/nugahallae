@@ -100,7 +100,7 @@ export function LadderGame({
 
   return (
     <div className="ld-root">
-      <div className="ld-bar">벌칙 칸은 딱 하나! 차례대로 내 말을 눌러 내려가요</div>
+      <div className="ld-bar">벌칙 칸은 딱 하나! 차례대로 내 동물을 눌러 내려가요</div>
       <div className="ld-turn">
         {state.phase === 'done' ? `${pieceLabel(state.loser ?? tracer)} 걸렸어요` : `👉 ${pieceLabel(tracer)} 차례예요`}
       </div>

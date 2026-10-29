@@ -67,12 +67,12 @@ function setPlayers(n: number) {
 function pickGame(title: string, players?: number) {
   fireEvent.click(screen.getByText(title))
   if (players !== undefined) setPlayers(players)
-  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  fireEvent.click(screen.getByText('동물 고르기 시작'))
 }
 
 async function drawAll(n: number) {
   for (let i = 1; i <= n; i++) {
-    expect(screen.getByText(`${i}번째 사람, 내 말을 하나 골라요`)).toBeInTheDocument()
+    expect(screen.getByText(`${i}번째 사람, 내 동물을 하나 골라요`)).toBeInTheDocument()
     fireEvent.click(screen.getAllByTestId('piece-card').find((c) => !(c as HTMLButtonElement).disabled)!)
     await advance(400)
     fireEvent.click(screen.getByText('확인했어요'))
@@ -115,11 +115,11 @@ test('고른 직후 바로 확인했어요를 눌러도(더블탭) 말을 보여
   fireEvent.click(screen.getAllByTestId('piece-card')[0])
   // 같은 자리에 나타난 진짜 확인 버튼에 두 번째 탭이 들어온다
   fireEvent.click(screen.getByText('확인했어요'))
-  expect(screen.getByText(/내 말을 기억하세요/)).toBeInTheDocument()
-  expect(screen.queryByText('2번째 사람, 내 말을 하나 골라요')).not.toBeInTheDocument()
+  expect(screen.getByText(/내 동물을 기억하세요/)).toBeInTheDocument()
+  expect(screen.queryByText('2번째 사람, 내 동물을 하나 골라요')).not.toBeInTheDocument()
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
-  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
 })
 
 test('확인했어요 직후 바로 다른 카드를 눌러도(더블탭) 다음 사람 대기 상태가 유지된다', async () => {
@@ -130,11 +130,11 @@ test('확인했어요 직후 바로 다른 카드를 눌러도(더블탭) 다음
   await advance(400)
   fireEvent.click(screen.getByText('확인했어요'))
   fireEvent.click(screen.getAllByTestId('piece-card')[1])
-  expect(screen.queryByText(/내 말을 기억하세요/)).not.toBeInTheDocument()
-  expect(screen.getByText('2번째 사람, 내 말을 하나 골라요')).toBeInTheDocument()
+  expect(screen.queryByText(/내 동물을 기억하세요/)).not.toBeInTheDocument()
+  expect(screen.getByText('2번째 사람, 내 동물을 하나 골라요')).toBeInTheDocument()
   await advance(400)
   fireEvent.click(screen.getAllByTestId('piece-card')[1])
-  expect(screen.getByText(/내 말을 기억하세요/)).toBeInTheDocument()
+  expect(screen.getByText(/내 동물을 기억하세요/)).toBeInTheDocument()
 })
 
 test('마지막 돌림 중 뒤로가기 → 끝나도 결과로 가지 않고 그만할까요 유지, 계속하기 → 결과', async () => {
@@ -183,8 +183,8 @@ test('한 판 더 → 같은 게임 준비 화면, 다른 게임 → 홈', async
   fireEvent.click(screen.getByText('시작하기'))
   await playRoulette(2)
   fireEvent.click(screen.getByText('한 판 더'))
-  expect(screen.getByText('말 뽑기 시작')).toBeInTheDocument()
-  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  expect(screen.getByText('동물 고르기 시작')).toBeInTheDocument()
+  fireEvent.click(screen.getByText('동물 고르기 시작'))
   await drawAll(2)
   fireEvent.click(screen.getByText('시작하기'))
   await playRoulette(2)
@@ -200,9 +200,9 @@ test('인원수는 2 아래/10 위로 못 간다', async () => {
   expect(screen.getByTestId('player-count')).toHaveTextContent('2명')
   for (let i = 0; i < 15; i++) fireEvent.click(screen.getByLabelText('인원 늘리기'))
   expect(screen.getByTestId('player-count')).toHaveTextContent('10명')
-  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  fireEvent.click(screen.getByText('동물 고르기 시작'))
   await drawAll(10)
-  expect(screen.queryByText('11번째 사람, 내 말을 하나 골라요')).not.toBeInTheDocument()
+  expect(screen.queryByText('11번째 사람, 내 동물을 하나 골라요')).not.toBeInTheDocument()
   expect(screen.getByText('시작하기')).toBeInTheDocument()
 })
 
@@ -233,7 +233,7 @@ test('말 뽑기를 시작하면 인원수를 바꿀 수 없다', async () => {
   pickGame('돌림판', 3)
   expect(screen.queryByLabelText('인원 늘리기')).not.toBeInTheDocument()
   expect(screen.queryByLabelText('인원 줄이기')).not.toBeInTheDocument()
-  expect(screen.queryByText('말 뽑기 시작')).not.toBeInTheDocument()
+  expect(screen.queryByText('동물 고르기 시작')).not.toBeInTheDocument()
 })
 
 test('준비 화면에 돌림판 전용 문구는 다른 게임에서 보이지 않는다', async () => {

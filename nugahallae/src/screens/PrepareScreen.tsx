@@ -93,7 +93,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
         </div>
         {auto ? (
           <>
-            <p className="sc-auto-note">이 게임은 손가락을 올리는 순서대로 말이 정해져요</p>
+            <p className="sc-auto-note">이 게임은 손가락을 올리는 순서대로 차례가 정해져요</p>
             <BottomCTA
               fixed
               onClick={guard(() => {
@@ -112,7 +112,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
               setPieces(drawPieces(count))
             }}
           >
-            말 뽑기 시작
+            동물 고르기 시작
           </BottomCTA>
         )}
       </div>
@@ -130,7 +130,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
           <div className="sc-piece-tile" style={{ background: confirming.color }}>
             <span className="sc-piece">{confirming.emoji}</span>
           </div>
-          <div className="sc-piece-label">{pieceLabel(confirming)} — 내 말을 기억하세요</div>
+          <div className="sc-piece-label">{pieceLabel(confirming)} — 내 동물을 기억하세요</div>
           <button
             type="button"
             className="sc-confirm"
@@ -148,7 +148,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
         </p>
       ) : (
         <p className="sc-pick-guide" role="status">
-          {picked.length + 1}번째 사람, 내 말을 하나 골라요
+          {picked.length + 1}번째 사람, 내 동물을 하나 골라요
         </p>
       )}
 

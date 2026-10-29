@@ -146,7 +146,7 @@ export function RouletteGame({
     <div className="rl-root">
       <div className="rl-bar">
         <span className="rl-rule">걸리면 통과! 마지막까지 남으면 벌칙</span>
-        <span className="rl-count">남은 말 {state.remaining.length}개</span>
+        <span className="rl-count">남은 동물 {state.remaining.length}개</span>
       </div>
 
       <div className="rl-turn">👉 {pieceLabel(spinner)} 차례예요</div>

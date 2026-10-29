@@ -9,7 +9,7 @@ import { haptic } from '../../../platform/sdk'
 vi.mock('../../../platform/sdk', () => ({ haptic: vi.fn(async () => {}) }))
 
 const order = drawPieces(4, () => 0.5)
-const rule = '벌칙 칸은 딱 하나! 차례대로 내 말을 눌러 내려가요'
+const rule = '벌칙 칸은 딱 하나! 차례대로 내 동물을 눌러 내려가요'
 
 function seeded(seed: number) {
   let s = seed >>> 0
