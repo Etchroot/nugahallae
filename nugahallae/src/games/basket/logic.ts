@@ -6,13 +6,16 @@ export const W = 320
 export const H = 520
 export const BALL_D = 28
 export const BALL_X = W / 2
-export const BALL_Y = 400
+export const BALL_Y = 380
 export const BASKET_Y = 90
-/** 중력(px/s^2), 당김 → 속도 배율, 최대 속도, 최소 당김 거리 */
+/** 중력(px/s^2), 당김 → 속도 배율, 가로 감쇠(같은 당김이 착지점을 덜 흔들게), 최대·최소 당김 거리 */
 export const G = 2000
 export const K = 12
-export const MAX_SPEED = 1600
+export const H_DAMP = 0.3
+export const MAX_PULL = 110
 export const MIN_PULL = 24
+/** 공의 가장자리 기준 판정: 입구 반폭에 공 반지름의 절반을 더해 준다 */
+export const EDGE_TOL = BALL_D / 4
 export const THROWS = 3
 
 export interface Basket {
@@ -43,18 +46,19 @@ export function pickBasket(rng: Rng): Basket {
   return { x, width }
 }
 
+/** 당김 길이를 MAX_PULL로 제한(방향 유지). 그리기와 던지기가 같은 값을 쓴다 */
+export function clampPull(dx: number, dy: number): { dx: number; dy: number } {
+  const len = Math.hypot(dx, dy)
+  if (len <= MAX_PULL) return { dx, dy }
+  return { dx: (dx * MAX_PULL) / len, dy: (dy * MAX_PULL) / len }
+}
+
 /** 당긴 벡터(dx, dy: 공 기준, 아래쪽이 +dy) → 초기 속도. 던지기가 아니면 null */
 export function launchOf(dx: number, dy: number): Launch | null {
   if (dy <= 0) return null
   if (Math.hypot(dx, dy) < MIN_PULL) return null
-  let vx = -dx * K
-  let vy = dy * K
-  const sp = Math.hypot(vx, vy)
-  if (sp > MAX_SPEED) {
-    vx = (vx * MAX_SPEED) / sp
-    vy = (vy * MAX_SPEED) / sp
-  }
-  return { vx, vy }
+  const c = clampPull(dx, dy)
+  return { vx: -c.dx * K * H_DAMP, vy: c.dy * K }
 }
 
 /** 시각 t(초)의 공 위치. 프레임과 무관한 해석식 */
@@ -71,7 +75,7 @@ export function resolveThrow(l: Launch, basket: Basket): Resolved {
   const tCross = (l.vy + Math.sqrt(disc)) / G
   const crossX = BALL_X + l.vx * tCross
   return {
-    success: Math.abs(crossX - basket.x) <= basket.width / 2,
+    success: Math.abs(crossX - basket.x) <= basket.width / 2 + EDGE_TOL,
     tCross,
     crossX,
     tEnd: tCross,

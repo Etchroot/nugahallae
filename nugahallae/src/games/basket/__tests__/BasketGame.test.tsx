@@ -255,6 +255,25 @@ test('언마운트하면 타이머를 정리하고 onFinish를 부르지 않는�
   expect(vi.getTimerCount()).toBe(0)
 })
 
+test('손을 뗄 때 좌표가 달라도 마지막 move 위치로 던진다(미리보기와 동일)', () => {
+  mount()
+  clock += 500
+  ev('pointerDown', BALL_X, BALL_Y)
+  ev('pointerMove', BALL_X, BALL_Y + 110)
+  ev('pointerUp', BALL_X - 80, BALL_Y + 30) // 흔들린 up 좌표는 무시
+  advance(1000)
+  expect(screen.getByText('들어갔어요')).toBeTruthy()
+})
+
+test('공을 너무 멀리 당겨도 그려진 공이 화면(viewBox) 밖으로 나가지 않는다', () => {
+  const { container } = mount()
+  clock += 500
+  ev('pointerDown', BALL_X, BALL_Y)
+  ev('pointerMove', BALL_X, BALL_Y + 500)
+  const ball = container.querySelector('.bk-ball') as SVGCircleElement
+  expect(Number(ball.getAttribute('cy')) + 14).toBeLessThanOrEqual(520)
+})
+
 test('비행 중 언마운트해도 안전하다', () => {
   const { onFinish, unmount } = mount()
   pullAndRelease(...HIT, 100)

@@ -12,7 +12,7 @@ import { useScreenGuard } from '../shared/useScreenGuard'
 import { useRecordFinish } from '../shared/useRecordFinish'
 import {
   BALL_D, BALL_X, BALL_Y, BASKET_Y, H, THROWS, W,
-  flightAnimMs, launchOf, makeRecord, pickBasket, positionAt, recordText, resolveThrow, whyText,
+  clampPull, flightAnimMs, launchOf, makeRecord, pickBasket, positionAt, recordText, resolveThrow, whyText,
 } from './logic'
 import type { BasketRecord, Launch, Resolved } from './logic'
 import '../shared/record.css'
@@ -21,7 +21,6 @@ import './basket.css'
 const TICK_MS = 16
 /** 공을 잡을 수 있는 범위(논리 좌표) */
 const GRAB_R = 60
-const MAX_DRAW_PULL = 140
 const RULE = '3번 던져서 많이 넣기! 가장 적으면 벌칙'
 
 type Phase = 'aim' | 'flying' | 'done'
@@ -54,6 +53,8 @@ export function BasketGame({
   const madeRef = useRef(0)
   const thrownRef = useRef(0)
   const pointerId = useRef<number | null>(null)
+  /** 마지막 move 위치. 던지기는 이 값으로 정한다(손을 뗄 때의 좌표 흔들림 무시) */
+  const lastPull = useRef<Pt | null>(null)
   const interval = useRef<ReturnType<typeof setInterval> | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const { guard, prime } = useScreenGuard(now)
@@ -164,18 +165,22 @@ export function BasketGame({
       /* 일부 환경은 캡처를 지원하지 않는다 */
     }
     pointerId.current = e.pointerId
+    lastPull.current = p
     setMsg(null)
     setPull(p)
   }
 
   const onMove = (e: ReactPointerEvent<SVGSVGElement>) => {
     if (phaseRef.current !== 'aim' || e.pointerId !== pointerId.current) return
-    setPull(toLocal(e.clientX, e.clientY))
+    const p = toLocal(e.clientX, e.clientY)
+    lastPull.current = p
+    setPull(p)
   }
 
   const onUp = (e: ReactPointerEvent<SVGSVGElement>) => {
     if (phaseRef.current !== 'aim' || e.pointerId !== pointerId.current) return
-    const p = toLocal(e.clientX, e.clientY)
+    // up 좌표는 쓰지 않는다: 미리보기에 보인 마지막 move 위치로 던진다
+    const p = lastPull.current ?? { x: BALL_X, y: BALL_Y }
     pointerId.current = null
     const l = launchOf(p.x - BALL_X, p.y - BALL_Y)
     if (!l) {
@@ -226,14 +231,8 @@ export function BasketGame({
   let drawBall = ball
   const preview: Pt[] = []
   if (phase === 'aim' && pull) {
-    let dx = pull.x - BALL_X
-    let dy = pull.y - BALL_Y
-    const len = Math.hypot(dx, dy)
-    if (len > MAX_DRAW_PULL) {
-      dx = (dx * MAX_DRAW_PULL) / len
-      dy = (dy * MAX_DRAW_PULL) / len
-    }
-    drawBall = { x: BALL_X + dx, y: BALL_Y + dy }
+    const c = clampPull(pull.x - BALL_X, pull.y - BALL_Y)
+    drawBall = { x: BALL_X + c.dx, y: BALL_Y + c.dy }
     const l = launchOf(pull.x - BALL_X, pull.y - BALL_Y)
     if (l) {
       const tEnd = resolveThrow(l, basket).tEnd

@@ -113,7 +113,7 @@ export function TwisterGame({
     <div className="rg-root">
       <div className="rg-bar">{RULE}</div>
       <div className="rg-turn">👉 {pieceLabel(piece)} 차례예요</div>
-      <div className="rg-stage">
+      <div className="rg-stage tw-field">
         <p className="tw-sentence">{sentence}</p>
         <div className="tw-note">
           {phase === 'judge' && '맞았는지는 함께 있는 사람들이 판정해요'}

@@ -1,8 +1,8 @@
 import { test, expect, describe } from 'vitest'
 import { drawPieces } from '../../../domain/pieces'
 import {
-  BALL_D, BALL_X, BALL_Y, BASKET_Y, G, K, MAX_SPEED, MIN_PULL, THROWS, W,
-  flightAnimMs, launchOf, makeRecord, pickBasket, positionAt, recordText, resolveThrow, whyText,
+  BALL_D, BALL_X, BALL_Y, BASKET_Y, EDGE_TOL, G, H_DAMP, K, MAX_PULL, MIN_PULL, THROWS, W,
+  clampPull, flightAnimMs, launchOf, makeRecord, pickBasket, positionAt, recordText, resolveThrow, whyText,
 } from '../logic'
 
 function seeded(seed: number) {
@@ -36,9 +36,9 @@ describe('pickBasket', () => {
 })
 
 describe('launchOf', () => {
-  test('수평 속도 = -dx*K, 수직 속도 = dy*K', () => {
+  test('수평 속도 = -dx*K*H_DAMP(감쇠), 수직 속도 = dy*K', () => {
     const l = launchOf(-5, 100)!
-    expect(l.vx).toBeCloseTo(5 * K)
+    expect(l.vx).toBeCloseTo(5 * K * H_DAMP)
     expect(l.vy).toBeCloseTo(100 * K)
   })
   test('최소 당김 미만이면 던지기가 아니다(null)', () => {
@@ -49,10 +49,14 @@ describe('launchOf', () => {
     expect(launchOf(0, -80)).toBeNull()
     expect(launchOf(80, 0)).toBeNull()
   })
-  test('최대 속도 제한(방향 유지)', () => {
+  test('당김 길이는 MAX_PULL로 제한(방향 유지), 그리기와 같은 값', () => {
+    const c = clampPull(-100, 300)
+    expect(Math.hypot(c.dx, c.dy)).toBeCloseTo(MAX_PULL)
+    expect(c.dx / c.dy).toBeCloseTo(-100 / 300)
     const l = launchOf(-100, 300)!
-    expect(Math.hypot(l.vx, l.vy)).toBeCloseTo(MAX_SPEED)
-    expect(l.vx / l.vy).toBeCloseTo(100 / 300)
+    expect(l.vy).toBeCloseTo(c.dy * K)
+    expect(l.vx).toBeCloseTo(-c.dx * K * H_DAMP)
+    expect(clampPull(3, 4)).toEqual({ dx: 3, dy: 4 })
   })
 })
 
@@ -85,10 +89,11 @@ describe('비행 해석식', () => {
     const l = launchOf(-5, 100)!
     const cx = resolveThrow(l, { x: 0, width: 10 }).crossX as number
     const w = 80
-    expect(resolveThrow(l, { x: cx + w / 2, width: w }).success).toBe(true)
-    expect(resolveThrow(l, { x: cx + w / 2 - 1e-6, width: w }).success).toBe(true)
-    expect(resolveThrow(l, { x: cx + w / 2 + 0.01, width: w }).success).toBe(false)
-    expect(resolveThrow(l, { x: cx - w / 2 - 0.01, width: w }).success).toBe(false)
+    const h = w / 2 + EDGE_TOL // 공 가장자리까지 봐 준다
+    expect(resolveThrow(l, { x: cx + h, width: w }).success).toBe(true)
+    expect(resolveThrow(l, { x: cx + h - 1e-6, width: w }).success).toBe(true)
+    expect(resolveThrow(l, { x: cx + h + 0.01, width: w }).success).toBe(false)
+    expect(resolveThrow(l, { x: cx - h - 0.01, width: w }).success).toBe(false)
     expect(resolveThrow(l, { x: cx, width: w }).success).toBe(true)
   })
   test('비행 시간(애니메이션)은 600~900ms로 맞춘다', () => {
@@ -110,5 +115,51 @@ describe('기록', () => {
     expect(recordText(r)).toBe('2/3')
     expect(whyText(r)).toBe('2개 넣었어요')
     expect(whyText(makeRecord(a, 0))).toBe('0개 넣었어요')
+  })
+})
+
+describe('조준 허용 범위(수치 스윕)', () => {
+  const widths = [0, 1, 2, 3, 4].map((i) => BALL_D * (2.2 + 0.2 * i))
+  const xs = Array.from({ length: 13 }, (_, i) => W * (0.2 + (0.6 * i) / 12))
+
+  test('모든 바구니가 닿을 수 있고, 보통 당김(dy=100)에서 성공 구간이 당김 x 기준 24px 이상', () => {
+    for (const x of xs)
+      for (const width of widths) {
+        const basket = { x, width }
+        let reachable = false
+        for (let dy = 1; dy <= MAX_PULL && !reachable; dy += 1)
+          for (let dx = -MAX_PULL; dx <= MAX_PULL; dx += 1) {
+            const l = launchOf(dx, dy)
+            if (l && resolveThrow(l, basket).success) {
+              reachable = true
+              break
+            }
+          }
+        expect(reachable, `닿지 않음 x=${x} w=${width}`).toBe(true)
+        let n = 0
+        for (let dx = -MAX_PULL; dx <= MAX_PULL; dx += 0.25) {
+          const l = launchOf(dx, 100)
+          if (l && resolveThrow(l, basket).success) n++
+        }
+        expect(n * 0.25, `성공 구간 x=${x} w=${width}`).toBeGreaterThanOrEqual(24)
+      }
+  })
+
+  test('바구니 높이에 닿는 무작위 당김의 8% 이상이 성공한다(모든 구성)', () => {
+    for (const x of [xs[0], xs[3], xs[6], xs[9], xs[12]])
+      for (const width of [widths[0], widths[2], widths[4]]) {
+        let valid = 0
+        let ok = 0
+        for (let dy = 1; dy <= MAX_PULL; dy += 1)
+          for (let dx = -MAX_PULL; dx <= MAX_PULL; dx += 1) {
+            const l = launchOf(dx, dy)
+            if (!l) continue
+            const r = resolveThrow(l, { x, width })
+            if (r.crossX === null) continue
+            valid++
+            if (r.success) ok++
+          }
+        expect(ok / valid, `성공률 x=${x} w=${width}`).toBeGreaterThanOrEqual(0.08)
+      }
   })
 })
