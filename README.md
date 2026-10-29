@@ -41,6 +41,13 @@ npx tsc -b   # 타입 검사
 - **데모 웹 빌드**: `npm run build:pages` → `nugahallae/dist-pages/` (로컬 확인은 `npm run dev:web`).
   TDS는 앱인토스 밖에서 실행되지 않으므로, 이 빌드에서만 `src/web/`의 대체 부품으로 바꿔 끼웁니다(`vite.config.ts`의 `--mode web`). 게임 로직과 화면 흐름은 토스 앱 번들과 같습니다.
 
+## 배너 광고
+
+- 홈·준비·결과 화면 맨 위에 배너 광고 한 줄이 흐름대로 놓입니다(게임 진행 화면에는 두지 않습니다 — 비게임 출시 기준 "스크롤 가능한 화면에만", 광고 정책 "게임 플레이 영역과 인접 배치 금지").
+- 광고 그룹 ID는 빌드할 때 `VITE_AD_GROUP_ID`로 넣습니다. 제출용 값은 `nugahallae/.env.production`에 콘솔에서 발급받은 ID를 적고, 비어 있으면 광고를 쓰지 않습니다.
+- 토스 앱 5.241.0 미만이거나 웹 데모처럼 지원하지 않는 환경에서는 배너 자리가 생기지 않습니다. 샌드박스 앱은 인앱 광고를 지원하지 않으므로, 콘솔의 QR로 테스트합니다.
+- 콘솔 QR 테스트용 빌드(테스트 광고 ID): `AD_TEST=1 npm run build` → `build/nugahallae-v<버전>-adtest.ait`. 제출용으로 쓰지 마세요.
+
 `main` 브랜치에 push하면 `.github/workflows/pages.yml`이 데모 웹 빌드를 GitHub Pages에 배포합니다.
 
 ## 데모 주소

@@ -4,6 +4,27 @@
   box-sizing: border-box;
 }
 
+/* 맨 위 배너 자리 + 아래 본문. 본문이 position: fixed 자식의 기준이 되어(transform) 화면들이 배너 아래 남은 영역을 채운다 */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+.ad-top {
+  flex: none;
+  width: 100%;
+  min-height: 102px;
+  background: #ffffff;
+}
+.app-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  transform: translateZ(0);
+}
+
 @media (min-width: 481px) {
   #root {
     background-color: #ffffff !important;

@@ -1,6 +1,6 @@
 .sc-page {
   box-sizing: border-box;
-  min-height: 100vh;
+  min-height: 100%;
   padding: 24px 20px 24px;
   word-break: keep-all;
   overflow-wrap: break-word;
@@ -61,7 +61,7 @@
 .play-game { position: relative; flex: 1; }
 .play-game .rl-root { position: absolute; padding-top: 0; }
 .rs-root {
-  box-sizing: border-box; min-height: 100vh; display: flex; flex-direction: column;
+  box-sizing: border-box; min-height: 100%; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 16px; padding: 24px 20px 24px;
   text-align: center; word-break: keep-all; color: #191f28;
 }
@@ -75,7 +75,7 @@
 }
 
 /* 홈 */
-.hm-page { min-height: 100vh; background: #f7f8fa; word-break: keep-all; overflow-wrap: break-word; color: #191f28; }
+.hm-page { min-height: 100%; background: #f7f8fa; word-break: keep-all; overflow-wrap: break-word; color: #191f28; }
 .hm-hero {
   position: relative; box-sizing: border-box; min-height: 330px; overflow: hidden; color: #fff;
   padding: calc(env(safe-area-inset-top) + 40px) 20px 98px;

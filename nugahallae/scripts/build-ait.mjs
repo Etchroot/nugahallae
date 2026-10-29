@@ -13,11 +13,14 @@ if (!/^\d+\.\d+$/.test(version)) {
 }
 
 const outDir = join(root, 'build')
-const target = join(outDir, `${appName}-v${version}.ait`)
+// AD_TEST=1: 콘솔 QR로 광고를 확인하는 테스트용 빌드(테스트 광고 ID 사용). 제출용 빌드에는 쓰지 마세요.
+const adTest = process.env.AD_TEST === '1'
+const suffix = adTest ? '-adtest' : ''
+const target = join(outDir, `${appName}-v${version}${suffix}.ait`)
 const rootFile = join(root, `${appName}.ait`)
 
 if (existsSync(target)) {
-  console.error(`build/${appName}-v${version}.ait 가 이미 있어요. ait-version.txt의 버전을 올린 뒤 다시 실행하세요.`)
+  console.error(`build/${appName}-v${version}${suffix}.ait 가 이미 있어요. ait-version.txt의 버전을 올린 뒤 다시 실행하세요.`)
   process.exit(1)
 }
 if (existsSync(rootFile)) {
@@ -26,10 +29,11 @@ if (existsSync(rootFile)) {
 }
 
 for (const cmd of ['npx vite build', 'npx ait build']) {
-  const r = spawnSync(cmd, { cwd: root, stdio: 'inherit', shell: true })
+  const env = adTest ? { ...process.env, VITE_AD_GROUP_ID: 'ait-ad-test-banner-id' } : process.env
+  const r = spawnSync(cmd, { cwd: root, stdio: 'inherit', shell: true, env })
   if (r.status !== 0) process.exit(r.status ?? 1)
 }
 
 mkdirSync(outDir, { recursive: true })
 renameSync(rootFile, target)
-console.log(`\n만들었어요: build/${appName}-v${version}.ait`)
+console.log(`\n만들었어요: build/${appName}-v${version}${suffix}.ait`)

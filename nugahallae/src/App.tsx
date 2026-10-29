@@ -4,6 +4,8 @@ import type { Screen } from './app/flow'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { closeApp, getUserKey, onBack, storageGet, storageSet } from './platform/sdk'
 import { loadSound, playClick, stopAllSounds, unlockAudio } from './platform/sound'
+import { initAds } from './platform/ads'
+import { TopBanner } from './components/TopBanner'
 import { EMPTY_HISTORY, loadHistory, recordPlay, saveHistory } from './domain/history'
 import type { History } from './domain/history'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './domain/settings'
@@ -25,6 +27,7 @@ function App() {
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [history, setHistory] = useState<History>(EMPTY_HISTORY)
+  const [adsReady, setAdsReady] = useState(false)
   const screenRef = useRef(screen)
   screenRef.current = screen
   const confirmRef = useRef(confirm)
@@ -37,6 +40,17 @@ function App() {
     let alive = true
     void loadSettings().then((s) => {
       if (alive && !touchedRef.current) setSettings(s)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  // 배너 광고 SDK는 앱에서 한 번만 초기화한다. 지원하지 않는 환경(웹 데모·구버전 토스)이면 조용히 건너뛴다.
+  useEffect(() => {
+    let alive = true
+    void initAds().then((ok) => {
+      if (alive) setAdsReady(ok)
     })
     return () => {
       alive = false
@@ -181,9 +195,16 @@ function App() {
     )
   }
 
+  // 배너는 홈·준비·결과 화면 맨 위에만 둔다. 게임 진행 화면은 터치 영역이 많고 스크롤이 없어서 광고를 두지 않는다
+  // (비게임 출시 기준 "스크롤 가능한 화면에만", 광고 정책 "게임 플레이 영역과 인접 배치 금지").
+  const showBanner = adsReady && screen.name !== 'play'
+
   return (
     <>
-      <main>{body}</main>
+      <div className="app-shell">
+        {showBanner && <TopBanner />}
+        <main className="app-body">{body}</main>
+      </div>
       <ConfirmDialog
         open={confirm === 'quitGame'}
         title="게임을 그만할까요?"
