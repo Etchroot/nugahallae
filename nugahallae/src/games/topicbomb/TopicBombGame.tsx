@@ -4,6 +4,8 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx, playTickTrain, startLoop } from '../../platform/sound'
+import type { LoopHandle } from '../../platform/sound'
 import { END_EFFECT_MS } from '../shared/timing'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import {
@@ -35,6 +37,8 @@ export function TopicBombGame({
   const t0 = useRef(0)
   const interval = useRef<ReturnType<typeof setInterval> | null>(null)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  // 심지 타는 소리: 속도·높이 고정(남은 시간을 드러내지 않는다). 말소리를 가리지 않게 조금 작게
+  const fuse = useRef<LoopHandle | null>(null)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
   const { guard } = useScreenGuard(now)
@@ -43,9 +47,19 @@ export function TopicBombGame({
     stateRef.current = s
     setState(s)
   }
+  const stopFuse = () => {
+    fuse.current?.stop()
+    fuse.current = null
+  }
+  const startFuse = () => {
+    stopFuse()
+    fuse.current = startLoop('fuse')
+    fuse.current.set('gain', 0.8)
+  }
   const stopTick = () => {
     if (interval.current !== null) clearInterval(interval.current)
     interval.current = null
+    stopFuse()
   }
 
   // 틱 횟수가 아니라 실제 경과 시간으로 센다(백그라운드에서 타이머가 늦어도 심지가 늘어나지 않게)
@@ -58,6 +72,7 @@ export function TopicBombGame({
       const next = explode(cur, order.length)
       commit(next)
       void haptic('error')
+      playSfx('boom')
       const loser = next.loserIdx === null ? null : order[next.loserIdx]
       if (loser) {
         setOverlay(`${pieceLabel(loser)} 폭탄이 터졌어요`)
@@ -71,7 +86,10 @@ export function TopicBombGame({
   useEffect(() => {
     const list = timers.current
     const onVisibility = () => {
-      if (document.visibilityState === 'visible') tick()
+      if (document.visibilityState !== 'visible') return
+      tick()
+      // 백그라운드에서 꺼진 심지 소리를 다시 켠다
+      if (stateRef.current.phase === 'lit') startFuse()
     }
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
@@ -88,6 +106,8 @@ export function TopicBombGame({
     const next = ignite(cur)
     if (next === cur) return
     commit(next)
+    playSfx('bomb.ignite')
+    startFuse()
     t0.current = now()
     interval.current = setInterval(tick, TICK_MS)
   }
@@ -100,13 +120,16 @@ export function TopicBombGame({
     if (next === cur) return
     commit(next)
     void haptic('tap')
+    playSfx('whoosh')
     setPassKey((k) => k + 1)
   }
 
   const swap = () => {
     const cur = stateRef.current
     const next = swapTopic(cur, rng)
-    if (next !== cur) commit(next)
+    if (next === cur) return
+    commit(next)
+    playTickTrain([0, 0.03, 0.06, 0.09, 0.12, 0.15])
   }
 
   const idle = state.phase === 'idle'

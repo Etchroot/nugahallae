@@ -4,6 +4,8 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { notePitch, playSfx, startLoop } from '../../platform/sound'
+import type { LoopHandle } from '../../platform/sound'
 import { NEED, explode, ignite, initBomb, shakeSeconds, tapBomb } from './logic'
 import type { BombState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -25,6 +27,8 @@ export function BombGame({
   const t0 = useRef(0)
   const interval = useRef<ReturnType<typeof setInterval> | null>(null)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  // 심지 타는 소리: 속도·높이가 고정이라 남은 시간을 드러내지 않는다
+  const fuse = useRef<LoopHandle | null>(null)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
 
@@ -36,7 +40,20 @@ export function BombGame({
   const stopTick = () => {
     if (interval.current !== null) clearInterval(interval.current)
     interval.current = null
+    fuse.current?.stop()
+    fuse.current = null
   }
+
+  // 백그라운드에서 꺼진 심지 소리를 돌아오면 다시 켠다
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState !== 'visible' || stateRef.current.phase !== 'lit') return
+      fuse.current?.stop()
+      fuse.current = startLoop('fuse')
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
 
   useEffect(() => {
     const list = timers.current
@@ -57,6 +74,7 @@ export function BombGame({
       const next = explode(cur, order)
       commit(next)
       void haptic('error')
+      playSfx('boom')
       const loser = next.loser
       if (loser) {
         setOverlay(`${pieceLabel(loser)} 펑!`)
@@ -72,6 +90,8 @@ export function BombGame({
     const next = ignite(cur)
     if (next === cur) return
     commit(next)
+    playSfx('bomb.ignite')
+    fuse.current = startLoop('fuse')
     t0.current = now()
     interval.current = setInterval(tick, TICK_MS)
   }
@@ -81,6 +101,8 @@ export function BombGame({
     const r = tapBomb(stateRef.current, order)
     if (r.state === stateRef.current) return
     commit(r.state)
+    if (r.passed) playSfx('whoosh')
+    else playSfx('note', { pitch: notePitch(r.state.taps - 1) })
     if (r.passed) {
       void haptic('tap')
       setPassKey((k) => k + 1)

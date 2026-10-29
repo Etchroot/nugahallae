@@ -32,6 +32,43 @@ export function planSpin(
   }
 }
 
+// 휠 CSS 전환과 같은 곡선: cubic-bezier(0.12, 0.7, 0.1, 1)
+const EASE = { x1: 0.12, y1: 0.7, x2: 0.1, y2: 1 }
+const bez = (a: number, b: number, s: number) => 3 * (1 - s) * (1 - s) * s * a + 3 * (1 - s) * s * s * b + s * s * s
+
+/** 진행률 y(0~1)에 닿는 시간 비율 x(0~1). 곡선의 y는 단조 증가라 이분법으로 찾는다 */
+export function easeTimeAt(y: number): number {
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2
+    if (bez(EASE.y1, EASE.y2, mid) < y) lo = mid
+    else hi = mid
+  }
+  return bez(EASE.x1, EASE.x2, (lo + hi) / 2)
+}
+
+/**
+ * 돌림판 걸쇠 소리 시각(ms). 회전이 칸 경계(360/count의 배수)를 지날 때마다 한 번.
+ * 처음엔 너무 촘촘하므로 직전 틱과 minGapMs보다 가까운 틱은 버린다.
+ */
+export function tickTimes(
+  fromDeg: number,
+  toDeg: number,
+  count: number,
+  durationMs: number,
+  minGapMs = 40,
+): number[] {
+  if (!(toDeg > fromDeg) || count < 1 || !(durationMs > 0)) return []
+  const w = 360 / count
+  const out: number[] = []
+  for (let m = Math.floor(fromDeg / w) + 1; m * w <= toDeg; m++) {
+    const t = easeTimeAt((m * w - fromDeg) / (toDeg - fromDeg)) * durationMs
+    if (out.length === 0 || t - out[out.length - 1] >= minGapMs) out.push(t)
+  }
+  return out
+}
+
 export interface RouletteState {
   remaining: Piece[]
   spinnerTurn: number

@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { TEETH, currentPlayer, initCroc, pressTooth } from './logic'
 import type { CrocState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -35,9 +36,12 @@ export function CrocGame({
     if (next === prev) return
     stateRef.current = next
     setState(next)
+    // 안전한 이빨은 어느 것이든 똑같은 소리(함정까지의 거리 같은 힌트를 주지 않는다)
+    if (next.phase !== 'bitten') playSfx('croc.tooth')
     if (next.phase === 'bitten' && next.loser) {
       const loser = next.loser
       void haptic('error')
+      playSfx('croc.chomp')
       setOverlay(`${pieceLabel(loser)} 콱!`)
       timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     }

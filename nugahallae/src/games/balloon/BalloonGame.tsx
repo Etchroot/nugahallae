@@ -5,6 +5,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { MAX_PUMP, balloonScale, canPass, canPump, initBalloon, passTurn, pump } from './logic'
 import type { BalloonState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -41,9 +42,14 @@ export function BalloonGame({
     const next = pump(prev, order)
     if (next === prev) return
     commit(next)
+    if (next.phase !== 'popped') {
+      // 높이는 화면에 보이는 크기(누적 펌프 수)만 따른다. 터질 때까지 남은 횟수와는 무관하다
+      playSfx('balloon.pump', { pitch: Math.sqrt(balloonScale(next.total)) })
+    }
     if (next.phase === 'popped' && next.loser) {
       const loser = next.loser
       void haptic('error')
+      playSfx('balloon.pop')
       setOverlay(`${pieceLabel(loser)} 펑!`)
       timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     }
@@ -55,6 +61,7 @@ export function BalloonGame({
     if (next === prev) return
     commit(next)
     void haptic('tap')
+    playSfx('tapSoft')
   }
 
   const popped = state.phase === 'popped'

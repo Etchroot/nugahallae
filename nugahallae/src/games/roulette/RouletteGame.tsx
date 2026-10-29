@@ -6,12 +6,15 @@ import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx, playTickTrain } from '../../platform/sound'
+import type { StopHandle } from '../../platform/sound'
 import {
   currentSpinner,
   initRoulette,
   planSpin,
   resolveSpin,
   startSpin,
+  tickTimes,
 } from './logic'
 import type { RouletteState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -83,6 +86,7 @@ export function RouletteGame({
   const stateRef = useRef(state)
   const rotationRef = useRef(0)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const ticks = useRef<StopHandle | null>(null)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
 
@@ -91,6 +95,7 @@ export function RouletteGame({
     return () => {
       list.forEach(clearTimeout)
       list.length = 0
+      ticks.current?.stop()
     }
   }, [])
 
@@ -114,6 +119,12 @@ export function RouletteGame({
       rng,
       cur.remaining.length === 2,
     )
+    // 걸쇠 소리: 휠과 같은 곡선으로 칸 경계를 지날 때마다(착지 칸은 화면에 보이는 회전 그대로)
+    playSfx('whoosh')
+    ticks.current?.stop()
+    ticks.current = playTickTrain(
+      tickTimes(rotationRef.current, plan.targetRotation, cur.remaining.length, plan.durationMs).map((t) => t / 1000),
+    )
     rotationRef.current = plan.targetRotation
     setDurationMs(plan.durationMs)
     setRotation(plan.targetRotation)
@@ -122,6 +133,7 @@ export function RouletteGame({
       const next = resolveSpin(spinning, plan.landedIndex)
       setPassed(next.lastPassed)
       void haptic('tap')
+      playSfx('success')
       if (next.phase === 'done' && next.loser) {
         // 마지막 스핀: 통과 오버레이를 바로 보여주고 END_EFFECT_MS 뒤 종료
         const loser = next.loser

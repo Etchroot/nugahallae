@@ -6,6 +6,7 @@ import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -21,6 +22,8 @@ import './basket.css'
 const TICK_MS = 16
 /** 공을 잡을 수 있는 범위(논리 좌표) */
 const GRAB_R = 60
+/** 고무줄 당기는 소리 간격(당긴 길이, 논리 좌표) */
+const STRETCH_STEP = 20
 const RULE = '3번 던져서 많이 넣기! 가장 적으면 벌칙'
 
 type Phase = 'aim' | 'flying' | 'done'
@@ -48,6 +51,7 @@ export function BasketGame({
   const [msg, setMsg] = useState<Msg>(null)
   const [records, setRecords] = useState<BasketRecord[]>([])
   const [pull, setPull] = useState<Pt | null>(null)
+  const stretch = useRef(0)
   const [ball, setBall] = useState<Pt>({ x: BALL_X, y: BALL_Y })
   const phaseRef = useRef<Phase>('aim')
   const madeRef = useRef(0)
@@ -124,6 +128,8 @@ export function BasketGame({
     setThrown(thrownRef.current)
     setMade(madeRef.current)
     setMsg(success ? 'hit' : 'miss')
+    // 성공 여부는 던질 때 이미 정해지지만, 소리는 착지할 때 낸다
+    playSfx(success ? 'basket.swish' : 'basket.rim')
     if (success) void haptic('tap')
     resetBall()
     if (thrownRef.current >= THROWS) {
@@ -166,6 +172,8 @@ export function BasketGame({
     }
     pointerId.current = e.pointerId
     lastPull.current = p
+    stretch.current = 0
+    playSfx('tapSoft')
     setMsg(null)
     setPull(p)
   }
@@ -174,6 +182,13 @@ export function BasketGame({
     if (phaseRef.current !== 'aim' || e.pointerId !== pointerId.current) return
     const p = toLocal(e.clientX, e.clientY)
     lastPull.current = p
+    // 당긴 길이(화면에 보이는 만큼)가 한 칸 늘 때마다 낮은 딸깍
+    const c = clampPull(p.x - BALL_X, p.y - BALL_Y)
+    const step = Math.floor(Math.hypot(c.dx, c.dy) / STRETCH_STEP)
+    if (step !== stretch.current) {
+      if (step > stretch.current) playSfx('tick', { pitch: 0.4 + step * 0.08 })
+      stretch.current = step
+    }
     setPull(p)
   }
 
@@ -187,6 +202,7 @@ export function BasketGame({
       resetBall()
       return
     }
+    playSfx('whoosh')
     fly(l, resolveThrow(l, basket))
   }
 

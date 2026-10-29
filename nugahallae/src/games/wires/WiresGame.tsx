@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { END_EFFECT_MS } from '../shared/timing'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { TURN_MS, cancelTurn, cutWire, expire, initWires, startTurn, wireSpecs } from './logic'
@@ -11,6 +12,9 @@ import type { WireSpec, WiresState } from './logic'
 import './wires.css'
 
 const TICK_MS = 100
+
+/** 남은 시간 째깍 소리 번호: 처음 5초는 1초마다, 마지막 3초는 0.5초마다(제한 시간은 모두에게 같고 화면에도 보인다) */
+const beatOf = (e: number) => (e < 5000 ? Math.floor(e / 1000) : 5 + Math.floor((e - 5000) / 500))
 
 function WireArt({ spec, cut }: { spec: WireSpec; cut: boolean }) {
   const common = { stroke: spec.color, strokeWidth: 8, strokeLinecap: 'round' as const }
@@ -52,6 +56,7 @@ export function WiresGame({
   const t0 = useRef(0)
   const interval = useRef<ReturnType<typeof setInterval> | null>(null)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const beat = useRef(0)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
   const { guard, prime } = useScreenGuard(now)
@@ -69,6 +74,8 @@ export function WiresGame({
     stopTick()
     commit(s)
     void haptic('error')
+    if (s.reason === 'timeout') playSfx('buzz')
+    playSfx('boom')
     const loser = s.loserIdx === null ? null : order[s.loserIdx]
     if (!loser) return
     setOverlay(
@@ -85,6 +92,11 @@ export function WiresGame({
       setElapsed(TURN_MS)
       finish(expire(cur))
       return
+    }
+    const b = beatOf(e)
+    if (b > beat.current) {
+      beat.current = b
+      playSfx('tick', { pitch: e < 5000 ? 1 : 1.3 })
     }
     setElapsed(e)
   }
@@ -116,6 +128,8 @@ export function WiresGame({
     commit(next)
     setRetry(false)
     setElapsed(0)
+    playSfx('goBeep')
+    beat.current = 0
     t0.current = now()
     interval.current = setInterval(tick, TICK_MS)
   }
@@ -124,7 +138,10 @@ export function WiresGame({
     const cur = stateRef.current
     const r = cutWire(cur, i, now() - t0.current)
     if (r.result === 'ignored') return
+    // 자르는 소리는 어느 전선이든 같다. 결과음은 판정과 같은 순간에
+    playSfx('wires.snip')
     if (r.result === 'safe') {
+      playSfx('success')
       stopTick()
       commit(r.state)
       prime()

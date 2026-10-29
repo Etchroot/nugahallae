@@ -3,6 +3,7 @@ import type { MouseEvent, PointerEvent } from 'react'
 import type { GameProps } from '../types'
 import { pieceLabel } from '../../domain/pieces'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { SWITCH_IGNORE_MS, judgeTap, limitMs, nextNumber } from './logic'
 import type { TapAction } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -52,6 +53,7 @@ export function Clap369Game({
     setPhase('lost')
     const loser = order[r.turn % order.length]
     void haptic('error')
+    playSfx('loseSting')
     setOverlay(`${pieceLabel(loser)} 짝을 놓쳤어요`)
     timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
   }
@@ -78,6 +80,7 @@ export function Clap369Game({
     if (r.phase !== 'ready' || nowRef.current() < r.lockUntil) return
     r.phase = 'run'
     r.claps = 0
+    playSfx('tapSoft')
     const limit = limitMs(r.n)
     r.deadline = nowRef.current() + limit
     clearLimit()
@@ -90,6 +93,8 @@ export function Clap369Game({
   const act = (action: TapAction) => {
     const r = ref.current
     if (r.phase !== 'run') return
+    // 짝 소리는 맞든 틀리든 같다(판정은 그다음에 화면과 함께 알린다)
+    playSfx(action === 'clap' ? 'clap.clap' : 'whoosh', action === 'clap' ? undefined : { gain: 0.6 })
     if (nowRef.current() >= r.deadline) return lose()
     const res = judgeTap(r.n, r.claps, action)
     if (res === 'wrong') return lose()
@@ -104,6 +109,7 @@ export function Clap369Game({
     r.n = nextNumber(r.n)
     r.lockUntil = nowRef.current() + SWITCH_IGNORE_MS
     void haptic('tap')
+    playSfx('chime', { gain: 0.5 })
     setTurn(r.turn)
     setN(r.n)
     setPhase('ready')

@@ -1,7 +1,7 @@
 import { test, expect } from 'vitest'
 import { drawPieces } from '../../../domain/pieces'
 import {
-  segmentAtPointer, planSpin, initRoulette, startSpin, resolveSpin, currentSpinner,
+  segmentAtPointer, planSpin, initRoulette, startSpin, resolveSpin, currentSpinner, easeTimeAt, tickTimes,
 } from '../logic'
 
 const norm = (x: number) => ((x % 360) + 360) % 360
@@ -70,4 +70,31 @@ test('currentSpinner는 order를 순환한다', () => {
   const s = initRoulette(order)
   expect(currentSpinner(s, order)).toBe(order[0])
   expect(currentSpinner({ ...s, spinnerTurn: 4 }, order)).toBe(order[1])
+})
+
+test('easeTimeAt: 양 끝은 0과 1, 진행률이 늘면 시간도 는다', () => {
+  expect(easeTimeAt(0)).toBeCloseTo(0, 5)
+  expect(easeTimeAt(1)).toBeCloseTo(1, 5)
+  for (let y = 0.1; y < 1; y += 0.1) expect(easeTimeAt(y)).toBeGreaterThan(easeTimeAt(y - 0.1))
+  // 출발이 빠른 곡선: 절반을 도는 데 시간은 절반보다 훨씬 적게 든다
+  expect(easeTimeAt(0.5)).toBeLessThan(0.2)
+})
+
+test('tickTimes: 칸 경계마다 한 번, 시간순, 회전 시간 안, 간격은 minGap 이상', () => {
+  const plan = planSpin(30, 6, () => 0.42, false)
+  const times = tickTimes(30, plan.targetRotation, 6, plan.durationMs, 40)
+  expect(times.length).toBeGreaterThan(5)
+  for (let i = 1; i < times.length; i++) expect(times[i] - times[i - 1]).toBeGreaterThanOrEqual(40)
+  expect(times[times.length - 1]).toBeLessThanOrEqual(plan.durationMs)
+  // 버리지 않으면 지나간 경계 수와 같다
+  const all = tickTimes(30, plan.targetRotation, 6, plan.durationMs, 0)
+  const crossed = Math.floor(plan.targetRotation / 60) - Math.floor(30 / 60)
+  expect(all).toHaveLength(crossed)
+  // 끝으로 갈수록 느려진다(마지막 간격이 처음 간격보다 길다)
+  expect(all[all.length - 1] - all[all.length - 2]).toBeGreaterThan(all[1] - all[0])
+})
+
+test('tickTimes: 돌지 않으면 빈 배열', () => {
+  expect(tickTimes(100, 100, 4, 4500)).toEqual([])
+  expect(tickTimes(0, 360, 4, 0)).toEqual([])
 })

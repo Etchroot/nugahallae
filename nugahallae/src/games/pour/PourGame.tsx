@@ -5,6 +5,8 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx, startLoop } from '../../platform/sound'
+import type { LoopHandle } from '../../platform/sound'
 import {
   CAP,
   DROP,
@@ -54,6 +56,7 @@ export function PourGame({
   const pressRef = useRef<Press | null>(null)
   const lockUntil = useRef(Number.NEGATIVE_INFINITY)
   const stopListen = useRef<(() => void) | null>(null)
+  const water = useRef<{ loop: LoopHandle; trembling: boolean } | null>(null)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
 
@@ -65,6 +68,8 @@ export function PourGame({
   const endPress = () => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
     rafRef.current = null
+    water.current?.loop.stop(0.06)
+    water.current = null
     pressRef.current = null
     stopListen.current?.()
     stopListen.current = null
@@ -89,6 +94,7 @@ export function PourGame({
       endPress()
       setPouring(false)
       void haptic('error')
+      playSfx('pour.splash')
       const loser = next.loser
       if (loser) {
         setOverlay(`${pieceLabel(loser)} 넘쳤다!`)
@@ -100,6 +106,7 @@ export function PourGame({
     if (press && !press.domed && prev.volume <= CAP && next.volume > CAP) {
       press.domed = true
       void haptic('tap')
+      playSfx('pop', { pitch: 0.6 })
     }
   }
 
@@ -110,6 +117,19 @@ export function PourGame({
     const amount = (Math.min(now - from, MAX_STEP_MS) / 1000) * POUR_RATE
     press.poured += amount
     apply(amount)
+    if (pressRef.current) pourSound(stateRef.current)
+  }
+
+  // 붓는 소리: 높이는 잔이 찬 만큼(CAP까지, 화면에 보이는 수위)만 따르고, 넘치기 직전 떨림은 화면 떨림과 같을 때만.
+  // CAP 위로는 높이가 그대로라 숨은 한계를 소리로 짐작할 수 없다.
+  const pourSound = (s: PourState) => {
+    if (!water.current) water.current = { loop: startLoop('water'), trembling: false }
+    water.current.loop.set('pitch', 1 + (1.3 * Math.min(s.volume, CAP)) / CAP, 0.1)
+    const t = isTrembling(s)
+    if (t !== water.current.trembling) {
+      water.current.trembling = t
+      water.current.loop.set('lfoRate', t ? 18 : 9)
+    }
   }
 
   const tick = () => {
@@ -132,7 +152,10 @@ export function PourGame({
       const t = performance.now()
       if (t - press.start > TAP_MS) accrue(press, t)
       // 짧은 탭이거나, 첫 프레임 전에 뗀 경우에도 한 방울은 붓는다.
-      if (pressRef.current && press.poured < DROP) apply(DROP)
+      if (pressRef.current && press.poured < DROP) {
+        playSfx('pour.drip')
+        apply(DROP)
+      }
       endPress()
       setPouring(false)
     }
@@ -163,6 +186,7 @@ export function PourGame({
     // 두 번째 손가락 등으로 누르는 중에 넘기면 붓기를 끝내고 넘긴다(다음 사람에게 이어지지 않게).
     endPress()
     setPouring(false)
+    playSfx('tapSoft')
     lockUntil.current = performance.now() + PASS_LOCK_MS
     commit(passTurn(cur))
   }
