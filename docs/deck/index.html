@@ -160,6 +160,19 @@ h2 { font-size: 72px; }
 #pager span.now { opacity: 1; filter: none; transform: scale(1.35); }
 #pager span.next { opacity: 1; filter: none; }
 
+
+/* 글자 대비 전·후 */
+.cmp { margin-top: 56px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
+.cbox { background: #f7f8fa; border-radius: 32px; padding: 48px 56px 52px; box-shadow: 0 0 0 2px var(--line); }
+.cbox .lab { font-size: 34px; font-weight: 700; color: var(--ink-2); }
+.cbox .lab b { font-size: 56px; letter-spacing: -0.03em; margin-left: 14px; color: var(--ink); }
+.cbox.bad .lab b { color: var(--red); }
+.cbox.good .lab b { color: var(--blue); }
+.cbox .words { margin-top: 44px; display: flex; justify-content: space-between; font-size: 96px; font-weight: 800; letter-spacing: -0.04em; }
+.cbox .note { margin-top: 36px; font-size: 30px; color: var(--ink-2); line-height: 1.5; }
+.scale { margin-top: 44px; font-size: 32px; font-weight: 600; color: var(--ink-2); }
+.scale b { color: var(--ink); }
+
 @media print {
   @page { size: 1920px 1080px; margin: 0 }
   html, body { overflow: visible; height: auto; background: none; }
@@ -307,6 +320,25 @@ h2 { font-size: 72px; }
 </section>
 
 <!-- 9 버그 헌트 -->
+<!-- 8-2 글자 대비 -->
+<section class="slide">
+  <h2>안 보이던 글씨를 고쳤어요</h2>
+  <p class="lead" style="margin-top:16px">글자 색 맞히기 · 글자색과 바탕색이 얼마나 다르게 보이는가</p>
+  <div class="cmp">
+    <div class="cbox bad">
+      <div class="lab">전<b>1.5 : 1</b></div>
+      <div class="words"><span style="color:#F04452">빨강</span><span style="color:#3182F6">파랑</span><span style="color:#FFC342">노랑</span><span style="color:#8B5CF6">보라</span></div>
+      <div class="note">노랑이 바탕과 거의 같은 색처럼 보임</div>
+    </div>
+    <div class="cbox good">
+      <div class="lab">후<b>3.43 : 1</b></div>
+      <div class="words"><span style="color:#F04452">빨강</span><span style="color:#3182F6">파랑</span><span style="color:#B7791F">노랑</span><span style="color:#8B5CF6">보라</span></div>
+      <div class="note">진한 황토색으로 바꿔 또렷하게 읽힘</div>
+    </div>
+  </div>
+  <p class="scale">읽기 편한 기준 <b>3 : 1 이상</b> · 숫자가 클수록 또렷해요 (최대 21 : 1)</p>
+</section>
+
 <section class="slide">
   <h2>테스트가 못 잡은 버그</h2>
   <div class="bug">
