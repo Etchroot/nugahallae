@@ -85,6 +85,19 @@ test('반칙: 신호 전에 누르면 즉결 + haptic error 1회 + onFinish 1회
   expect(msg()).not.toBe('지금!')
 })
 
+test('신호 직후 처리됐지만 at이 신호보다 이른 터치는 반칙', () => {
+  const onFinish = begin()
+  advance(WAIT_MIN_MS)
+  expect(msg()).toBe('지금!')
+  t -= 5 // 신호 타이머가 돌기 직전에 닿은 손가락
+  press(1)
+  expect(screen.getByText(`${pieceLabel(order[1])} 너무 빨랐어요`)).toBeTruthy()
+  advance(END_EFFECT_MS)
+  expect(onFinish).toHaveBeenCalledTimes(1)
+  expect(onFinish).toHaveBeenCalledWith(order[1])
+  expect(haptic).toHaveBeenCalledTimes(1)
+})
+
 test('모두 누르면 즉시 종료, 가장 늦게 누른 사람이 loser, 신호 때 햅틱 없음', () => {
   const onFinish = begin()
   advance(WAIT_MIN_MS)

@@ -27,6 +27,7 @@ export function NeverGame({
   const [fingers, setFingers] = useState<number[]>(() => initFingers(n))
   const [folded, setFolded] = useState<number[]>([])
   const [overlay, setOverlay] = useState<string | null>(null)
+  const [locked, setLocked] = useState(false)
   const deckRef = useRef<Deck>(first.deck)
   const fingersRef = useRef(fingers)
   const foldedRef = useRef<number[]>([])
@@ -65,6 +66,7 @@ export function NeverGame({
     setFolded(foldedRef.current)
     // 같은 순간 0이 된 다른 사람을 기다렸다가 확정한다
     if (zeroed(fingersRef.current).length > 0 && settleTimer.current === null) {
+      setLocked(true)
       settleTimer.current = setTimeout(conclude, ZERO_SETTLE_MS)
     }
   }
@@ -109,7 +111,12 @@ export function NeverGame({
         )}
       </div>
       <div className="rg-after">
-        <button type="button" className="rg-btn" onClick={guard(next)}>
+        <button
+          type="button"
+          className={'rg-btn' + (locked ? ' nv-off' : '')}
+          aria-disabled={locked}
+          onClick={guard(next)}
+        >
           다음 문장
           <svg
             aria-hidden="true"

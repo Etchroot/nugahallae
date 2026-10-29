@@ -108,6 +108,11 @@ export function LastTouchGame({
       return
     }
     if (p !== 'signal') return
+    // 신호 타이머가 돈 직후 처리됐지만 실제로는 신호보다 먼저 닿은 터치
+    if (at < signalAt.current) {
+      decide(index, '너무 빨랐어요')
+      return
+    }
     if (pressesRef.current.some((x) => x.index === index)) return
     pressesRef.current = [...pressesRef.current, { index, at }]
     setPressed(pressesRef.current.map((x) => x.index))

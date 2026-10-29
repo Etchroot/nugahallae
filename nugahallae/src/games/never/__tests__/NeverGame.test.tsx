@@ -115,6 +115,19 @@ test('손가락이 0이 되면 즉결: haptic error 1회, 오버레이, onFinish
   expect(screen.getByText('라운드 5')).toBeTruthy()
 })
 
+test('0이 된 뒤(확정 대기·종료)에는 다음 문장 버튼이 비활성', () => {
+  setup()
+  expect(nextBtn().getAttribute('aria-disabled')).toBe('false')
+  for (let r = 0; r < 4; r++) {
+    press(1)
+    nextRound()
+  }
+  press(1)
+  expect(nextBtn().getAttribute('aria-disabled')).toBe('true')
+  advance(ZERO_SETTLE_MS)
+  expect(nextBtn().getAttribute('aria-disabled')).toBe('true')
+})
+
 test('같은 라운드에 여러 명이 0이 되면 rng로 한 명(오버레이에 동점 표시 없음)', () => {
   const onFinish = setup(vi.fn(), () => 0.99)
   for (let r = 0; r < 4; r++) {

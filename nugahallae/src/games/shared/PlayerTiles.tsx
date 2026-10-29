@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
@@ -35,11 +35,37 @@ export function PlayerTiles({
   const cbRef = useRef({ onTileDown, now })
   cbRef.current = { onTileDown, now }
 
+  const uid = useId()
+
+  // 그리드 밖에서 손을 떼도 포인터가 풀리도록 window에서도 듣는다(포인터가 있는 동안만)
+  const winUp = useRef((e: PointerEvent) => {
+    active.current.delete(e.pointerId)
+    if (active.current.size === 0) detach()
+  })
+  function detach() {
+    window.removeEventListener('pointerup', winUp.current)
+    window.removeEventListener('pointercancel', winUp.current)
+  }
+  useEffect(
+    () => () => {
+      detach()
+      active.current.clear()
+    },
+    [],
+  )
+
   const down = (e: ReactPointerEvent<HTMLButtonElement>, i: number) => {
     e.preventDefault()
     const at = cbRef.current.now()
     if (active.current.has(e.pointerId)) return
     active.current.set(e.pointerId, i)
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+    } catch {
+      /* 캡처 실패는 무시 */
+    }
+    window.addEventListener('pointerup', winUp.current)
+    window.addEventListener('pointercancel', winUp.current)
     if (disabled?.(i)) return
     cbRef.current.onTileDown(i, at)
   }
@@ -70,6 +96,7 @@ export function PlayerTiles({
             type="button"
             className={'pt-tile' + (off ? ' pt-off' : '')}
             aria-label={pieceLabel(piece)}
+            aria-describedby={`${uid}-s${i}`}
             aria-disabled={off}
             style={{ borderColor: piece.color, background: `${piece.color}26` }}
             onPointerDown={(e) => down(e, i)}
@@ -81,7 +108,9 @@ export function PlayerTiles({
             <span className="pt-name">
               {piece.colorName} {piece.animalName}
             </span>
-            <span className="pt-status">{renderStatus?.(i)}</span>
+            <span className="pt-status" id={`${uid}-s${i}`}>
+              {renderStatus?.(i)}
+            </span>
           </button>
         )
       })}

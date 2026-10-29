@@ -16,6 +16,9 @@
   /* 밝은 배경 위 노란 계열 글자 / 도형 */
   --pl-warn-text: #8a5a00;
   --pl-warn: #e67700;
+  /* 성공·신호 면(연한 초록)과 그 위 글자(대비 4.5:1 이상) */
+  --pl-success-bg: #d3f9d8;
+  --pl-success-text: #14532d;
   --pl-disabled-bg: #e5e8eb;
   --pl-disabled-text: #8b95a1;
   /* 규칙 띠 */

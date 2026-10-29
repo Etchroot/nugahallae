@@ -121,6 +121,48 @@ test('겹침 없이 n-1명이 누르면 남은 한 명이 마지막', () => {
   expect(onFinish).toHaveBeenCalledWith(order[2])
 })
 
+const upToThree = (rng: () => number) => {
+  const onFinish = begin(vi.fn(), rng)
+  press(0)
+  advance(1000)
+  press(1)
+  advance(1000)
+  press(2) // n-1번째
+  return onFinish
+}
+
+test('4명: n-1번째 뒤 249ms에 마지막 사람이 누르면 겹침(두 명 중 rng)', () => {
+  const onFinish = upToThree(() => 0.99)
+  advance(OVERLAP_MS - 1)
+  press(3)
+  advance(OVERLAP_MS)
+  expect(screen.getByText(`${pieceLabel(order[3])} 겹쳤어요`)).toBeTruthy()
+  advance(END_EFFECT_MS)
+  expect(onFinish).toHaveBeenCalledWith(order[3])
+})
+
+test('4명: 같은 249ms 겹침에서 rng가 낮으면 n-1번째 사람이 loser', () => {
+  const onFinish = upToThree(() => 0)
+  advance(OVERLAP_MS - 1)
+  press(3)
+  advance(OVERLAP_MS)
+  expect(screen.getByText(`${pieceLabel(order[2])} 겹쳤어요`)).toBeTruthy()
+  advance(END_EFFECT_MS)
+  expect(onFinish).toHaveBeenCalledWith(order[2])
+})
+
+test('4명: n-1번째 뒤 251ms에 누르면 이미 마지막으로 확정되어 늦은 터치는 무시', () => {
+  const onFinish = upToThree(() => 0)
+  advance(OVERLAP_MS + 1)
+  expect(screen.getByText(`${pieceLabel(order[3])} 마지막이에요`)).toBeTruthy()
+  press(3)
+  advance(END_EFFECT_MS)
+  expect(screen.queryByText(/겹쳤어요/)).toBeNull()
+  expect(screen.queryByText('4번')).toBeNull()
+  expect(onFinish).toHaveBeenCalledTimes(1)
+  expect(onFinish).toHaveBeenCalledWith(order[3])
+})
+
 test('첫 입력 전에는 시간 제한 없이 기다려도 된다', () => {
   const onFinish = begin()
   advance(600000)

@@ -1,7 +1,7 @@
 .pt-grid {
   display: grid;
-  grid-auto-rows: minmax(72px, 112px);
-  gap: 10px;
+  grid-auto-rows: minmax(72px, auto);
+  gap: 8px;
   width: 100%;
   max-width: 420px;
   box-sizing: border-box;
@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 6px 4px;
+  padding: 4px 2px;
   font-size: 15px;
   font-weight: 700;
   word-break: keep-all;
@@ -39,5 +39,7 @@
   min-height: 18px;
   font-size: 15px;
   font-weight: 700;
+  line-height: 1.2;
   color: var(--pl-text-2);
+  word-break: keep-all;
 }

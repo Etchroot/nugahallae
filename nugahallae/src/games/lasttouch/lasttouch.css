@@ -13,7 +13,7 @@
   background: transparent;
   transition: background 120ms ease-out;
 }
-.lt-field.lt-signal { background: #d3f9d8; }
+.lt-field.lt-signal { background: var(--pl-success-bg); }
 .lt-msg {
   min-height: 56px;
   display: flex;
@@ -25,7 +25,7 @@
   text-align: center;
 }
 .lt-msg.lt-count { font-size: 56px; color: var(--pl-primary); }
-.lt-msg.lt-go { font-size: 48px; color: #14532d; }
+.lt-msg.lt-go { font-size: 48px; color: var(--pl-success-text); }
 @media (prefers-reduced-motion: reduce) {
   .lt-field { transition: none; }
 }

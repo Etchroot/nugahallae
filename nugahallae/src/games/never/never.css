@@ -28,6 +28,7 @@
   text-align: center;
   word-break: keep-all;
 }
+.nv-off { opacity: 0.45; }
 .nv-done { color: var(--pl-warn-text); }
 .nv-sr {
   position: absolute;
