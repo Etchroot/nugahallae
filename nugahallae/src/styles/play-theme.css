@@ -16,6 +16,8 @@
   /* 밝은 배경 위 노란 계열 글자 / 도형 */
   --pl-warn-text: #8a5a00;
   --pl-warn: #e67700;
+  /* 바구니 면(밝은 황토색): 게임 그림용 */
+  --pl-basket-fill: #f3d9a4;
   --pl-disabled-bg: #e5e8eb;
   --pl-disabled-text: #8b95a1;
   /* 규칙 띠 */
