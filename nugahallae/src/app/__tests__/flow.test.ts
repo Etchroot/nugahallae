@@ -4,8 +4,8 @@ import { backActionFor } from '../flow'
 import { PIECES } from '../../domain/pieces'
 const piece = PIECES[0]
 
-test('home -> confirmClose', () => {
-  expect(backActionFor({ name: 'home' })).toEqual({ kind: 'confirmClose' })
+test('home -> close (확인 창 없이 종료)', () => {
+  expect(backActionFor({ name: 'home' })).toEqual({ kind: 'close' })
 })
 test('prepare -> goto home', () => {
   expect(backActionFor({ name: 'prepare', gameId: 'roulette' })).toEqual({ kind: 'goto', screen: { name: 'home' } })

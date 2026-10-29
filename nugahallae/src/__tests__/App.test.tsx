@@ -118,13 +118,20 @@ test('홈 화면이 보인다', () => {
   expect(screen.getByText('게임 고르기')).toBeInTheDocument()
 })
 
-test('홈에서 뒤로가기 → 종료 확인, 닫기 누르면 closeApp', async () => {
+test('홈에서 뒤로가기 → 확인 창 없이 closeApp 한 번', () => {
   renderApp()
-  expect(screen.queryByText('누가할래를 닫을까요?')).not.toBeInTheDocument()
   act(() => backHandler!())
-  expect(await screen.findByText('누가할래를 닫을까요?')).toBeInTheDocument()
-  fireEvent.click(screen.getByText('닫기'))
   expect(closeApp).toHaveBeenCalledTimes(1)
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.queryByText('누가할래를 닫을까요?')).not.toBeInTheDocument()
+})
+
+test('준비 화면에서 뒤로가기는 홈으로 가고 앱은 닫히지 않는다', () => {
+  renderApp()
+  fireEvent.click(screen.getByText('돌림판'))
+  act(() => backHandler!())
+  expect(screen.getByText('게임 고르기')).toBeInTheDocument()
+  expect(closeApp).not.toHaveBeenCalled()
 })
 
 test('언마운트 시 onBack 해제', () => {

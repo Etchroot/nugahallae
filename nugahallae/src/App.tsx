@@ -17,7 +17,7 @@ import './App.css'
 
 const UID_KEY = 'nugahallae:uid'
 
-type Confirm ='close' | 'quitGame' | null
+type Confirm = 'quitGame' | null
 
 function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
@@ -80,7 +80,7 @@ function App() {
         return
       }
       const action = backActionFor(screenRef.current)
-      if (action.kind === 'confirmClose') setConfirm('close')
+      if (action.kind === 'close') closeApp()
       else if (action.kind === 'confirmQuitGame') setConfirm('quitGame')
       else setScreen(action.screen)
     })
@@ -159,17 +159,6 @@ function App() {
   return (
     <>
       <main>{body}</main>
-      <ConfirmDialog
-        open={confirm === 'close'}
-        title="누가할래를 닫을까요?"
-        confirmLabel="닫기"
-        cancelLabel="취소"
-        onConfirm={() => {
-          setConfirm(null)
-          closeApp()
-        }}
-        onCancel={() => setConfirm(null)}
-      />
       <ConfirmDialog
         open={confirm === 'quitGame'}
         title="게임을 그만할까요?"
