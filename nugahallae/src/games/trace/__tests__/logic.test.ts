@@ -49,22 +49,27 @@ test('점-선분 거리', () => {
 test('길 생성: 인접하지 않은 구간끼리 길 폭 이상 떨어져 있다(여러 시드)', () => {
   for (let seed = 1; seed <= 3000; seed++) {
     const p = makePath(seeded(seed))
+    // expect를 안쪽 반복마다 부르면 느리므로 시드마다 최솟값만 구해 한 번 검사한다.
+    let minGap = Infinity
     for (let i = 0; i < p.length - 1; i++) {
       for (let j = i + 2; j < p.length - 1; j++) {
-        expect(segSegDist(p[i], p[i + 1], p[j], p[j + 1])).toBeGreaterThanOrEqual(ROAD_W)
+        minGap = Math.min(minGap, segSegDist(p[i], p[i + 1], p[j], p[j + 1]))
       }
     }
+    expect(minGap, `seed ${seed}`).toBeGreaterThanOrEqual(ROAD_W)
   }
-})
+}, 30_000)
 
 test('길 생성: 모든 꺾임의 안쪽 각도는 75도 이상(날카로운 모서리 없음)', () => {
   for (let seed = 1; seed <= 3000; seed++) {
     const p = makePath(seeded(seed))
+    let minAngle = Infinity
     for (let i = 1; i < p.length - 1; i++) {
-      expect(interiorAngleDeg(p[i - 1], p[i], p[i + 1])).toBeGreaterThanOrEqual(75 - 1e-9)
+      minAngle = Math.min(minAngle, interiorAngleDeg(p[i - 1], p[i], p[i + 1]))
     }
+    expect(minAngle, `seed ${seed}`).toBeGreaterThanOrEqual(75 - 1e-9)
   }
-})
+}, 30_000)
 
 test('모서리 안쪽을 25px 벗어나 붙어 가도 100%에 도달한다(여러 시드)', () => {
   for (let seed = 1; seed <= 600; seed++) {
