@@ -156,12 +156,10 @@ h2 { font-size: 72px; }
 .two-col li::before { content: ''; position: absolute; left: 0; top: 16px; width: 12px; height: 12px; border-radius: 50%; background: var(--ink-3); }
 
 /* 페이지 표시: 돌림판처럼 지나간 동물은 흐려진다 */
-#pager { position: absolute; left: 120px; right: 120px; bottom: 56px; display: flex; gap: 14px; align-items: center; z-index: 5; }
-#pager span { font-family: var(--emoji); font-size: 40px; line-height: 1; transition: opacity .3s, transform .3s; opacity: .22; filter: grayscale(1); }
+#pager { position: absolute; left: 120px; bottom: 28px; display: flex; gap: 12px; align-items: center; z-index: 5; }
+#pager span { font-family: var(--emoji); font-size: 36px; line-height: 1; transition: opacity .3s, transform .3s; opacity: .22; filter: grayscale(1); }
 #pager span.now { opacity: 1; filter: none; transform: scale(1.35); }
 #pager span.next { opacity: 1; filter: none; }
-#pager .hint { margin-left: auto; font-size: 22px; color: var(--ink-3); font-weight: 600; }
-.dark-pager #pager .hint { color: rgba(255,255,255,.85); }
 
 @media print {
   @page { size: 1920px 1080px; margin: 0 }
@@ -176,6 +174,8 @@ h2 { font-size: 72px; }
 <div id="stage">
 
 <!-- 1 표지 -->
+<div id="pager"></div>
+
 <section class="slide s-cover" data-dark>
   <div class="wrap">
     <div>
@@ -355,7 +355,6 @@ h2 { font-size: 72px; }
 </section>
 
 </div>
-<div id="pager"></div>
 <script>
 (function () {
   var stage = document.getElementById('stage');
@@ -363,7 +362,6 @@ h2 { font-size: 72px; }
   var pager = document.getElementById('pager');
   var animals = ['🦊', '🐸', '🐥', '🐧', '🐷', '🐻', '🦄', '🐼', '🐰', '🐶'];
   var dots = slides.map(function (_, i) { var s = document.createElement('span'); s.textContent = animals[i % animals.length]; pager.appendChild(s); return s; });
-  var hint = document.createElement('div'); hint.className = 'hint'; hint.textContent = '← → 키 또는 클릭'; pager.appendChild(hint);
   var idx = 0;
   function fit() {
     var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
