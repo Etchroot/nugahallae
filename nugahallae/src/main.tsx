@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import config from "../apps-in-toss.config.ts";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/play-theme.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -4,8 +4,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #191f28;
-  color: #fff;
+  background: var(--pl-bg);
+  color: var(--pl-text);
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
@@ -18,7 +18,8 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px 16px;
-  background: #333d4b;
+  background: var(--pl-rule-bg);
+  color: var(--pl-rule-text);
   font-size: 15px;
   font-weight: 700;
   text-align: center;
@@ -34,7 +35,7 @@
   margin-top: 16px;
   font-size: 48px;
   font-weight: 700;
-  color: #b197fc;
+  color: #7048e8;
 }
 .ud-hint {
   min-height: 32px;
@@ -44,8 +45,8 @@
   font-weight: 700;
 }
 .ud-up, .ud-down { display: inline-flex; align-items: center; gap: 6px; }
-.ud-up { color: #ff8a8a; }
-.ud-down { color: #74c0fc; }
+.ud-up { color: #e03131; }
+.ud-down { color: #1971c2; }
 .ud-hist {
   width: 100%;
   box-sizing: border-box;
@@ -61,7 +62,7 @@
 .ud-chip {
   padding: 6px 12px;
   border-radius: 999px;
-  background: #333d4b;
+  background: var(--pl-surface-2);
   font-size: 15px;
   font-weight: 600;
 }
@@ -74,7 +75,9 @@
   max-width: 88%;
   padding: 16px 24px;
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.88);
+  background: var(--pl-surface);
+  color: var(--pl-text);
+  box-shadow: var(--pl-card-shadow);
   font-size: 22px;
   font-weight: 700;
   text-align: center;
@@ -93,14 +96,14 @@
   min-height: 56px;
   box-sizing: border-box;
   padding: 0 16px;
-  border: 2px solid #4e5968;
+  border: 2px solid var(--pl-line);
   border-radius: 16px;
-  background: #2b3340;
-  color: #fff;
+  background: var(--pl-surface);
+  color: var(--pl-text);
   font-size: 20px;
   font-weight: 700;
 }
-.ud-input:focus { outline: none; border-color: #b197fc; }
+.ud-input:focus { outline: none; border-color: var(--pl-primary); }
 .ud-ok {
   min-width: 88px;
   min-height: 56px;
@@ -111,10 +114,10 @@
   font-size: 18px;
   font-weight: 700;
 }
-.ud-ok:disabled { background: #4e5968; color: #8b95a1; }
+.ud-ok:disabled { background: var(--pl-disabled-bg); color: var(--pl-disabled-text); }
 .ud-error {
   margin: 8px 0 0;
   min-height: 22px;
   font-size: 15px;
-  color: #ff8a8a;
+  color: var(--pl-danger-text);
 }

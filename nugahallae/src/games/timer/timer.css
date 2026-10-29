@@ -1,11 +1,11 @@
 .tm-target {
   font-size: 20px;
-  color: #b0b8c1;
+  color: var(--pl-text-3);
 }
 .tm-target b {
   font-size: 28px;
   font-weight: 700;
-  color: #fff;
+  color: var(--pl-text);
 }
 .tm-time {
   font-size: min(22vw, 96px);
@@ -18,5 +18,5 @@
   min-height: 24px;
   font-size: 18px;
   font-weight: 700;
-  color: #ffc342;
+  color: var(--pl-warn-text);
 }

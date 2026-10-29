@@ -195,8 +195,8 @@ export function PourGame({
                 <path d={CUP_PATH} />
               </clipPath>
             </defs>
-            <ellipse cx="100" cy="240" rx="70" ry="10" fill="rgba(0,0,0,0.35)" />
-            <path d={CUP_PATH} fill="rgba(255,255,255,0.08)" />
+            <ellipse cx="100" cy="240" rx="70" ry="10" fill="rgba(25,31,40,0.12)" />
+            <path d={CUP_PATH} fill="rgba(255,255,255,0.7)" />
             <g clipPath="url(#pr-clip)">
               <rect x="0" y={levelY} width="200" height={BOTTOM_Y - levelY + 2} fill="#4aa8ff" />
               <rect x="0" y={levelY} width="200" height="4" fill="#8fcaff" />
@@ -210,8 +210,8 @@ export function PourGame({
                 strokeWidth="2"
               />
             )}
-            <path d={CUP_PATH} fill="none" stroke="#e5e8eb" strokeWidth="5" strokeLinejoin="round" />
-            <path d="M52 64 L60 210" stroke="rgba(255,255,255,0.35)" strokeWidth="5" strokeLinecap="round" />
+            <path d={CUP_PATH} fill="none" stroke="#8b95a1" strokeWidth="5" strokeLinejoin="round" />
+            <path d="M52 64 L60 210" stroke="rgba(255,255,255,0.9)" strokeWidth="5" strokeLinecap="round" />
             {spilled && (
               <g>
                 <path className="pr-stream" d="M38 52 Q28 110 34 190" stroke="#4aa8ff" strokeWidth="8" fill="none" strokeLinecap="round" />
