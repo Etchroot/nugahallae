@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { GameProps } from '../types'
 import { pieceLabel } from '../../domain/pieces'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { LIMIT, canPick, currentPlayer, initThirtyOne, pickCount, spoken } from './logic'
 import type { ThirtyOneState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -36,10 +37,17 @@ export function ThirtyOneGame({ order, onFinish }: GameProps) {
     if (next.phase === 'lost' && next.loser) {
       const loser = next.loser
       void haptic('error')
+      playSfx('loseSting')
       setOverlay(`${pieceLabel(loser)} 31을 불렀어요`)
       timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     } else {
       void haptic('tap')
+      // 부른 숫자만큼 "똑똑똑", 숫자가 클수록 높게
+      spoken(prev.n, count).forEach((n, k) => {
+        const play = () => playSfx('note', { pitch: Math.pow(2, (n - 1) / 20) })
+        if (k === 0) play()
+        else timers.current.push(setTimeout(play, k * 80))
+      })
     }
   }
 

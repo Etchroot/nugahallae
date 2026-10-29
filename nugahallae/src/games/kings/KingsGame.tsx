@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { END_EFFECT_MS } from '../shared/timing'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { KING_COUNT, confirmCard, drawCard, faceOf, initKings } from './logic'
@@ -61,8 +62,16 @@ export function KingsGame({
     if (r.event === 'ignored') return
     commit(r.state)
     prime()
+    // 뒤집는 소리는 카드 종류와 무관하게 같다. 그 뒤 공개된 카드의 소리
+    playSfx('cardFlip')
+    if (r.event === 'king') playSfx('kings.king')
+    if (r.event === 'effect') {
+      const face = faceOf(r.state, i)
+      playSfx('chime', face.kind === 'effect' && face.effect !== 'say' ? { pitch: 1.25 } : undefined)
+    }
     if (r.event === 'last-king') {
       void haptic('error')
+      playSfx('loseSting')
       const loser = r.state.loserIdx === null ? null : order[r.state.loserIdx]
       if (loser) {
         setOverlay(`${pieceLabel(loser)} 마지막 왕을 뽑았어요`)
@@ -75,6 +84,7 @@ export function KingsGame({
     const r = confirmCard(stateRef.current)
     if (r.state === stateRef.current) return
     commit(r.state)
+    playSfx('tapSoft')
     if (r.passed) void haptic('tap')
   }
 

@@ -5,6 +5,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { COLS, ROWS, TOP, initTower, pullBlock } from './logic'
 import type { TowerState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -58,6 +59,7 @@ export function TowerGame({
     const { state: next, result } = pullBlock(prev, r, i, order, rng)
     if (result === 'ignored') return
     if (result === 'top' || result === 'last') {
+      playSfx('tapSoft', { pitch: 0.7 })
       setMsg(MESSAGES[result])
       return
     }
@@ -65,6 +67,9 @@ export function TowerGame({
     setState(next)
     setMsg(null)
     if (result === 'safe') {
+      // 삐걱 소리는 늘 같다(무너질 확률과 무관)
+      playSfx('tower.knock')
+      playSfx('tower.creak')
       void haptic('tap')
       setWobble((w) => w + 1)
       return
@@ -73,6 +78,7 @@ export function TowerGame({
     const loser = next.loser
     if (!loser) return
     void haptic('error')
+    playSfx('tower.collapse')
     setFlying(scatter(rng))
     setOverlay(`${pieceLabel(loser)} 와르르!`)
     timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))

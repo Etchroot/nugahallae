@@ -5,6 +5,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { initUpdown, submitGuess } from './logic'
 import type { UpdownState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -54,6 +55,7 @@ export function UpdownGame({
     if (prev.phase !== 'playing') return
     const r = submitGuess(prev, text, order)
     if (r.error) {
+      playSfx('buzz', { gain: 0.6 })
       setError(true)
       return
     }
@@ -62,9 +64,11 @@ export function UpdownGame({
     setState(r.state)
     setText('')
     inputRef.current?.focus()
+    if (r.state.hint) playSfx(r.state.hint === 'up' ? 'updown.up' : 'updown.down')
     if (r.state.phase === 'boom' && r.state.loser) {
       const loser = r.state.loser
       void haptic('error')
+      playSfx('boom')
       setOverlay(`${pieceLabel(loser)} 펑!`)
       timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     }

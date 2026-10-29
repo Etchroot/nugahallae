@@ -6,6 +6,8 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx, playTickTrain } from '../../platform/sound'
+import type { StopHandle } from '../../platform/sound'
 import {
   LEVELS,
   TRACE_MS,
@@ -22,6 +24,8 @@ import './ladder.css'
 
 // SVG 좌표: 세로줄 간격 100, 한 단계 높이 100
 const U = 100
+/** 내려가는 동안의 발소리 시각(초): 220ms 간격 고정 */
+const STEP_TIMES = Array.from({ length: Math.floor(TRACE_MS / 220) }, (_, k) => 0.1 + (k * 220) / 1000)
 
 const cssVar = (name: string, value: string | number) => ({ [name]: value }) as CSSProperties
 
@@ -43,6 +47,7 @@ export function LadderGame({
   const guard = useTapGuard()
   const stateRef = useRef(state)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const steps = useRef<StopHandle | null>(null)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
 
@@ -51,6 +56,7 @@ export function LadderGame({
     return () => {
       list.forEach(clearTimeout)
       list.length = 0
+      steps.current?.stop()
     }
   }, [])
 
@@ -67,10 +73,12 @@ export function LadderGame({
     if (next.phase === 'done' && next.loser) {
       const loser = next.loser
       void haptic('error')
+      playSfx('loseSting')
       setOverlay(`${pieceLabel(loser)} 벌칙!`)
       timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     } else {
       void haptic('tap')
+      playSfx('success')
     }
   }
 
@@ -79,6 +87,10 @@ export function LadderGame({
     const next = startTrace(prev)
     if (next === prev) return
     commit(next)
+    // 내려가는 소리는 목적지와 무관하게 늘 같은 박자
+    playSfx('whoosh')
+    steps.current?.stop()
+    steps.current = playTickTrain(STEP_TIMES)
     timers.current.push(setTimeout(finish, TRACE_MS))
   }
 

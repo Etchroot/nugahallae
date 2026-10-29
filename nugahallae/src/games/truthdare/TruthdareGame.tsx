@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx, playTickTrain } from '../../platform/sound'
 import { useTapGuard } from '../../app/useTapGuard'
 import { END_EFFECT_MS } from '../shared/timing'
 import { cardsOf, drawCard, pickPlayer } from './logic'
@@ -62,9 +63,11 @@ export function TruthdareGame({
     const iv = setInterval(() => {
       step++
       setHl(at(step))
+      playSfx('tick')
       if (step >= STEPS) {
         clearInterval(iv)
         void haptic('tap')
+        playSfx('chime')
         // 선택된 칸이 하이라이트된 채 잠깐 머문 뒤 선택 화면으로 넘어간다.
         timers.current.push(setTimeout(() => setPhase('choose'), HOLD_MS))
       }
@@ -76,6 +79,7 @@ export function TruthdareGame({
     if (phase !== 'choose') return
     const idx = drawCard(k, used.current[k], rng)
     used.current[k].push(idx)
+    playSfx('cardFlip')
     setKind(k)
     setCard(idx)
     setPhase('card')
@@ -87,11 +91,13 @@ export function TruthdareGame({
     used.current[kind].push(idx)
     setCard(idx)
     setSwapped(true)
+    playTickTrain([0, 0.03, 0.06, 0.09, 0.12, 0.15])
   }
 
   const done = () => {
     if (phase !== 'card') return
     setPhase('done')
+    playSfx('success')
     const loser = order[selected]
     timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
   }

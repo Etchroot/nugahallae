@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { currentPlayer, drawStraw, initStraws } from './logic'
 import type { StrawsState } from './logic'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -37,13 +38,17 @@ export function StrawsGame({
     if (next === prev) return
     stateRef.current = next
     setState(next)
+    // 뽑는 소리는 어느 막대든 같고, 결과음은 공개와 같은 순간에
+    playSfx('whoosh', { pitch: 1.4 })
     if (next.phase === 'lost' && next.loser) {
       const loser = next.loser
       void haptic('error')
+      playSfx('loseSting')
       setOverlay(`${pieceLabel(loser)} 짧은 막대!`)
       timers.current.push(setTimeout(() => onFinishRef.current(loser), END_EFFECT_MS))
     } else {
       void haptic('tap')
+      playSfx('success', { gain: 0.7 })
     }
   }
 

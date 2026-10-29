@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { useTapGuard } from '../../app/useTapGuard'
 import { RECORD_END_MS } from '../shared/timing'
 import { initLiar, resolveLiar, tally } from './logic'
@@ -62,6 +63,7 @@ export function LiarGame({
     phaseRef.current = p
     setPhase(p)
     void haptic('tap')
+    playSfx(p === 'discuss' ? 'chime' : 'tapSoft')
   }, [])
 
   const release = useCallback(() => {
@@ -97,12 +99,22 @@ export function LiarGame({
     if (phase !== 'discuss') return
     const start = nowRef.current()
     setRemaining(DISCUSS_MS)
+    let lastSec = 11
     const id = setInterval(() => {
       const rem = Math.max(0, DISCUSS_MS - (nowRef.current() - start))
       setRemaining(rem)
+      // 마지막 10초는 1초마다 째깍(모두에게 보이는 타이머와 같은 정보)
+      const sec = Math.ceil(rem / 1000)
+      if (sec <= 10 && sec < lastSec) {
+        lastSec = sec
+        if (sec > 0) playSfx('tick')
+      }
       if (rem <= 0) {
         clearInterval(id)
-        if (phaseRef.current === 'discuss') go('vote')
+        if (phaseRef.current === 'discuss') {
+          playSfx('buzz', { gain: 0.6 })
+          go('vote')
+        }
       }
     }, 250)
     return () => clearInterval(id)
@@ -117,6 +129,7 @@ export function LiarGame({
       setTurn(turn + 1)
       setSeen(false)
       void haptic('tap')
+      playSfx('tapSoft')
     }
   }
 
@@ -127,6 +140,7 @@ export function LiarGame({
       setVoteTurn(voteTurn + 1)
       setSelected(null)
       void haptic('tap')
+      playSfx('tapSoft')
       return
     }
     const pointed = tally(votes.current, order.length, rng)
@@ -135,6 +149,7 @@ export function LiarGame({
     setPhase('result')
     setResult(res)
     void haptic('error')
+    playSfx(res.caught ? 'success' : 'loseSting')
     const loser = order[res.loser]
     timers.current.push(setTimeout(() => onFinishRef.current(loser), RECORD_END_MS))
   }
@@ -170,6 +185,8 @@ export function LiarGame({
               onPointerDown={(e) => {
                 if (holdRef.current || e.button > 0) return
                 holdRef.current = { id: e.pointerId }
+                // 라이어든 아니든 똑같은 소리(누가 라이어인지 소리로 드러나지 않게)
+                playSfx('cardFlip')
                 setHolding(true)
                 setSeen(true)
                 try {
@@ -229,7 +246,11 @@ export function LiarGame({
                   aria-label={pieceLabel(p)}
                   aria-pressed={selected === i}
                   className={'lr-pick' + (selected === i ? ' lr-on' : '')}
-                  onClick={() => setSelected(i)}
+                  onClick={() => {
+                    // 누구를 골랐는지 드러나지 않게 모든 칸이 같은 소리(동물 울음은 쓰지 않는다)
+                    playSfx('tapSoft')
+                    setSelected(i)
+                  }}
                 >
                   <span className="lr-emoji" aria-hidden="true">
                     {p.emoji}
