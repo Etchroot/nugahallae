@@ -6,8 +6,8 @@
 2. 게임 컴포넌트를 만들어요. `GameProps`(`order`, `onFinish`)를 받고, 끝나면 `onFinish(벌칙자)`를 불러요.
 3. `src/games/<id>/definition.ts`에서 `GameDefinition`을 `export default` 해요.
    - 필수: `id`, `icon`, `title`, `summary`(30자 이하), `rule`, `tint`, `Component`
-   - 선택: `badge`, `pieceMode`, `minPlayers`(기본 2), `maxPlayers`(기본 10)
+   - 선택: `badge`, `pieceMode`, `minPlayers`(기본 2), `maxPlayers`(기본 10), `order`(홈 목록 순서, 작은 수가 먼저)
 4. 테스트를 `src/games/<id>/__tests__/`에 추가해요.
 5. css 클래스는 게임마다 고유한 접두어를 쓰고, 색은 `src/styles/play-theme.css`의 `--pl-*` 변수를 써요. (라이트 모드 전용)
 
-자동으로 모인 게임은 기존 게임 뒤에 id 알파벳순으로 붙어요. id가 겹치면 테스트가 실패해요.
+`order`가 없는 게임은 `order`가 있는 게임 뒤에 id 알파벳순으로 붙어요. id가 겹치면 테스트가 실패해요.

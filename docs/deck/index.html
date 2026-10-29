@@ -257,8 +257,8 @@ h2 { font-size: 72px; }
       </div>
     </div>
     <ul class="rules">
-      <li><b>테스트하기 쉬워요.</b> 로직이 난수와 시계를 주입받아서 같은 상황을 그대로 다시 만들 수 있어요. 지금 테스트 904개가 이 덕분이에요.</li>
-      <li><b>게임 추가가 가벼워요.</b> 새 게임은 <span class="mono" style="font-size:26px">definition.ts</span>를 두면 목록에 자동으로 나타나요. 현재 13개가 이 방식이고, 나머지 17개는 기존 방식으로 등록돼 있어요.</li>
+      <li><b>테스트하기 쉬워요.</b> 로직이 난수와 시계를 주입받아서 같은 상황을 그대로 다시 만들 수 있어요. 자동 테스트를 쉽게 쓸 수 있는 것도 이 덕분이에요.</li>
+      <li><b>게임 추가가 가벼워요.</b> 모든 게임이 <span class="mono" style="font-size:26px">definition.ts</span> 하나로 등록돼요. 새 게임도 이 파일만 두면 목록에 자동으로 나타나요.</li>
       <li><b>토스 안팎에서 같은 코드가 돌아요.</b> TDS는 앱인토스 안에서만 실행돼서, 웹 데모는 부품만 바꾼 빌드를 따로 두었어요. 검사를 우회한 게 아니에요.</li>
     </ul>
   </div>
@@ -282,7 +282,7 @@ h2 { font-size: 72px; }
   <h2>막아 둔 실패</h2>
   <div class="fail">
     <div class="fcard"><div class="when">버튼을 연달아 누르면</div><h3>한 번만 처리해요</h3><p>모든 게임 화면이 같은 탭 가드(0.4초)를 써서 연타해도 판이 꼬이지 않아요.</p></div>
-    <div class="fcard"><div class="when">터치가 끊기거나 앱이 가려지면</div><h3>그 순간의 입력을 취소해요</h3><p>누르고 있던 입력이 기록으로 남지 않게, 17개 게임이 터치 취소나 화면 전환을 감지해요.</p></div>
+    <div class="fcard"><div class="when">터치가 끊기거나 앱이 가려지면</div><h3>그 순간의 입력을 취소해요</h3><p>누르고 있던 입력이 기록으로 남지 않게, 게임들이 터치 취소와 화면 전환을 감지해요.</p></div>
     <div class="fcard"><div class="when">플랫폼 호출이 실패하면</div><h3>기본값으로 계속해요</h3><p>진동, 저장소, 사용자 키 호출이 예외를 던지지 않아요. 저장이 안 되면 브라우저 저장소로 대신해요.</p></div>
     <div class="fcard"><div class="when">옆 사람이 화면을 보면</div><h3>손을 떼면 바로 가려요</h3><p>라이어 게임의 제시어는 누르고 있는 동안에만 보여요.</p></div>
   </div>
@@ -294,7 +294,7 @@ h2 { font-size: 72px; }
   <div class="nums">
     <div class="num"><div class="lab">게임이 끝나고 결과까지</div><div class="big"><s>2.2초</s>0.5초</div><div class="sub">기록형 게임은 2.1초 → 1.2초</div></div>
     <div class="num"><div class="lab">선 따라 그리기 꼼수</div><div class="big"><s>70%</s>0%</div><div class="sub">길의 70%를 건너뛸 수 있던 것을 막고, 공격 시뮬레이션으로 확인</div></div>
-    <div class="num"><div class="lab">자동 테스트</div><div class="big"><s>1개</s>904개</div><div class="sub">96개 파일. 화면 넘침·색 대비·CSS 규칙도 검사</div></div>
+    <div class="num"><div class="lab">자동 테스트</div><div class="big">계속 쌓임</div><div class="sub">버그를 찾으면 다시 안 나게 검사로 남김. 화면 넘침·색 대비·CSS 규칙도 검사</div></div>
   </div>
   <div class="todo">
     <div class="t">4일차 사용자 테스트에서 채울 칸 (4명, 2회)</div>
@@ -346,7 +346,7 @@ h2 { font-size: 72px; }
       </ul>
       <h3>다음 단계</h3>
       <ul>
-        <li>남은 17개 게임을 같은 구조로 옮기기</li>
+        <li>게임 계속 늘리기</li>
         <li>실제 폰 확인과 사용자 테스트 반영</li>
         <li>앱인토스 등록과 출시</li>
       </ul>

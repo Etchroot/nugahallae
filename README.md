@@ -78,6 +78,6 @@ nugahallae/
 1. `nugahallae/src/games/<id>/` 폴더를 만들고 게임 컴포넌트를 작성합니다.
 2. `nugahallae/src/games/<id>/definition.ts`에서 `GameDefinition`(`games/types.ts`)을 `export default` 하면 목록에 자동으로 나타납니다. 자세한 방법은 [games/README.md](nugahallae/src/games/README.md)를 보세요.
 
-현재 13개 게임이 이 방식(`definition.ts`)이고, 나머지 17개는 `registry.ts`의 `INLINE_GAMES`에 직접 등록돼 있습니다.
+모든 게임(30종)이 이 방식으로 등록돼 있고, 홈 목록 순서는 `definition.ts`의 `order` 값(작은 수가 먼저)으로 정합니다.
 
 문구는 `copy-guard` 테스트가 검사하는 금지어를 피해야 합니다. 결과는 "걸렸다", "차례", "통과", "벌칙"으로 표현합니다.

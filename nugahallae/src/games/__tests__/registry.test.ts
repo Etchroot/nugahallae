@@ -24,12 +24,25 @@ describe('collectDefinitions', () => {
     })
     expect(out.map((g) => g.id)).toEqual(['alpha', 'zeta'])
   })
+  test('order가 작은 게임이 먼저, order가 없으면 맨 뒤에 id순으로 놓는다', () => {
+    const out = collectDefinitions({
+      './zeta/definition.ts': { default: { ...stub('zeta'), order: 1 } },
+      './beta/definition.ts': { default: stub('beta') },
+      './alpha/definition.ts': { default: stub('alpha') },
+      './mid/definition.ts': { default: { ...stub('mid'), order: 2 } },
+    })
+    expect(out.map((g) => g.id)).toEqual(['zeta', 'mid', 'alpha', 'beta'])
+  })
   test('default export가 없는 모듈은 건너뛴다', () => {
     expect(collectDefinitions({ './x/definition.ts': {} as { default: GameDefinition } })).toEqual([])
   })
 })
 
 describe('registry', () => {
+  test('게임 30종이 모두 자동 등록되고 홈 목록은 돌림판부터 시작한다', () => {
+    expect(GAMES).toHaveLength(30)
+    expect(GAMES.slice(0, 4).map((g) => g.id)).toEqual(['roulette', 'pour', 'ladder', 'croc'])
+  })
   test('id가 중복되지 않는다', () => {
     const ids = GAMES.map((g) => g.id)
     expect(new Set(ids).size).toBe(ids.length)
