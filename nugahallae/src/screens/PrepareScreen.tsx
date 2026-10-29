@@ -5,6 +5,7 @@ import { useTapGuard } from '../app/useTapGuard'
 import { drawPieces, pieceLabel } from '../domain/pieces'
 import type { Piece } from '../domain/pieces'
 import type { GameDefinition } from '../games/types'
+import { playAnimal } from '../platform/sound'
 import './screens.css'
 
 const DEFAULT_MIN_PLAYERS = 2
@@ -162,10 +163,12 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
               className={`sc-pick${taken ? ' sc-pick-taken' : ''}`}
               style={{ '--pc': p.color } as CSSProperties}
               data-testid="piece-card"
+              data-silent
               data-piece-id={p.id}
               disabled={taken || confirming !== null || done}
               onClick={guard(() => {
                 if (taken || confirming !== null) return
+                playAnimal(p.id)
                 setConfirming(p)
               })}
             >

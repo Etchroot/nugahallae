@@ -3,6 +3,7 @@ import { backActionFor } from './app/flow'
 import type { Screen } from './app/flow'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { closeApp, getUserKey, onBack, storageGet, storageSet } from './platform/sdk'
+import { loadSound, playClick, unlockAudio } from './platform/sound'
 import { EMPTY_HISTORY, loadHistory, recordPlay, saveHistory } from './domain/history'
 import type { History } from './domain/history'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './domain/settings'
@@ -40,6 +41,20 @@ function App() {
     return () => {
       alive = false
     }
+  }, [])
+
+  // 효과음: 저장된 켜짐/꺼짐을 불러오고, 버튼을 누를 때 기본 클릭음을 낸다.
+  // data-silent 안의 버튼(동물 카드처럼 자기 소리가 있는 것)과 비활성 버튼은 소리를 내지 않는다.
+  useEffect(() => {
+    void loadSound()
+    const onDown = (e: PointerEvent) => {
+      unlockAudio()
+      const el = (e.target as Element | null)?.closest?.('button,[role="button"]')
+      if (!el || el.closest('[data-silent]') || (el as HTMLButtonElement).disabled) return
+      playClick()
+    }
+    document.addEventListener('pointerdown', onDown, true)
+    return () => document.removeEventListener('pointerdown', onDown, true)
   }, [])
 
   // 사용자 식별키: 시작할 때 한 번만 확인해 저장한다(화면에 보이지 않고, 실패해도 앱은 그대로 동작).

@@ -3,6 +3,7 @@ import { BottomCTA, Button } from '@toss/tds-mobile'
 import { pieceLabel } from '../domain/pieces'
 import type { Piece } from '../domain/pieces'
 import { haptic } from '../platform/sdk'
+import { playResult } from '../platform/sound'
 import './screens.css'
 
 interface Props {
@@ -15,7 +16,8 @@ interface Props {
 export function ResultScreen({ loser, onAgain, onOtherGame }: Props) {
   useEffect(() => {
     void haptic('success')
-  }, [])
+    playResult(loser.id)
+  }, [loser.id])
 
   return (
     <div className="rs-root">

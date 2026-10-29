@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GAMES, findGame } from '../games/registry'
 import type { GameDefinition } from '../games/types'
 import { PIECES } from '../domain/pieces'
+import { isSoundEnabled, loadSound, playClick, setSoundEnabled } from '../platform/sound'
 import './screens.css'
 
 interface Props {
@@ -32,6 +33,22 @@ function ClearIcon() {
   )
 }
 
+function SoundIcon({ on }: { on: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+      {on ? (
+        <>
+          <path d="M15.5 9a4.2 4.2 0 010 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path d="M18 6.5a8 8 0 010 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </>
+      ) : (
+        <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      )}
+    </svg>
+  )
+}
+
 function GameCard({ g, testId, onPick }: { g: GameDefinition; testId: string; onPick: (id: string) => void }) {
   return (
     <button type="button" className="hm-card" data-testid={testId} onClick={() => onPick(g.id)}>
@@ -49,6 +66,16 @@ function GameCard({ g, testId, onPick }: { g: GameDefinition; testId: string; on
 
 export function HomeScreen({ onPickGame, recent = [] }: Props) {
   const [query, setQuery] = useState('')
+  const [soundOn, setSoundOn] = useState(isSoundEnabled)
+  useEffect(() => {
+    let alive = true
+    void loadSound().then((on) => {
+      if (alive) setSoundOn(on)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
   const q = query.trim().toLowerCase()
   const shown = q
     ? GAMES.filter((g) => (g.title + ' ' + g.summary).toLowerCase().includes(q))
@@ -112,7 +139,23 @@ export function HomeScreen({ onPickGame, recent = [] }: Props) {
         )}
         <div className="hm-sec">
           <h2>게임 고르기</h2>
-          <span>{shown.length}개</span>
+          <span className="hm-sec-end">
+            <span>{shown.length}개</span>
+            <button
+              type="button"
+              className="hm-sound"
+              aria-label={soundOn ? '소리 끄기' : '소리 켜기'}
+              aria-pressed={soundOn}
+              onClick={() => {
+                const next = !soundOn
+                setSoundEnabled(next)
+                setSoundOn(next)
+                if (next) playClick()
+              }}
+            >
+              <SoundIcon on={soundOn} />
+            </button>
+          </span>
         </div>
         {shown.length === 0 ? (
           <p className="hm-empty" role="status">
