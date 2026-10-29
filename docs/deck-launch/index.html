@@ -56,9 +56,11 @@ h2 { font-size: 68px; }
 .step .n { width: 72px; height: 72px; border-radius: 50%; background: var(--blue50); color: var(--blue500); font-size: 36px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; }
 .step b { display: block; font-size: 36px; font-weight: 700; }
 .step span { display: block; margin-top: 14px; font-size: 26px; color: var(--grey600); }
-.step.on { background: var(--blue500); }
-.step.on .n { background: #fff; }
-.step.on b, .step.on span { color: #fff; }
+.step.hl { background: var(--blue500); }
+.step.hl .n { background: #fff; }
+.step.hl b, .step.hl span { color: #fff; }
+.step.later .n { background: var(--grey100); color: var(--grey500); }
+.step.later b { color: var(--grey600); }
 .mine { margin-top: 130px; display: flex; gap: 24px; align-items: center; font-size: 44px; font-weight: 600; color: var(--grey700); }
 
 /* 4 하네스 */
@@ -171,14 +173,14 @@ h2 { font-size: 68px; }
 <section class="slide">
   <h2>출시까지 8단계</h2>
   <div class="flow">
-    <div class="step on"><div class="n">1</div><b>기획</b><span>10/28</span></div>
-    <div class="step on"><div class="n">2</div><b>개발</b><span>10/28~29</span></div>
-    <div class="step on"><div class="n">3</div><b>준비물</b><span>10/29</span></div>
-    <div class="step on"><div class="n">4</div><b>콘솔 등록</b><span>10/29</span></div>
-    <div class="step on"><div class="n">5</div><b>빌드·업로드</b><span>10/29</span></div>
-    <div class="step on"><div class="n">6</div><b>검토</b><span>영업일 3~7일</span></div>
-    <div class="step on"><div class="n">7</div><b>출시</b><span>10/29 첫 버전</span></div>
-    <div class="step"><div class="n">8</div><b>운영</b><span>계속</span></div>
+    <div class="step"><div class="n">1</div><b>기획</b><span>10/28</span></div>
+    <div class="step"><div class="n">2</div><b>개발</b><span>10/28~29</span></div>
+    <div class="step"><div class="n">3</div><b>준비물</b><span>10/29</span></div>
+    <div class="step"><div class="n">4</div><b>콘솔 등록</b><span>10/29</span></div>
+    <div class="step"><div class="n">5</div><b>빌드·업로드</b><span>10/29</span></div>
+    <div class="step"><div class="n">6</div><b>검토</b><span>영업일 3~7일</span></div>
+    <div class="step hl"><div class="n">7</div><b>출시</b><span>10/29 첫 버전</span></div>
+    <div class="step later"><div class="n">8</div><b>운영</b><span>계속</span></div>
   </div>
   <div class="mine"><span class="chip">누가할래</span>이틀 만에 첫 버전 출시</div>
 </section>
