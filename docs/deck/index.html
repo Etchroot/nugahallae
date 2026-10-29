@@ -115,14 +115,13 @@ h2 { font-size: 72px; }
 .fcard p { font-size: 28px; line-height: 1.5; color: var(--ink-2); }
 
 /* 8 숫자 */
-.s-num { background: var(--grad); color: #fff; }
-.s-num h2 { color: #fff; }
+.s-num { background: var(--bg); }
 .nums { margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 50px; }
-.num .lab { font-size: 30px; font-weight: 700; opacity: .95; }
-.num .big { font-size: 150px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-top: 8px; }
-.num .big s { font-size: 70px; font-weight: 600; opacity: .7; text-decoration-thickness: 5px; margin-right: 16px; letter-spacing: -0.03em; }
-.num .sub { font-size: 26px; opacity: .9; margin-top: 8px; line-height: 1.45; }
-.todo { margin-top: 56px; border: 4px dashed rgba(255,255,255,.75); border-radius: 28px; padding: 30px 44px; }
+.num .lab { font-size: 30px; font-weight: 700; color: var(--ink-2); }
+.num .big { color: var(--blue); font-size: 150px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-top: 8px; }
+.num .big s { font-size: 70px; font-weight: 600; color: var(--ink-3); opacity: .6; text-decoration-thickness: 5px; margin-right: 16px; letter-spacing: -0.03em; }
+.num .sub { font-size: 26px; color: var(--ink-2); margin-top: 8px; line-height: 1.45; }
+.todo { margin-top: 56px; border: 4px dashed #c7ccd3; border-radius: 28px; padding: 30px 44px; }
 .todo .t { font-size: 30px; font-weight: 800; margin-bottom: 14px; }
 .todo .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; }
 .todo .row div { font-size: 26px; line-height: 1.45; }
@@ -289,7 +288,7 @@ h2 { font-size: 72px; }
 </section>
 
 <!-- 8 숫자 -->
-<section class="slide s-num" data-dark>
+<section class="slide s-num">
   <h2>숫자로 확인했어요</h2>
   <div class="nums">
     <div class="num"><div class="lab">게임이 끝나고 결과까지</div><div class="big"><s>2.2초</s>0.5초</div><div class="sub">기록형 게임은 2.1초 → 1.2초</div></div>
