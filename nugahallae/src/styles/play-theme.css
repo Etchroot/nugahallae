@@ -18,6 +18,9 @@
   --pl-warn: #e67700;
   /* 바구니 면(밝은 황토색): 게임 그림용 */
   --pl-basket-fill: #f3d9a4;
+  /* 성공·신호 면(연한 초록)과 그 위 글자(대비 4.5:1 이상) */
+  --pl-success-bg: #d3f9d8;
+  --pl-success-text: #14532d;
   --pl-disabled-bg: #e5e8eb;
   --pl-disabled-text: #8b95a1;
   /* 규칙 띠 */
