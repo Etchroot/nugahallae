@@ -4,7 +4,7 @@
   max-width: 420px;
   height: 64px;
   border-radius: 16px;
-  background: #333d4b;
+  background: var(--pl-line);
 }
 .gg-zone {
   position: absolute;
@@ -21,7 +21,7 @@
   bottom: -8px;
   width: 2px;
   margin-left: -1px;
-  background: #fff;
+  background: var(--pl-text);
 }
 .gg-marker {
   position: absolute;
@@ -30,13 +30,13 @@
   width: 8px;
   margin-left: -4px;
   border-radius: 4px;
-  background: #ffc342;
+  background: var(--pl-warn);
 }
 .gg-marker.gg-fixed { background: #f04452; }
 .gg-rec {
   min-height: 28px;
   font-size: 20px;
   font-weight: 700;
-  color: #ffc342;
+  color: var(--pl-warn-text);
   text-align: center;
 }

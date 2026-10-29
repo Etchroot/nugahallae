@@ -1,0 +1,26 @@
+/* 앱 전체 라이트 테마 토큰(비게임 출시 기준: 미니앱 테마는 라이트 모드).
+   게임 플레이 화면 css는 색을 직접 쓰지 않고 이 변수를 쓴다. */
+:root {
+  --pl-bg: #f7f8fa;
+  --pl-surface: #ffffff;
+  --pl-surface-2: #f2f4f6;
+  --pl-line: #e5e8eb;
+  --pl-text: #191f28;
+  --pl-text-2: #4e5968;
+  --pl-text-3: #6b7684;
+  --pl-primary: #3182f6;
+  --pl-danger: #f04452;
+  /* 흰 글자를 올리는 빨간 면(대비 4.5:1)과 밝은 배경 위 빨간 글자 */
+  --pl-danger-fill: #e03131;
+  --pl-danger-text: #c92a2a;
+  /* 밝은 배경 위 노란 계열 글자 / 도형 */
+  --pl-warn-text: #8a5a00;
+  --pl-warn: #e67700;
+  --pl-disabled-bg: #e5e8eb;
+  --pl-disabled-text: #8b95a1;
+  /* 규칙 띠 */
+  --pl-rule-bg: #e8f3ff;
+  --pl-rule-text: #1b64da;
+  /* 떠 있는 카드(오버레이·토스트) */
+  --pl-card-shadow: 0 8px 24px rgba(25, 31, 40, 0.18);
+}

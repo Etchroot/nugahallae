@@ -1,17 +1,19 @@
 .rul-stage { gap: 8px; padding: 16px 0 8px; justify-content: flex-start; }
 .rul-target-text { font-size: 28px; font-weight: 700; text-align: center; padding: 0 16px; }
-.rul-msg { min-height: 24px; font-size: 16px; font-weight: 700; color: #ffc342; text-align: center; padding: 0 16px; }
+.rul-msg { min-height: 24px; font-size: 16px; font-weight: 700; color: var(--pl-warn-text); text-align: center; padding: 0 16px; }
 .rul-area {
   flex: none;
   display: block;
   width: 100%;
   height: 240px;
   touch-action: none;
-  background: #242c38;
+  background: var(--pl-surface);
+  border-top: 1px solid var(--pl-line);
+  border-bottom: 1px solid var(--pl-line);
   cursor: crosshair;
 }
-.rul-line { stroke: #ffc342; stroke-width: 6; stroke-linecap: round; pointer-events: none; }
-.rul-dot { fill: #ffc342; pointer-events: none; }
+.rul-line { stroke: var(--pl-warn); stroke-width: 6; stroke-linecap: round; pointer-events: none; }
+.rul-dot { fill: var(--pl-warn); pointer-events: none; }
 .rul-done {
   list-style: none;
   margin: 0;
@@ -21,10 +23,10 @@
   justify-content: center;
   gap: 6px 12px;
   font-size: 15px;
-  color: #b0b8c1;
+  color: var(--pl-text-3);
 }
 .rul-result { flex: none; width: calc(100% - 32px); max-width: 420px; margin: 16px 0; }
-.rul-label { font-size: 18px; fill: #fff; }
+.rul-label { font-size: 18px; fill: var(--pl-text); }
 .rul-target { fill: #3182f6; }
 .rul-bar { fill: #8b95a1; }
 .rul-bar-lose { fill: #f04452; }

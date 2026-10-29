@@ -1,4 +1,4 @@
-import { test, expect, vi } from 'vitest'
+import { test, expect, vi, describe } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { HomeScreen } from '../HomeScreen'
 import { GAMES } from '../../games/registry'
@@ -80,4 +80,41 @@ test('지우기 버튼은 글자가 있을 때만 보이고 누르면 전체 목
   expect(search()).toHaveValue('')
   expect(cards()).toHaveLength(GAMES.length)
   expect(screen.queryByLabelText('검색어 지우기')).not.toBeInTheDocument()
+})
+
+describe('최근 한 게임', () => {
+  const renderRecent = (recent: string[]) => {
+    const pick = vi.fn()
+    render(<HomeScreen onPickGame={pick} recent={recent} />)
+    return pick
+  }
+  test('기록이 없으면 섹션이 없다', () => {
+    renderRecent([])
+    expect(screen.queryByText('최근 한 게임')).not.toBeInTheDocument()
+    expect(screen.queryAllByTestId('recent-card')).toHaveLength(0)
+  })
+  test('기록이 있으면 게임 고르기 위에 최대 2개, game-card 개수는 그대로', () => {
+    renderRecent(['pour', 'roulette', 'ladder'])
+    const head = screen.getByText('최근 한 게임')
+    const pick = screen.getByText('게임 고르기')
+    expect(head.compareDocumentPosition(pick) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const rc = screen.getAllByTestId('recent-card')
+    expect(rc).toHaveLength(2)
+    expect(rc[0].textContent).toContain('잔 채우기')
+    expect(rc[1].textContent).toContain('돌림판')
+    expect(cards()).toHaveLength(GAMES.length)
+  })
+  test('누르면 onPickGame, 검색 중에는 숨김', () => {
+    const pick = renderRecent(['pour'])
+    fireEvent.click(screen.getByTestId('recent-card'))
+    expect(pick).toHaveBeenCalledWith('pour')
+    fireEvent.change(search(), { target: { value: '돌림' } })
+    expect(screen.queryByText('최근 한 게임')).not.toBeInTheDocument()
+    fireEvent.change(search(), { target: { value: '' } })
+    expect(screen.getByText('최근 한 게임')).toBeInTheDocument()
+  })
+  test('모르는 id는 건너뛴다', () => {
+    renderRecent(['ghost'])
+    expect(screen.queryByText('최근 한 게임')).not.toBeInTheDocument()
+  })
 })

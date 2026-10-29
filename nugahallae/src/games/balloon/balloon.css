@@ -4,8 +4,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #191f28;
-  color: #fff;
+  background: var(--pl-bg);
+  color: var(--pl-text);
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
@@ -20,7 +20,8 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px 16px;
-  background: #333d4b;
+  background: var(--pl-rule-bg);
+  color: var(--pl-rule-text);
   font-size: 15px;
   font-weight: 700;
   text-align: center;
@@ -56,7 +57,9 @@
   max-width: 88%;
   padding: 16px 24px;
   border-radius: 16px;
-  background: rgba(0, 0, 0, 0.82);
+  background: var(--pl-surface);
+  color: var(--pl-text);
+  box-shadow: var(--pl-card-shadow);
   font-size: 22px;
   font-weight: 700;
   text-align: center;
@@ -78,7 +81,7 @@
 .bl-pump { margin: 0 16px 12px; background: #f472b6; color: #fff; }
 .bl-pass { margin: 0 16px 34px; background: #3182f6; color: #fff; }
 .bl-pump:disabled,
-.bl-pass:disabled { background: #4e5968; color: #8b95a1; }
+.bl-pass:disabled { background: var(--pl-disabled-bg); color: var(--pl-disabled-text); }
 @media (prefers-reduced-motion: reduce) {
   .bl-balloon, .bl-popped { transition: none; }
 }

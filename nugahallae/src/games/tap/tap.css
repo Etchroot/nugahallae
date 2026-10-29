@@ -5,8 +5,9 @@
   min-height: 220px;
   border: 0;
   border-radius: 24px;
-  background: #4e5968;
-  color: #fff;
+  background: var(--pl-surface);
+  box-shadow: inset 0 0 0 1px var(--pl-line);
+  color: var(--pl-text);
   font-size: 28px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -14,23 +15,23 @@
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-.tp-count { font-size: 72px; background: #3182f6; }
-.tp-go { font-size: 72px; background: #ff7a2f; }
-.tp-go:active { background: #e8641a; }
+.tp-count { font-size: 72px; background: #3182f6; color: #fff; box-shadow: none; }
+.tp-go { font-size: 72px; background: #f76707; color: #fff; box-shadow: none; }
+.tp-go:active { background: #e8590c; }
 .tp-bar {
   flex: none;
   width: 100%;
   max-width: 420px;
   height: 12px;
   border-radius: 6px;
-  background: #333d4b;
+  background: var(--pl-line);
   overflow: hidden;
 }
 .tp-bar i {
   display: block;
   height: 100%;
   width: 0;
-  background: #ffc342;
+  background: var(--pl-warn);
 }
 .tp-bar i.tp-run { animation: tp-fill linear forwards; }
 .tp-bar i.tp-full { width: 100%; }
@@ -47,5 +48,5 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #ffc342;
+  color: var(--pl-warn-text);
 }

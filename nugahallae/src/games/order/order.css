@@ -1,13 +1,13 @@
 .og-next {
   font-size: 20px;
   font-weight: 700;
-  color: #ffc342;
+  color: var(--pl-warn-text);
   min-height: 56px;
   display: flex;
   align-items: center;
   text-align: center;
 }
-.og-next b { font-size: 40px; font-weight: 700; margin-left: 8px; color: #fff; }
+.og-next b { font-size: 40px; font-weight: 700; margin-left: 8px; color: var(--pl-text); }
 .og-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -41,7 +41,7 @@
   min-height: 28px;
   font-size: 20px;
   font-weight: 700;
-  color: #ffc342;
+  color: var(--pl-warn-text);
   text-align: center;
 }
 .og-penalty {
@@ -49,6 +49,6 @@
   margin-left: 12px;
   font-size: 18px;
   font-weight: 700;
-  color: #f04452;
+  color: var(--pl-danger-text);
   text-align: left;
 }

@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { GAMES } from '../games/registry'
+import { GAMES, findGame } from '../games/registry'
+import type { GameDefinition } from '../games/types'
 import { PIECES } from '../domain/pieces'
 import './screens.css'
 
 interface Props {
   onPickGame: (gameId: string) => void
+  /** 최근 한 게임 id(최신순). 검색 중에는 보이지 않는다 */
+  recent?: string[]
 }
 
 const STICKERS = ['fox', 'frog', 'penguin', 'chick', 'pig']
@@ -29,12 +32,33 @@ function ClearIcon() {
   )
 }
 
-export function HomeScreen({ onPickGame }: Props) {
+function GameCard({ g, testId, onPick }: { g: GameDefinition; testId: string; onPick: (id: string) => void }) {
+  return (
+    <button type="button" className="hm-card" data-testid={testId} onClick={() => onPick(g.id)}>
+      {g.badge && (
+        <span className={`hm-badge ${g.badge === 'NEW' ? 'hm-badge-new' : 'hm-badge-hot'}`}>{g.badge}</span>
+      )}
+      <span className="hm-ico" style={{ background: g.tint ?? '#f2f4f6' }} aria-hidden="true">
+        {g.icon}
+      </span>
+      <span className="hm-name">{g.title}</span>
+      <span className="hm-desc">{g.summary}</span>
+    </button>
+  )
+}
+
+export function HomeScreen({ onPickGame, recent = [] }: Props) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
   const shown = q
     ? GAMES.filter((g) => (g.title + ' ' + g.summary).toLowerCase().includes(q))
     : GAMES
+  const recentGames = q
+    ? []
+    : recent
+        .map((id) => findGame(id))
+        .filter((g) => g !== undefined)
+        .slice(0, 2)
 
   return (
     <div className="hm-page">
@@ -72,6 +96,20 @@ export function HomeScreen({ onPickGame }: Props) {
       </section>
 
       <section className="hm-body">
+        {recentGames.length > 0 && (
+          <>
+            <div className="hm-sec">
+              <h2>최근 한 게임</h2>
+            </div>
+            <ul className="hm-grid hm-recent">
+              {recentGames.map((g) => (
+                <li key={g.id}>
+                  <GameCard g={g} testId="recent-card" onPick={onPickGame} />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
         <div className="hm-sec">
           <h2>게임 고르기</h2>
           <span>{shown.length}개</span>
@@ -84,23 +122,7 @@ export function HomeScreen({ onPickGame }: Props) {
           <ul className="hm-grid">
             {shown.map((g) => (
               <li key={g.id}>
-                <button
-                  type="button"
-                  className="hm-card"
-                  data-testid="game-card"
-                  onClick={() => onPickGame(g.id)}
-                >
-                  {g.badge && (
-                    <span className={`hm-badge ${g.badge === 'NEW' ? 'hm-badge-new' : 'hm-badge-hot'}`}>
-                      {g.badge}
-                    </span>
-                  )}
-                  <span className="hm-ico" style={{ background: g.tint ?? '#f2f4f6' }} aria-hidden="true">
-                    {g.icon}
-                  </span>
-                  <span className="hm-name">{g.title}</span>
-                  <span className="hm-desc">{g.summary}</span>
-                </button>
+                <GameCard g={g} testId="game-card" onPick={onPickGame} />
               </li>
             ))}
           </ul>

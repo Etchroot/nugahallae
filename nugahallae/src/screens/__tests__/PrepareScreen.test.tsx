@@ -1,5 +1,5 @@
 import { test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act, fireEvent, within } from '@testing-library/react'
+import { render, screen, act, fireEvent, within, cleanup } from '@testing-library/react'
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait'
 import { PrepareScreen } from '../PrepareScreen'
 import { pieceLabel } from '../../domain/pieces'
@@ -29,6 +29,59 @@ async function pick(i: number) {
   fireEvent.click(screen.getByText('확인했어요'))
   await advance(400)
 }
+
+function renderRange(def: Partial<GameDefinition>, initialCount: number) {
+  const onCountChosen = vi.fn<(n: number) => void>()
+  render(
+    <TDSMobileAITProvider brandPrimaryColor="#3182F6">
+      <PrepareScreen
+        game={{ title: 't', rule: 'r', ...def } as unknown as GameDefinition}
+        initialCount={initialCount}
+        onCountChosen={onCountChosen}
+        onStart={() => {}}
+      />
+    </TDSMobileAITProvider>,
+  )
+  return { onCountChosen }
+}
+const minus = () => screen.getByLabelText('인원 줄이기') as HTMLButtonElement
+const plus = () => screen.getByLabelText('인원 늘리기') as HTMLButtonElement
+const shown = () => screen.getByTestId('player-count').textContent
+
+test('minPlayers 3: 저장값 2도 3부터 보이고 −는 3에서 막힌다', () => {
+  renderRange({ minPlayers: 3 }, 2)
+  expect(shown()).toBe('3명')
+  expect(minus()).toBeDisabled()
+  fireEvent.click(plus())
+  expect(shown()).toBe('4명')
+  fireEvent.click(minus())
+  expect(shown()).toBe('3명')
+  expect(minus()).toBeDisabled()
+})
+
+test('maxPlayers 6: 저장값 8도 6으로 보이고 +는 막힌다, 건드리지 않고 시작하면 저장값을 바꾸지 않는다', () => {
+  const { onCountChosen } = renderRange({ maxPlayers: 6, pieceMode: 'auto' }, 8)
+  expect(shown()).toBe('6명')
+  expect(plus()).toBeDisabled()
+  fireEvent.click(screen.getByText('시작하기'))
+  expect(onCountChosen).not.toHaveBeenCalled()
+})
+
+test('범위 안에서 사용자가 바꾸면 저장한다', () => {
+  const { onCountChosen } = renderRange({ maxPlayers: 6, pieceMode: 'auto' }, 8)
+  fireEvent.click(minus())
+  fireEvent.click(screen.getByText('시작하기'))
+  expect(onCountChosen).toHaveBeenCalledWith(5)
+})
+
+test('기본 범위는 2~10명(기존 게임 그대로)', () => {
+  renderRange({}, 2)
+  expect(minus()).toBeDisabled()
+  cleanup()
+  renderRange({}, 10)
+  expect(plus()).toBeDisabled()
+  expect(shown()).toBe('10명')
+})
 
 beforeEach(() => {
   vi.useFakeTimers()

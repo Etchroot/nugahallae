@@ -7,8 +7,8 @@ import type { Piece } from '../domain/pieces'
 import type { GameDefinition } from '../games/types'
 import './screens.css'
 
-const MIN_PLAYERS = 2
-const MAX_PLAYERS = 10
+const DEFAULT_MIN_PLAYERS = 2
+const DEFAULT_MAX_PLAYERS = 10
 
 interface Props {
   game: GameDefinition
@@ -34,7 +34,14 @@ function PlusIcon() {
 }
 
 export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Props) {
-  const [count, setCount] = useState(initialCount)
+  const MIN_PLAYERS = game.minPlayers ?? DEFAULT_MIN_PLAYERS
+  const MAX_PLAYERS = Math.max(MIN_PLAYERS, game.maxPlayers ?? DEFAULT_MAX_PLAYERS)
+  // 저장된 인원이 이 게임의 범위 밖이면 가장 가까운 값을 보여 준다(저장값은 사용자가 직접 바꾸기 전까지 그대로 둔다).
+  const [count, setCount] = useState(() => Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, initialCount)))
+  const [adjusted, setAdjusted] = useState(false)
+  const saveCount = () => {
+    if (adjusted || count === initialCount) onCountChosen(count)
+  }
   const [pieces, setPieces] = useState<Piece[] | null>(null) // 뽑기를 시작하면 채워진다(표시 순서)
   const [picked, setPicked] = useState<Piece[]>([]) // 고른 순서 = 게임 차례
   const [confirming, setConfirming] = useState<Piece | null>(null)
@@ -60,7 +67,10 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
               className="sc-step"
               aria-label="인원 줄이기"
               disabled={count <= MIN_PLAYERS}
-              onClick={() => setCount((c) => Math.max(MIN_PLAYERS, c - 1))}
+              onClick={() => {
+                setAdjusted(true)
+                setCount((c) => Math.max(MIN_PLAYERS, c - 1))
+              }}
             >
               <MinusIcon />
             </button>
@@ -72,7 +82,10 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
               className="sc-step"
               aria-label="인원 늘리기"
               disabled={count >= MAX_PLAYERS}
-              onClick={() => setCount((c) => Math.min(MAX_PLAYERS, c + 1))}
+              onClick={() => {
+                setAdjusted(true)
+                setCount((c) => Math.min(MAX_PLAYERS, c + 1))
+              }}
             >
               <PlusIcon />
             </button>
@@ -84,7 +97,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
             <BottomCTA
               fixed
               onClick={guard(() => {
-                onCountChosen(count)
+                saveCount()
                 onStart(drawPieces(count))
               })}
             >
@@ -95,7 +108,7 @@ export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Pr
           <BottomCTA
             fixed
             onClick={() => {
-              onCountChosen(count)
+              saveCount()
               setPieces(drawPieces(count))
             }}
           >
