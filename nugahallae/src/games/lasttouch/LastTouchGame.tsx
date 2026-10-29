@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { PlayerTiles } from '../shared/PlayerTiles'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -71,6 +72,7 @@ export function LastTouchGame({
     clearTimers()
     setP('done')
     void haptic('error')
+    playSfx('loseSting')
     setOverlay(`${pieceLabel(order[loser])} ${text}`)
     later(() => onFinishRef.current(order[loser]), END_EFFECT_MS)
   }
@@ -81,13 +83,22 @@ export function LastTouchGame({
     pressesRef.current = []
     setPressed([])
     setCd(3)
+    playSfx('countBeep')
     setP('count')
-    later(() => setCd(2), COUNT_STEP_MS)
-    later(() => setCd(1), COUNT_STEP_MS * 2)
+    later(() => {
+      setCd(2)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS)
+    later(() => {
+      setCd(1)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS * 2)
     later(() => {
       setP('wait')
+      playSfx('tapSoft')
       later(() => {
         signalAt.current = now()
+        playSfx('lasttouch.signal')
         setP('signal')
         later(finishRound, LIMIT_MS)
       }, signalDelay(rng))
@@ -104,17 +115,20 @@ export function LastTouchGame({
   const onTileDown = (index: number, at: number) => {
     const p = phaseRef.current
     if (p === 'wait') {
+      playSfx('buzz')
       decide(index, '너무 빨랐어요')
       return
     }
     if (p !== 'signal') return
     // 신호 타이머가 돈 직후 처리됐지만 실제로는 신호보다 먼저 닿은 터치
     if (at < signalAt.current) {
+      playSfx('buzz')
       decide(index, '너무 빨랐어요')
       return
     }
     if (pressesRef.current.some((x) => x.index === index)) return
     pressesRef.current = [...pressesRef.current, { index, at }]
+    playSfx('stopClick')
     setPressed(pressesRef.current.map((x) => x.index))
     if (pressesRef.current.length >= n) finishRound()
   }

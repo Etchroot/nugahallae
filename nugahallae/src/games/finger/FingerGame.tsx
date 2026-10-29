@@ -5,6 +5,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { END_EFFECT_MS } from '../shared/timing'
 import {
   ARM_MS,
@@ -69,6 +70,7 @@ export function FingerGame({
       steps.forEach((step, k) => {
         schedule(() => {
           setLit(step.index)
+          playSfx('tick')
           if (k === steps.length - 1) conclude()
         }, step.at)
       })
@@ -81,6 +83,7 @@ export function FingerGame({
     commit(done)
     const loser = order[done.targetSlot]
     void haptic('error')
+    playSfx('loseSting')
     setOverlay(`${pieceLabel(loser)} 찍혔다!`)
     schedule(() => onFinishRef.current(loser), END_EFFECT_MS)
   }
@@ -107,10 +110,14 @@ export function FingerGame({
     }
     commit(next)
     if (next.fingers.includes(e.pointerId)) {
+      playSfx('pop', { pitch: 1 + (next.slots[e.pointerId] ?? 0) * 0.12 })
       const p = place(e)
       setPos((cur) => ({ ...cur, [e.pointerId]: p }))
     }
-    if (next.phase === 'armed' && prev.phase !== 'armed') arm()
+    if (next.phase === 'armed' && prev.phase !== 'armed') {
+      playSfx('chime')
+      arm()
+    }
   }
 
   const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -126,6 +133,7 @@ export function FingerGame({
     if (next === prev) return
     commit(next)
     if (prev.fingers.includes(e.pointerId)) {
+      playSfx('pop', { pitch: 0.7 })
       setPos((cur) => {
         const { [e.pointerId]: _gone, ...rest } = cur
         void _gone

@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { notePitch, playSfx } from '../../platform/sound'
 import { PlayerTiles } from '../shared/PlayerTiles'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -73,10 +74,20 @@ export function NunchiGame({
     pressesRef.current = []
     setPressed([])
     setCd(3)
+    playSfx('countBeep')
     setP('count')
-    later(() => setCd(2), COUNT_STEP_MS)
-    later(() => setCd(1), COUNT_STEP_MS * 2)
-    later(() => setP('play'), COUNT_STEP_MS * 3)
+    later(() => {
+      setCd(2)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS)
+    later(() => {
+      setCd(1)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS * 2)
+    later(() => {
+      setP('play')
+      playSfx('goBeep')
+    }, COUNT_STEP_MS * 3)
   }
 
   const conclude = () => {
@@ -88,6 +99,7 @@ export function NunchiGame({
     const kind = v ? v.kind : 'overlap'
     setP('done')
     void haptic('error')
+    playSfx(kind === 'overlap' ? 'nunchi.clash' : 'loseSting')
     setOverlay(`${pieceLabel(order[loser])} ${kind === 'overlap' ? '겹쳤어요' : '마지막이에요'}`)
     later(() => onFinishRef.current(order[loser]), END_EFFECT_MS)
   }
@@ -96,6 +108,7 @@ export function NunchiGame({
     if (phaseRef.current !== 'play') return
     if (pressesRef.current.some((p) => p.index === index)) return
     pressesRef.current = [...pressesRef.current, { index, at }]
+    playSfx('pop', { pitch: notePitch(pressesRef.current.length - 1) })
     setPressed(pressesRef.current.map((p) => p.index))
     // 겹침이 보이거나 n-1명이 눌렀으면 곧 판가름. 같은 순간 눌린 다른 손가락(연쇄)을 기다렸다가 확정한다.
     const pending = findOverlapGroup(pressesRef.current) !== null || pressesRef.current.length >= n - 1

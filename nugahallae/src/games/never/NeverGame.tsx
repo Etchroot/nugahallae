@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
 import { haptic } from '../../platform/sdk'
+import { playSfx } from '../../platform/sound'
 import { PlayerTiles } from '../shared/PlayerTiles'
 import { useScreenGuard } from '../shared/useScreenGuard'
 import { END_EFFECT_MS } from '../shared/timing'
@@ -53,6 +54,7 @@ export function NeverGame({
     decidedRef.current = true
     const loser = zeros[Math.min(zeros.length - 1, Math.floor(rng() * zeros.length))]
     void haptic('error')
+    playSfx('loseSting')
     setOverlay(`${pieceLabel(order[loser])} 손가락을 다 접었어요`)
     endTimer.current = setTimeout(() => onFinishRef.current(order[loser]), END_EFFECT_MS)
   }
@@ -61,6 +63,7 @@ export function NeverGame({
     if (decidedRef.current) return
     if (foldedRef.current.includes(index)) return
     fingersRef.current = foldFinger(fingersRef.current, index)
+    playSfx('never.fold', { pitch: 0.8 + 0.05 * fingersRef.current[index] })
     foldedRef.current = [...foldedRef.current, index]
     setFingers(fingersRef.current)
     setFolded(foldedRef.current)
@@ -75,6 +78,7 @@ export function NeverGame({
     if (decidedRef.current || settleTimer.current !== null) return
     const r = draw(deckRef.current, rng)
     deckRef.current = r.deck
+    playSfx('cardFlip')
     foldedRef.current = []
     setFolded([])
     setSentence(r.sentence)
