@@ -49,7 +49,16 @@ test('터지면 들고 있던 말이 loser, 이후 탭 무시', () => {
 
 test('흔들림 주기는 시간이 갈수록 짧아지고 0.08초 아래로 안 내려간다', () => {
   expect(shakeSeconds(0, 20000)).toBeCloseTo(0.5)
-  expect(shakeSeconds(10000, 20000)).toBeCloseTo(0.29)
-  expect(shakeSeconds(20000, 20000)).toBeCloseTo(0.08)
-  expect(shakeSeconds(99999, 20000)).toBe(0.08)
+  expect(shakeSeconds(5000, 20000)).toBeGreaterThan(shakeSeconds(10000, 20000))
+  expect(shakeSeconds(15000, 20000)).toBeCloseTo(0.08)
+  expect(shakeSeconds(99999, 20000)).toBeCloseTo(0.08)
+  expect(shakeSeconds(99999, 20000)).toBeGreaterThanOrEqual(0.08)
+})
+
+test('흔들림은 심지의 75%에서 포화해 남은 시간을 드러내지 않는다', () => {
+  // 75% 이후로는 심지가 얼마나 남았든 같은 속도다
+  expect(shakeSeconds(15000, 20000)).toBe(shakeSeconds(19999, 20000))
+  expect(shakeSeconds(9000, 12000)).toBe(shakeSeconds(11999, 12000))
+  // 마지막 25%(3~7.5초)는 흔들림이 변하지 않는다
+  expect(shakeSeconds(22500, 30000)).toBe(shakeSeconds(29999, 30000))
 })

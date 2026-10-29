@@ -45,7 +45,9 @@ export function explode(s: BombState, order: Piece[]): BombState {
   return { ...s, phase: 'exploded', loser: order[s.idx % order.length] }
 }
 
-/** 시간이 갈수록 빨라지는 흔들림 한 번의 길이(초) */
+/** 시간이 갈수록 빨라지는 흔들림 한 번의 길이(초). 심지의 75% 지점에서 포화해 남은 시간을 짐작하기 어렵다 */
 export function shakeSeconds(elapsed: number, fuse: number): number {
-  return Math.max(0.08, 0.5 - (elapsed / fuse) * 0.42)
+  const p = Math.min(1, elapsed / (fuse * 0.75))
+  const eased = 1 - (1 - p) * (1 - p)
+  return Math.max(0.08, 0.5 - eased * 0.42)
 }
