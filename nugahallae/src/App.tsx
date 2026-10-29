@@ -3,7 +3,7 @@ import { backActionFor } from './app/flow'
 import type { Screen } from './app/flow'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { closeApp, getUserKey, onBack, storageGet, storageSet } from './platform/sdk'
-import { loadSound, playClick, unlockAudio } from './platform/sound'
+import { loadSound, playClick, stopAllSounds, unlockAudio } from './platform/sound'
 import { EMPTY_HISTORY, loadHistory, recordPlay, saveHistory } from './domain/history'
 import type { History } from './domain/history'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './domain/settings'
@@ -44,17 +44,27 @@ function App() {
   }, [])
 
   // 효과음: 저장된 켜짐/꺼짐을 불러오고, 버튼을 누를 때 기본 클릭음을 낸다.
-  // data-silent 안의 버튼(동물 카드처럼 자기 소리가 있는 것)과 비활성 버튼은 소리를 내지 않는다.
+  // data-silent 안의 버튼(동물 카드·게임 화면처럼 자기 소리가 있는 것)과 비활성 버튼은 소리를 내지 않는다.
+  // 단 data-silent 안이라도 data-click이 붙은 버튼(다음 사람 등)은 기본 클릭음을 낸다.
+  // 앱이 백그라운드로 가면 울리던 소리를 모두 끈다.
   useEffect(() => {
     void loadSound()
     const onDown = (e: PointerEvent) => {
       unlockAudio()
       const el = (e.target as Element | null)?.closest?.('button,[role="button"]')
-      if (!el || el.closest('[data-silent]') || (el as HTMLButtonElement).disabled) return
+      if (!el || (el as HTMLButtonElement).disabled) return
+      if (el.closest('[data-silent]') && !el.closest('[data-click]')) return
       playClick()
     }
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') stopAllSounds()
+    }
     document.addEventListener('pointerdown', onDown, true)
-    return () => document.removeEventListener('pointerdown', onDown, true)
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true)
+      document.removeEventListener('visibilitychange', onVis)
+    }
   }, [])
 
   // 사용자 식별키: 시작할 때 한 번만 확인해 저장한다(화면에 보이지 않고, 실패해도 앱은 그대로 동작).

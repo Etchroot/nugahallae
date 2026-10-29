@@ -1,7 +1,7 @@
 /** `다음 사람 →` / `결과 보기`. onNext는 화면 공용 가드(useScreenGuard)로 감싸서 넘긴다 */
 export function NextButton({ last, onNext }: { last: boolean; onNext: () => void }) {
   return (
-    <button type="button" className="rg-btn" onClick={onNext}>
+    <button type="button" className="rg-btn" data-click onClick={onNext}>
       {last ? (
         '결과 보기'
       ) : (
