@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import aitDevtools from "@apps-in-toss/devtools/unplugin";
 
 // `--mode web`: 앱인토스 밖에서 시연하기 위한 데모 웹 빌드.
-// TDS는 앱인토스 밖에서 실행되지 않으므로 src/web/의 대체 부품으로 바꿔 끼운다.
+// TDS(Toss Design System, 토스 디자인 시스템: 토스 앱의 버튼·화면 부품 모음)는 앱인토스 밖에서 실행되지 않으므로 src/web/의 대체 부품으로 바꿔 끼운다.
 export default defineConfig(({ mode }) => ({
   plugins: [aitDevtools.vite(), react()],
   resolve:

@@ -1,5 +1,5 @@
 // 데모 웹 빌드(`vite --mode web`) 전용: @toss/tds-mobile 대신 쓰는 최소 대체 부품.
-// TDS는 앱인토스 밖에서 실행되지 않으므로, 앱이 쓰는 부품만 같은 이름·props로 흉내 낸다.
+// TDS(Toss Design System, 토스 디자인 시스템: 토스 앱의 버튼·화면 부품 모음)는 앱인토스 밖에서 실행되지 않으므로, 앱이 쓰는 부품만 같은 이름·props로 흉내 낸다.
 // 토스용 빌드(`npm run build`)에는 포함되지 않는다.
 import type { ChangeEvent, ReactNode } from 'react'
 import './tds-web.css'
