@@ -12,6 +12,7 @@ vi.mock('../../platform/sdk', () => ({
     }
   },
   closeApp: () => {},
+  getUserKey: async () => null,
   haptic: vi.fn(async () => {}),
   storageGet: async (k: string) => store.get(k) ?? null,
   storageSet: async (k: string, v: string) => {

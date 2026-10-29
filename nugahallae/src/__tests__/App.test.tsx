@@ -1,5 +1,5 @@
 import { test, expect, vi, beforeEach } from 'vitest'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait'
 
 let backHandler: (() => void) | null = null
@@ -13,9 +13,16 @@ vi.mock('../platform/sdk', () => ({
   },
   closeApp: () => closeApp(),
   haptic: async () => {},
-  storageGet: async () => null,
-  storageSet: async () => {},
+  getUserKey: () => getUserKey(),
+  storageGet: async (k: string) => store.get(k) ?? null,
+  storageSet: async (k: string, v: string) => {
+    store.set(k, v)
+    storageSetSpy(k, v)
+  },
 }))
+const store = new Map<string, string>()
+const storageSetSpy = vi.fn()
+const getUserKey = vi.fn(async (): Promise<string | null> => null)
 
 // TDS ConfirmDialog는 jsdom에서 언마운트 시 난독화된 셀렉터 해제 코드가 실패한다.
 // 다이얼로그 자체는 브라우저에서 확인하고, 여기서는 App의 배선만 검증하기 위해 얇은 대역으로 바꾼다.
@@ -53,6 +60,57 @@ beforeEach(() => {
   vi.spyOn(performance, 'now').mockImplementation(() => (t += 1000))
   backHandler = null
   closeApp.mockClear()
+  store.clear()
+  storageSetSpy.mockClear()
+  getUserKey.mockReset()
+  getUserKey.mockResolvedValue(null)
+})
+
+test('시작 시 사용자 키를 한 번 확인하고, 저장된 값과 다르면 저장한다', async () => {
+  getUserKey.mockResolvedValue('hash-1')
+  renderApp()
+  await waitFor(() => expect(store.get('nugahallae:uid')).toBe('hash-1'))
+  expect(getUserKey).toHaveBeenCalledTimes(1)
+  expect(screen.queryByText('hash-1')).not.toBeInTheDocument()
+})
+
+test('사용자 키가 이미 같으면 다시 저장하지 않고, 없으면(null) 저장하지 않는다', async () => {
+  store.set('nugahallae:uid', 'hash-1')
+  getUserKey.mockResolvedValue('hash-1')
+  const { unmount } = renderApp()
+  await waitFor(() => expect(getUserKey).toHaveBeenCalled())
+  await act(async () => {})
+  expect(storageSetSpy.mock.calls.filter((c) => c[0] === 'nugahallae:uid')).toHaveLength(0)
+  unmount()
+  store.clear()
+  getUserKey.mockResolvedValue(null)
+  renderApp()
+  await act(async () => {})
+  expect(store.has('nugahallae:uid')).toBe(false)
+})
+
+test('사용자 키 확인이 실패해도 홈이 정상으로 보인다', async () => {
+  getUserKey.mockRejectedValue(new Error('x'))
+  renderApp()
+  await act(async () => {})
+  expect(screen.getByText('게임 고르기')).toBeInTheDocument()
+})
+
+test('게임 플레이에 들어가면 기록이 저장되고, 홈에 최근 한 게임이 보인다', async () => {
+  renderApp()
+  expect(screen.queryByText('최근 한 게임')).not.toBeInTheDocument()
+  fireEvent.click(screen.getByText('돌림판'))
+  fireEvent.click(screen.getByText('말 뽑기 시작'))
+  for (let i = 1; i <= 4; i++) {
+    fireEvent.click(screen.getAllByTestId('piece-card').find((c) => !(c as HTMLButtonElement).disabled)!)
+    fireEvent.click(screen.getByText('확인했어요'))
+  }
+  fireEvent.click(screen.getByText('시작하기'))
+  await waitFor(() => expect(JSON.parse(store.get('nugahallae:history') ?? 'null')?.recent).toEqual(['roulette']))
+  act(() => backHandler!())
+  fireEvent.click(screen.getByText('그만하기'))
+  expect(screen.getByText('최근 한 게임')).toBeInTheDocument()
+  expect(screen.getAllByTestId('recent-card')).toHaveLength(1)
 })
 
 test('홈 화면이 보인다', () => {

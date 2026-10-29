@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { backActionFor } from './app/flow'
 import type { Screen } from './app/flow'
 import { ConfirmDialog } from './components/ConfirmDialog'
-import { closeApp, onBack } from './platform/sdk'
+import { closeApp, getUserKey, onBack, storageGet, storageSet } from './platform/sdk'
+import { EMPTY_HISTORY, loadHistory, recordPlay, saveHistory } from './domain/history'
+import type { History } from './domain/history'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './domain/settings'
 import type { Settings } from './domain/settings'
 import type { Piece } from './domain/pieces'
@@ -13,12 +15,15 @@ import { PlayScreen } from './screens/PlayScreen'
 import { ResultScreen } from './screens/ResultScreen'
 import './App.css'
 
-type Confirm = 'close' | 'quitGame' | null
+const UID_KEY = 'nugahallae:uid'
+
+type Confirm ='close' | 'quitGame' | null
 
 function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
+  const [history, setHistory] = useState<History>(EMPTY_HISTORY)
   const screenRef = useRef(screen)
   screenRef.current = screen
   const confirmRef = useRef(confirm)
@@ -36,6 +41,37 @@ function App() {
       alive = false
     }
   }, [])
+
+  // 사용자 식별키: 시작할 때 한 번만 확인해 저장한다(화면에 보이지 않고, 실패해도 앱은 그대로 동작).
+  useEffect(() => {
+    void (async () => {
+      try {
+        const key = await getUserKey()
+        if (key && (await storageGet(UID_KEY)) !== key) await storageSet(UID_KEY, key)
+      } catch {
+        // 무시
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+    void loadHistory().then((h) => {
+      if (alive) setHistory((cur) => (cur === EMPTY_HISTORY ? h : cur))
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const startPlay = (gameId: string, order: Piece[]) => {
+    setHistory((cur) => {
+      const next = recordPlay(cur, gameId)
+      void saveHistory(next)
+      return next
+    })
+    setScreen({ name: 'play', gameId, order })
+  }
 
   useEffect(() => {
     return onBack(() => {
@@ -85,6 +121,7 @@ function App() {
   if (screen.name === 'home' || !game) {
     body = (
       <HomeScreen
+        recent={history.recent}
         onPickGame={(gameId) => {
           touchedRef.current = true
           setScreen({ name: 'prepare', gameId })
@@ -98,7 +135,7 @@ function App() {
         game={game}
         initialCount={settings.playerCount}
         onCountChosen={(playerCount) => changeSettings({ ...settings, playerCount })}
-        onStart={(order) => setScreen({ name: 'play', gameId: screen.gameId, order })}
+        onStart={(order) => startPlay(screen.gameId, order)}
       />
     )
   } else if (screen.name === 'play') {
