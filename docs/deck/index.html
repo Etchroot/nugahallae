@@ -118,8 +118,8 @@ h2 { font-size: 72px; }
 .s-num { background: var(--bg); }
 .nums { margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 50px; }
 .num .lab { font-size: 30px; font-weight: 700; color: var(--ink-2); }
-.num .big { color: var(--blue); font-size: 150px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-top: 8px; }
-.num .big s { font-size: 70px; font-weight: 600; color: var(--ink-3); opacity: .6; text-decoration-thickness: 5px; margin-right: 16px; letter-spacing: -0.03em; }
+.num .big { color: var(--blue); font-size: 120px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-top: 8px; }
+.num .big s { font-size: 54px; font-weight: 600; color: var(--ink-3); opacity: .6; text-decoration-thickness: 5px; margin-right: 16px; letter-spacing: -0.03em; }
 .num .sub { font-size: 26px; color: var(--ink-2); margin-top: 8px; line-height: 1.45; }
 .todo { margin-top: 56px; border: 4px dashed #c7ccd3; border-radius: 28px; padding: 30px 44px; }
 .todo .t { font-size: 30px; font-weight: 800; margin-bottom: 14px; }
@@ -291,9 +291,9 @@ h2 { font-size: 72px; }
 <section class="slide s-num">
   <h2>숫자로 확인했어요</h2>
   <div class="nums">
-    <div class="num"><div class="lab">게임이 끝나고 결과까지</div><div class="big"><s>2.2초</s>0.5초</div><div class="sub">기록형 게임은 2.1초 → 1.2초</div></div>
-    <div class="num"><div class="lab">선 따라 그리기 꼼수</div><div class="big"><s>70%</s>0%</div><div class="sub">길의 70%를 건너뛸 수 있던 것을 막고, 공격 시뮬레이션으로 확인</div></div>
-    <div class="num"><div class="lab">자동 테스트</div><div class="big">계속 쌓임</div><div class="sub">버그를 찾으면 다시 안 나게 검사로 남김. 화면 넘침·색 대비·CSS 규칙도 검사</div></div>
+    <div class="num"><div class="lab">첫 화면 전송량</div><div class="big"><s>125KB</s>85KB</div><div class="sub">−32% · 느린 통신 기준<br>게임 화면 코드를 고를 때만 내려받게 나눔</div></div>
+    <div class="num"><div class="lab">선 따라 그리기 꼼수</div><div class="big"><s>70%</s>0%</div><div class="sub">길을 건너뛸 수 있던 것을 막음<br>이동 경로를 끝까지 검사하고 시뮬레이션으로 확인</div></div>
+    <div class="num"><div class="lab">게임이 끝나고 결과까지</div><div class="big"><s>2.2초</s>0.5초</div><div class="sub">기다리는 연출을 빼고 바로 표시<br>기록형 게임은 2.1초 → 1.2초</div></div>
   </div>
   <div class="todo">
     <div class="t">4일차 사용자 테스트에서 채울 칸 (4명, 2회)</div>
