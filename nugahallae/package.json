@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && ait build",
+    "build": "node scripts/build-ait.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "deploy": "ait deploy",
