@@ -1,8 +1,8 @@
 import type { Piece } from '../../domain/pieces'
 import type { Rng } from '../../domain/rng'
 
-export const SHORT_LEN = 22
-export const LONG_LEN = 50
+export const SHORT_LEN = 34
+export const LONG_LEN = 70
 
 export interface StrawsState {
   /** 막대별 길이(화면에는 뽑은 뒤에만 반영) */

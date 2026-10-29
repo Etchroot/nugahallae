@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react'
+import type { MouseEvent, PointerEvent } from 'react'
 import type { GameProps } from '../types'
 import { pieceLabel } from '../../domain/pieces'
 import { haptic } from '../../platform/sdk'
@@ -113,12 +113,10 @@ export function Clap369Game({
     e.preventDefault()
     act(action)
   }
-  // 키보드(Enter/Space)로 누르면 click 이벤트가 detail 0으로 온다. 포인터 입력은 pointerdown에서 이미 처리.
+  // 키보드: 브라우저가 Enter(keydown)·Space(keyup)에서 click(detail 0)을 한 번씩 보낸다. keydown은 막지 않는다.
+  // 포인터 입력은 pointerdown에서 이미 처리하고 이때 click은 detail >= 1이라 무시한다.
   const onClick = (action: TapAction) => (e: MouseEvent) => {
     if (e.detail === 0) act(action)
-  }
-  const onKey = (e: KeyboardEvent) => {
-    if (e.key === ' ') e.preventDefault()
   }
 
   const player = order[turn % order.length]
@@ -164,7 +162,6 @@ export function Clap369Game({
               disabled={phase === 'lost'}
               onPointerDown={onPointer('skip')}
               onClick={onClick('skip')}
-              onKeyDown={onKey}
             >
               숫자 넘기기
             </button>
@@ -174,7 +171,6 @@ export function Clap369Game({
               disabled={phase === 'lost'}
               onPointerDown={onPointer('clap')}
               onClick={onClick('clap')}
-              onKeyDown={onKey}
             >
               짝!
             </button>

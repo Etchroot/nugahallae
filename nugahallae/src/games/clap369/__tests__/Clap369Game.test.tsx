@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { drawPieces, pieceLabel } from '../../../domain/pieces'
@@ -181,6 +183,80 @@ test('백그라운드로 가면 그 시도는 무효: 같은 사람 준비 화�
   expect(onFinish).not.toHaveBeenCalled()
   startTurn()
   expect(num()).toBe(1)
+})
+
+// 33까지 통과시키고 33의 시도를 시작한다(짝 2번 필요)
+const to33 = () => {
+  for (let n = 1; n < 33; n++) passTurn(n)
+  startTurn()
+}
+
+test('키보드 Enter: 한 번 누르면 짝 1회만 센다(keydown은 막지 않는다)', () => {
+  render(<Clap369Game order={order} onFinish={() => {}} />)
+  to33()
+  const b = clap()
+  expect(fireEvent.keyDown(b, { key: 'Enter' })).toBe(true)
+  fireEvent.click(b, { detail: 0 })
+  expect(num()).toBe(33)
+  expect(screen.queryByRole('button', { name: '준비됐어요' })).toBeNull()
+  fireEvent.keyDown(b, { key: 'Enter' })
+  fireEvent.click(b, { detail: 0 })
+  expect(screen.getByRole('button', { name: '준비됐어요' })).toBeTruthy()
+})
+
+test('키보드 Space: keydown/keyup/click 한 번이 짝 1회로 센다', () => {
+  render(<Clap369Game order={order} onFinish={() => {}} />)
+  to33()
+  const b = clap()
+  const press = () => {
+    expect(fireEvent.keyDown(b, { key: ' ' })).toBe(true)
+    fireEvent.keyUp(b, { key: ' ' })
+    fireEvent.click(b, { detail: 0 })
+  }
+  press()
+  expect(screen.queryByRole('button', { name: '준비됐어요' })).toBeNull()
+  press()
+  expect(screen.getByRole('button', { name: '준비됐어요' })).toBeTruthy()
+})
+
+test('포인터 탭의 click(detail>=1)은 중복으로 세지 않는다', () => {
+  render(<Clap369Game order={order} onFinish={() => {}} />)
+  to33()
+  fireEvent.pointerDown(clap())
+  fireEvent.click(clap(), { detail: 1 })
+  expect(screen.queryByRole('button', { name: '준비됐어요' })).toBeNull()
+  fireEvent.pointerDown(clap())
+  expect(screen.getByRole('button', { name: '준비됐어요' })).toBeTruthy()
+})
+
+test('now 주입: 마감 1ms 전 탭은 통과, 마감 시각 탭은 패배', () => {
+  let t = 1000
+  const mk = (onFinish: () => void) =>
+    render(<Clap369Game order={order} onFinish={onFinish} now={() => t} />)
+  const first = mk(() => {})
+  fireEvent.pointerDown(ready())
+  t = 1000 + limitMs(1) - 1
+  fireEvent.pointerDown(skip())
+  expect(screen.getByText(`👉 ${pieceLabel(order[1])} 차례예요`)).toBeTruthy()
+  first.unmount()
+
+  t = 5000
+  const onFinish = vi.fn()
+  mk(onFinish)
+  fireEvent.pointerDown(ready())
+  t = 5000 + limitMs(1)
+  fireEvent.pointerDown(skip())
+  expect(screen.getByText(`${pieceLabel(order[0])} 짝을 놓쳤어요`)).toBeTruthy()
+  expect(haptic).toHaveBeenLastCalledWith('error')
+  advance(END_EFFECT_MS)
+  expect(onFinish).toHaveBeenCalledTimes(1)
+})
+
+test('움직임 줄이기에서도 시간 막대가 계단식으로 줄어든다(css)', () => {
+  const css = readFileSync(join(__dirname, '..', 'clap369.css'), 'utf8')
+  const rm = css.slice(css.indexOf('prefers-reduced-motion'))
+  expect(rm).toMatch(/steps\(/)
+  expect(rm).not.toMatch(/animation:\s*none/)
 })
 
 test('패배 연출 중 언마운트하면 onFinish 미호출', () => {

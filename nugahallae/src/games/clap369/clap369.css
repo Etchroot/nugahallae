@@ -135,5 +135,6 @@
   z-index: 3;
 }
 @media (prefers-reduced-motion: reduce) {
-  .c3-limit-fill { animation: none; }
+  /* 움직임은 줄이되 남은 시간은 계단식으로 줄어들어 알 수 있게 한다 */
+  .c3-limit-fill { animation-timing-function: steps(8, end); }
 }

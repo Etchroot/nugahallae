@@ -72,11 +72,11 @@ export function ThirtyOneGame({ order, onFinish }: GameProps) {
                 onClick={guard(() => pick(c))}
               >
                 <span>{c}개 부르기</span>
-                <span className="to-sub" aria-hidden="true">
-                  {spoken(state.n, c)
-                    .filter((v) => v <= LIMIT)
-                    .join(', ')}
-                </span>
+                {ok && (
+                  <span className="to-sub" aria-hidden="true">
+                    {spoken(state.n, c).join(', ')}
+                  </span>
+                )}
               </button>
             )
           })}

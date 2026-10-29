@@ -70,11 +70,11 @@ export function StrawsGame({
               >
                 <svg className="st-svg" viewBox="0 0 40 120" aria-hidden="true">
                   {len === null ? (
-                    <rect x="14" y="60" width="12" height="24" rx="3" className="st-straw" />
+                    <rect x="14" y="64" width="12" height="32" rx="3" className="st-straw" />
                   ) : (
                     <rect
                       x="14"
-                      y={58 - len}
+                      y={96 - len}
                       width="12"
                       height={len}
                       rx="3"

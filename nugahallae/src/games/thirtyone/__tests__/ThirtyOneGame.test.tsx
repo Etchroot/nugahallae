@@ -79,6 +79,16 @@ test('n=29에서는 3개만 비활성', () => {
   expect([1, 2, 3].map((c) => btn(c).disabled)).toEqual([false, false, true])
 })
 
+test('비활성 버튼은 부분 숫자 설명을 숨기고 라벨만 남긴다(n=30의 2개 → 31 표시 없음)', () => {
+  render(<ThirtyOneGame order={order} onFinish={() => {}} />)
+  expect(btn(2).textContent).toBe('2개 부르기1, 2')
+  for (let i = 0; i < 10; i++) pick(3)
+  expect(btn(2).disabled).toBe(true)
+  expect(btn(2).textContent).toBe('2개 부르기')
+  expect(btn(3).textContent).toBe('3개 부르기')
+  expect(btn(1).textContent).toBe('1개 부르기31')
+})
+
 test('언마운트하면 onFinish 미호출', () => {
   const onFinish = vi.fn()
   const { unmount } = render(<ThirtyOneGame order={order} onFinish={onFinish} />)

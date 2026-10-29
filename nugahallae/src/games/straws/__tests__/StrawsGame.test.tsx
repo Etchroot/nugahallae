@@ -91,6 +91,19 @@ test('마지막 사람도 직접 뽑고 남은 막대는 짧은 막대', () => {
   expect(onFinish).toHaveBeenCalledWith(order[2])
 })
 
+test('뽑힌 막대는 컵 안에 꽂힌 채(아랫단이 컵 윗선 70 아래) 올라오고, 긴 막대가 더 높다', () => {
+  const { container } = render(<StrawsGame order={order} onFinish={() => {}} rng={() => 0} />)
+  const rect = (i: number) => straw(i).querySelector('rect.st-straw') as SVGRectElement
+  const bottom = (i: number) => Number(rect(i).getAttribute('y')) + Number(rect(i).getAttribute('height'))
+  expect(bottom(1)).toBeGreaterThan(70)
+  pick(1)
+  pick(0)
+  expect(bottom(1)).toBeGreaterThan(70)
+  expect(bottom(0)).toBeGreaterThan(70)
+  expect(Number(rect(1).getAttribute('y'))).toBeLessThan(Number(rect(0).getAttribute('y')))
+  expect(container.querySelectorAll('.st-rise').length).toBe(2)
+})
+
 test('연출 중 언마운트하면 onFinish 미호출', () => {
   const onFinish = vi.fn()
   const { unmount } = render(<StrawsGame order={order} onFinish={onFinish} rng={() => 0} />)
