@@ -1,5 +1,5 @@
 import type { GameDefinition } from '../types'
-import { WiresGame } from './WiresGame'
+import { lazyGame } from '../lazyGame'
 
 const definition: GameDefinition = {
   id: 'wires',
@@ -9,7 +9,7 @@ const definition: GameDefinition = {
   rule: '폭탄에 전선이 여러 개 있어요. 차례마다 제한 시간 안에 하나씩 잘라요. 틀린 전선을 자르거나 시간이 다 되면 펑! 그 사람이 벌칙이에요.',
   tint: '#ffe9e3',
   minPlayers: 2,
-  Component: WiresGame,
+  Component: lazyGame(() => import('./WiresGame').then((m) => ({ default: m.WiresGame }))),
 }
 
 export default definition

@@ -22,5 +22,6 @@ export interface GameDefinition {
   maxPlayers?: number
   /** 'auto'면 준비 화면에서 말 고르기를 건너뛰고 말을 무작위로 배정한다 (기본 'pick') */
   pieceMode?: 'pick' | 'auto'
-  Component: ComponentType<GameProps>
+  /** 게임 화면. lazyGame으로 감싸면 고를 때만 내려받는다(preload로 미리 받을 수 있음) */
+  Component: ComponentType<GameProps> & { preload?: () => unknown }
 }

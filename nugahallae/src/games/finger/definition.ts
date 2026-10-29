@@ -1,5 +1,5 @@
 import type { GameDefinition } from '../types'
-import { FingerGame } from './FingerGame'
+import { lazyGame } from '../lazyGame'
 
 const definition: GameDefinition = {
   id: 'finger',
@@ -11,7 +11,7 @@ const definition: GameDefinition = {
   badge: 'NEW',
   pieceMode: 'auto',
   order: 12,
-  Component: FingerGame,
+  Component: lazyGame(() => import('./FingerGame').then((m) => ({ default: m.FingerGame }))),
 }
 
 export default definition

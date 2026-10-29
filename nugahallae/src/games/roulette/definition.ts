@@ -1,5 +1,5 @@
 import type { GameDefinition } from '../types'
-import { RouletteGame } from './RouletteGame'
+import { lazyGame } from '../lazyGame'
 
 const definition: GameDefinition = {
   id: 'roulette',
@@ -10,7 +10,7 @@ const definition: GameDefinition = {
   tint: '#fff4d6',
   badge: '인기',
   order: 1,
-  Component: RouletteGame,
+  Component: lazyGame(() => import('./RouletteGame').then((m) => ({ default: m.RouletteGame }))),
 }
 
 export default definition

@@ -101,6 +101,7 @@ test('홈 → 돌림판 → 3명 말 뽑기 → 시작 → 끝까지 → 결과�
   pickGame('돌림판', 3)
   await drawAll(3)
   fireEvent.click(screen.getByText('시작하기'))
+  await advance(100) // 게임 화면 코드가 뜰 때까지
   await playRoulette(3)
   expect(screen.getByText(/걸렸다!/)).toBeInTheDocument()
   expect(screen.queryByText(/벌칙:/)).not.toBeInTheDocument()

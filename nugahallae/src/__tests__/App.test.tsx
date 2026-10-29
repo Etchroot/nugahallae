@@ -141,7 +141,7 @@ test('언마운트 시 onBack 해제', () => {
   expect(backHandler).toBeNull()
 })
 
-function goToPlay() {
+async function goToPlay() {
   renderApp()
   fireEvent.click(screen.getByText('돌림판'))
   fireEvent.click(screen.getByText('동물 고르기 시작'))
@@ -151,11 +151,12 @@ function goToPlay() {
     fireEvent.click(screen.getByText('확인했어요'))
   }
   fireEvent.click(screen.getByText('시작하기'))
-  expect(screen.getByRole('button', { name: '돌리기' })).toBeInTheDocument()
+  // 게임 화면은 고를 때 내려받는 코드라서 뜰 때까지 기다린다
+  expect(await screen.findByRole('button', { name: '돌리기' })).toBeInTheDocument()
 }
 
-test('플레이 중 뒤로가기 → 그만할까요 확인, 계속하기는 게임 유지', () => {
-  goToPlay()
+test('플레이 중 뒤로가기 → 그만할까요 확인, 계속하기는 게임 유지', async () => {
+  await goToPlay()
   act(() => backHandler!())
   expect(screen.getByText('게임을 그만할까요?')).toBeInTheDocument()
   fireEvent.click(screen.getByText('계속하기'))
@@ -163,15 +164,15 @@ test('플레이 중 뒤로가기 → 그만할까요 확인, 계속하기는 게
   expect(screen.getByRole('button', { name: '돌리기' })).toBeInTheDocument()
 })
 
-test('그만하기는 홈으로 간다', () => {
-  goToPlay()
+test('그만하기는 홈으로 간다', async () => {
+  await goToPlay()
   act(() => backHandler!())
   fireEvent.click(screen.getByText('그만하기'))
   expect(screen.getByText('게임 고르기')).toBeInTheDocument()
 })
 
-test('다이얼로그가 열린 상태에서 뒤로가기는 다이얼로그를 닫는다', () => {
-  goToPlay()
+test('다이얼로그가 열린 상태에서 뒤로가기는 다이얼로그를 닫는다', async () => {
+  await goToPlay()
   act(() => backHandler!())
   expect(screen.getByText('게임을 그만할까요?')).toBeInTheDocument()
   act(() => backHandler!())

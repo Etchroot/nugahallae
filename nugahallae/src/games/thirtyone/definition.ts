@@ -1,5 +1,5 @@
 import type { GameDefinition } from '../types'
-import { ThirtyOneGame } from './ThirtyOneGame'
+import { lazyGame } from '../lazyGame'
 
 const definition: GameDefinition = {
   id: 'thirtyone',
@@ -9,7 +9,7 @@ const definition: GameDefinition = {
   rule: '차례대로 1개에서 3개까지 이어서 숫자를 불러요. 31을 부르는 사람이 벌칙이에요.',
   tint: '#e8f0ff',
   minPlayers: 2,
-  Component: ThirtyOneGame,
+  Component: lazyGame(() => import('./ThirtyOneGame').then((m) => ({ default: m.ThirtyOneGame }))),
 }
 
 export default definition

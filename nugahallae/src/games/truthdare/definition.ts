@@ -1,5 +1,5 @@
 import type { GameDefinition } from '../types'
-import { TruthdareGame } from './TruthdareGame'
+import { lazyGame } from '../lazyGame'
 
 const definition: GameDefinition = {
   id: 'truthdare',
@@ -9,7 +9,7 @@ const definition: GameDefinition = {
   rule: '룰렛이 한 명을 정해요. 걸린 사람은 진실 질문과 미션 중 하나를 골라 카드에 적힌 대로 해요.',
   tint: '#ffeaf6',
   minPlayers: 2,
-  Component: TruthdareGame,
+  Component: lazyGame(() => import('./TruthdareGame').then((m) => ({ default: m.TruthdareGame }))),
 }
 
 export default definition

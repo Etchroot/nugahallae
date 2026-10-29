@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import type { Piece } from '../domain/pieces'
 import { stopAllSounds } from '../platform/sound'
 import type { GameDefinition } from '../games/types'
@@ -19,7 +19,9 @@ export function PlayScreen({ game, order, onFinish }: Props) {
     <div className="play-root" data-silent>
       <div className="play-title">{game.title}</div>
       <div className="play-game">
-        <Game order={order} onFinish={onFinish} />
+        <Suspense fallback={<div className="play-loading" aria-busy="true" />}>
+          <Game order={order} onFinish={onFinish} />
+        </Suspense>
       </div>
     </div>
   )

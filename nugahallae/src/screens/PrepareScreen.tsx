@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { BottomCTA } from '@toss/tds-mobile'
 import { useTapGuard } from '../app/useTapGuard'
@@ -37,6 +37,10 @@ function PlusIcon() {
 export function PrepareScreen({ game, initialCount, onCountChosen, onStart }: Props) {
   const MIN_PLAYERS = game.minPlayers ?? DEFAULT_MIN_PLAYERS
   const MAX_PLAYERS = Math.max(MIN_PLAYERS, game.maxPlayers ?? DEFAULT_MAX_PLAYERS)
+  // 동물을 고르는 동안 게임 화면 코드를 미리 받아 둔다(시작할 때 기다리지 않게)
+  useEffect(() => {
+    void game.Component?.preload?.()
+  }, [game])
   // 저장된 인원이 이 게임의 범위 밖이면 가장 가까운 값을 보여 준다(저장값은 사용자가 직접 바꾸기 전까지 그대로 둔다).
   const [count, setCount] = useState(() => Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, initialCount)))
   const [adjusted, setAdjusted] = useState(false)
