@@ -186,3 +186,19 @@ test('넘기기 버튼은 높이 96px 이상(css), 본문은 라이트 토큰만
   expect(css).toMatch(/\.tb-pass\s*\{[^}]*min-height:\s*(9[6-9]|1\d\d)px/)
   expect(css).not.toMatch(/#191f28|#000\b/i)
 })
+
+test('심지가 이미 다 탔는데 틱이 아직 안 돈 상태에서 넘기기 → 넘어가지 않고 터진다', () => {
+  const onFinish = vi.fn()
+  mount(() => 0, onFinish)
+  start()
+  act(() => {
+    clock += FUSE + 1000 // 타이머는 돌리지 않고 시계만 감
+  })
+  pass()
+  expect(screen.getByText(`${pieceLabel(order[0])} 폭탄이 터졌어요`)).toBeTruthy()
+  expect(haptic).toHaveBeenCalledTimes(1)
+  expect(haptic).toHaveBeenCalledWith('error')
+  advance(END_EFFECT_MS)
+  expect(onFinish).toHaveBeenCalledTimes(1)
+  expect(onFinish).toHaveBeenCalledWith(order[0])
+})

@@ -110,3 +110,10 @@ test('faceOf: 왕과 효과를 구분', () => {
   expect(faceOf(s, 0)).toEqual({ kind: 'king' })
   expect(faceOf(s, 4)).toMatchObject({ kind: 'effect', text: '한 번 더 뽑기' })
 })
+
+test('2명일 때 건너뛰기는 같은 사람에게 돌아오므로 차례가 넘어간 것이 아니다', () => {
+  const s = layout(2, [0, 1, 2, 3], { 5: 1 })
+  const c = confirmCard(drawCard(s, 5).state)
+  expect(c.state.idx).toBe(2)
+  expect(c.passed).toBe(false)
+})

@@ -93,6 +93,8 @@ export function TopicBombGame({
   }
 
   const handOver = () => {
+    // 틱이 아직 안 돌았어도 심지가 이미 다 탔으면 넘기지 못하고 터진다
+    tick()
     const cur = stateRef.current
     const next = passBomb(cur, order.length)
     if (next === cur) return

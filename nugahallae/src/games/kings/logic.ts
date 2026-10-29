@@ -94,6 +94,6 @@ export function confirmCard(s: KingsState): { state: KingsState; passed: boolean
   else if (face.kind === 'effect' && face.effect === 'skip') step = 2
   return {
     state: { ...s, idx: s.idx + step, phase: 'pick', last: null },
-    passed: step > 0,
+    passed: step % s.players !== 0,
   }
 }

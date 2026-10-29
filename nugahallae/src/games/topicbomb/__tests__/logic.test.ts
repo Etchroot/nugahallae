@@ -95,8 +95,12 @@ test('시작 전에는 넘길 수도 터질 수도 없다', () => {
   expect(explode(s, 3)).toBe(s)
 })
 
-test('흔들림은 시간이 갈수록 빨라진다', () => {
-  expect(shakeSeconds(0, 10000)).toBeGreaterThan(shakeSeconds(5000, 10000))
-  expect(shakeSeconds(5000, 10000)).toBeGreaterThan(shakeSeconds(9999, 10000))
-  expect(shakeSeconds(10000, 10000)).toBeGreaterThanOrEqual(0.08)
+test('흔들림은 빨라지다가 심지의 75% 이후로는 더 빨라지지 않는다(심지 길이를 짐작 못 하게)', () => {
+  expect(shakeSeconds(0, 10000)).toBeGreaterThan(shakeSeconds(2000, 10000))
+  expect(shakeSeconds(2000, 10000)).toBeGreaterThan(shakeSeconds(5000, 10000))
+  expect(shakeSeconds(7500, 10000)).toBe(shakeSeconds(9999, 10000))
+  expect(shakeSeconds(7500, 10000)).toBeGreaterThanOrEqual(0.08)
+  // 선형이 아니다: 중간 지점에서 이미 절반 넘게 빨라져 있다
+  const full = shakeSeconds(0, 10000) - shakeSeconds(7500, 10000)
+  expect(shakeSeconds(0, 10000) - shakeSeconds(3750, 10000)).toBeGreaterThan(full * 0.6)
 })
