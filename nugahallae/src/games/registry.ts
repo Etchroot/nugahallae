@@ -1,4 +1,5 @@
 import type { GameDefinition } from './types'
+import { collectDefinitions } from './collect'
 import { RouletteGame } from './roulette/RouletteGame'
 import { PourGame } from './pour/PourGame'
 import { LadderGame } from './ladder/LadderGame'
@@ -17,7 +18,12 @@ import { RulerGame } from './ruler/RulerGame'
 import { OrderGame } from './order/OrderGame'
 import { ColorGame } from './color/ColorGame'
 
-export const GAMES: GameDefinition[] = [
+// 새 게임은 src/games/<id>/definition.ts(export default)만 만들면 아래에서 자동으로 모인다. 자세한 건 README.md.
+const collected = collectDefinitions(
+  import.meta.glob('./*/definition.ts', { eager: true }) as Record<string, { default?: GameDefinition }>,
+)
+
+const INLINE_GAMES: GameDefinition[] = [
   {
     id: 'roulette',
     icon: '🎡',
@@ -174,6 +180,12 @@ export const GAMES: GameDefinition[] = [
     tint: '#f6e8ff',
     Component: ColorGame,
   },
+]
+
+// 기존 게임은 그대로 두고, 자동 수집한 게임을 뒤에 붙인다(같은 id가 있으면 기존 쪽이 우선).
+export const GAMES: GameDefinition[] = [
+  ...INLINE_GAMES,
+  ...collected.filter((c) => !INLINE_GAMES.some((g) => g.id === c.id)),
 ]
 
 export function findGame(id: string): GameDefinition | undefined {
