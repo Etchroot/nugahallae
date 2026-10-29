@@ -78,6 +78,20 @@ export function LiarGame({
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [release])
 
+  // 누르는 동안: 버튼이 pointerup을 못 받는 경우(캡처 실패·WebView 누락)에도 window에서 해제한다.
+  useEffect(() => {
+    if (!holding) return
+    const onEnd = (e: PointerEvent) => {
+      if (holdRef.current && holdRef.current.id === e.pointerId) release()
+    }
+    window.addEventListener('pointerup', onEnd)
+    window.addEventListener('pointercancel', onEnd)
+    return () => {
+      window.removeEventListener('pointerup', onEnd)
+      window.removeEventListener('pointercancel', onEnd)
+    }
+  }, [holding, release])
+
   // 토론 타이머
   useEffect(() => {
     if (phase !== 'discuss') return
@@ -154,7 +168,7 @@ export function LiarGame({
               type="button"
               className="lr-hold"
               onPointerDown={(e) => {
-                if (holdRef.current) return
+                if (holdRef.current || e.button > 0) return
                 holdRef.current = { id: e.pointerId }
                 setHolding(true)
                 setSeen(true)
@@ -171,6 +185,9 @@ export function LiarGame({
                 if (holdRef.current && holdRef.current.id === e.pointerId) release()
               }}
               onLostPointerCapture={(e) => {
+                if (holdRef.current && holdRef.current.id === e.pointerId) release()
+              }}
+              onPointerLeave={(e) => {
                 if (holdRef.current && holdRef.current.id === e.pointerId) release()
               }}
               onBlur={release}
@@ -212,7 +229,6 @@ export function LiarGame({
                   aria-label={pieceLabel(p)}
                   aria-pressed={selected === i}
                   className={'lr-pick' + (selected === i ? ' lr-on' : '')}
-                  onPointerDown={() => setSelected(i)}
                   onClick={() => setSelected(i)}
                 >
                   <span className="lr-emoji" aria-hidden="true">

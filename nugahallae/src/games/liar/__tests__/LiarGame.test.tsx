@@ -55,7 +55,7 @@ function peekAll() {
   for (let i = 0; i < order.length; i++) {
     fire(holdBtn(), 'pointerdown')
     fire(holdBtn(), 'pointerup')
-    click(i === order.length - 1 ? '다음 사람' : '다음 사람')
+    click('다음 사람')
   }
 }
 function toVote() {
@@ -65,7 +65,7 @@ function toVote() {
 }
 function voteAll(targets: number[]) {
   targets.forEach((tg) => {
-    fireEvent.pointerDown(screen.getByRole('button', { name: pieceLabel(order[tg]) }))
+    fireEvent.click(screen.getByRole('button', { name: pieceLabel(order[tg]) }))
     click('확인했어요')
   })
 }
@@ -164,7 +164,7 @@ test('투표: 자기 자신은 후보에 없고, 선택 전에는 확인 비활�
   toVote()
   expect(screen.queryByRole('button', { name: pieceLabel(order[0]) })).toBeNull()
   expect((screen.getByRole('button', { name: '확인했어요' }) as HTMLButtonElement).disabled).toBe(true)
-  fireEvent.pointerDown(screen.getByRole('button', { name: pieceLabel(order[1]) }))
+  fireEvent.click(screen.getByRole('button', { name: pieceLabel(order[1]) }))
   expect((screen.getByRole('button', { name: '확인했어요' }) as HTMLButtonElement).disabled).toBe(false)
   click('확인했어요')
   // 다음 사람 화면에는 이전 선택이 남아 있지 않다

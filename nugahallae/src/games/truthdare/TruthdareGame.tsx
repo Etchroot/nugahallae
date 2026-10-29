@@ -12,6 +12,9 @@ import './truthdare.css'
 
 export const SPIN_MS = 800
 const SPIN_TICK_MS = 80
+const STEPS = SPIN_MS / SPIN_TICK_MS
+/** 멈춘 뒤 선택된 칸을 보여 주는 시간 */
+export const HOLD_MS = 300
 
 type Phase = 'start' | 'spin' | 'choose' | 'card' | 'done'
 
@@ -50,22 +53,23 @@ export function TruthdareGame({
     if (phase !== 'start') return
     const chosen = pickPlayer(rng, order.length) // 결과는 이미 정해졌고, 아래는 보여 주는 연출이다.
     setSelected(chosen)
-    setHl(0)
+    const n = order.length
+    // 마지막 틱(step === STEPS)이 정확히 chosen에 닿도록 시작 칸을 역산한다.
+    const at = (step: number) => (((chosen + step - STEPS) % n) + n) % n
+    setHl(at(0))
     setPhase('spin')
     let step = 0
     const iv = setInterval(() => {
       step++
-      setHl(step % order.length)
+      setHl(at(step))
+      if (step >= STEPS) {
+        clearInterval(iv)
+        void haptic('tap')
+        // 선택된 칸이 하이라이트된 채 잠깐 머문 뒤 선택 화면으로 넘어간다.
+        timers.current.push(setTimeout(() => setPhase('choose'), HOLD_MS))
+      }
     }, SPIN_TICK_MS)
     intervals.current.push(iv)
-    timers.current.push(
-      setTimeout(() => {
-        clearInterval(iv)
-        setHl(chosen)
-        setPhase('choose')
-        void haptic('tap')
-      }, SPIN_MS),
-    )
   }
 
   const choose = (k: CardKind) => {
