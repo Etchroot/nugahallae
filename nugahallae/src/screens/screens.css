@@ -110,7 +110,7 @@
 .hm-sec h2 { margin: 0; font-size: 19px; font-weight: 700; }
 .hm-sec span { font-size: 15px; color: #6b7684; }
 .hm-grid.hm-recent { margin-bottom: 24px; }
-.hm-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hm-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .hm-card {
   position: relative; box-sizing: border-box; width: 100%; min-height: 150px; padding: 16px; border: 0;
   border-radius: 22px; background: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.04); text-align: left;
