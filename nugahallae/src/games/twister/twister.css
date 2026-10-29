@@ -1,0 +1,28 @@
+.tw-sentence {
+  margin: 0;
+  max-width: 420px;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  word-break: keep-all;
+  color: var(--pl-text);
+}
+.tw-note {
+  min-height: 24px;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--pl-warn-text);
+}
+.tw-after { align-items: flex-start; }
+.tw-judge {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.tw-judge .tw-big { min-height: 72px; font-size: 22px; }
+.tw-ok { background: var(--pl-primary); }
+.tw-bad { background: var(--pl-danger-fill); }
