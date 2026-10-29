@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -61,6 +62,7 @@ export function TwisterGame({
 
   const start = () => {
     if (phaseRef.current !== 'ready') return
+    playSfx('goBeep')
     t0.current = now()
     setRetry(false)
     setLastRec(null)
@@ -70,12 +72,15 @@ export function TwisterGame({
   const stop = () => {
     if (phaseRef.current !== 'reading') return
     elapsedSec.current = (now() - t0.current) / 1000
+    playSfx('stopClick')
     setP('judge')
   }
 
   const judge = (ok: boolean) => () => {
     if (phaseRef.current !== 'judge') return
     const rec = makeRecord(order[idx], ok, elapsedSec.current)
+    // 맞든 틀리든 같은 기록음
+    playSfx('record')
     setRecords((rs) => [...rs, rec])
     setLastRec(rec)
     setP('done')

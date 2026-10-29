@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -69,12 +70,15 @@ export function ReactionGame({
     const cur = padRef.current
     if (cur === 'go') {
       const v = Math.round(now() - t0.current)
+      playSfx('stopClick')
+      playSfx('record')
       setMs(v)
       setP('done')
       record(v)
       prime()
     } else if (cur === 'idle') {
       guard(() => {
+        playSfx('tapSoft')
         setP('wait')
         waitTimer.current = setTimeout(() => {
           waitTimer.current = null
@@ -87,6 +91,8 @@ export function ReactionGame({
         if (waitTimer.current !== null) clearTimeout(waitTimer.current)
         waitTimer.current = null
         setP('foul')
+        // 부정출발도 같은 기록음(결과의 좋고 나쁨을 소리로 가르지 않는다)
+        playSfx('record')
         record(FOUL)
       })()
     }

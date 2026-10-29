@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -88,6 +89,8 @@ export function TapGame({
     }
     const done = endRound(roundRef.current)
     commit(done)
+    // 끝 신호는 몇 번 눌렀든 같다
+    playSfx('tap.whistle')
     setRows((rs) => [...rs, { piece: order[idxRef.current], v: done.count }])
   }
 
@@ -98,10 +101,18 @@ export function TapGame({
     voided.current = false
     commit(startCountdown(cur))
     setCd(3)
-    later(() => setCd(2), COUNT_STEP_MS)
-    later(() => setCd(1), COUNT_STEP_MS * 2)
+    playSfx('countBeep')
+    later(() => {
+      setCd(2)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS)
+    later(() => {
+      setCd(1)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS * 2)
     later(() => {
       setCd(null)
+      playSfx('goBeep')
       t0.current = now()
       commit(beginGo(roundRef.current))
       later(finishWindow, DURATION_MS)
@@ -114,6 +125,7 @@ export function TapGame({
       guard(start)()
     } else if (cur.phase === 'go') {
       commit(tapPad(cur))
+      playSfx('pop', { pitch: 0.95 + Math.random() * 0.1 })
       prime() // 연타 직후 나타나는 `다음 사람` 버튼을 더블탭에서 보호
     }
   }

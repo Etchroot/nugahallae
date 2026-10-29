@@ -5,6 +5,8 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx, startLoop } from '../../platform/sound'
+import type { LoopHandle } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -41,6 +43,8 @@ export function RulerGame({
   const startRef = useRef<{ x: number; y: number } | null>(null)
   const lastX = useRef(0)
   const pointerId = useRef<number | null>(null)
+  const chalk = useRef<LoopHandle | null>(null)
+  useEffect(() => () => chalk.current?.stop(), [])
   const svgRef = useRef<SVGSVGElement | null>(null)
   const { guard, prime } = useScreenGuard(now)
 
@@ -81,6 +85,7 @@ export function RulerGame({
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState !== 'hidden' || phaseRef.current !== 'drawing') return
+      stopChalk()
       pointerId.current = null
       startRef.current = null
       setLine(null)
@@ -106,6 +111,10 @@ export function RulerGame({
     const oy = r.top + (r.height - AREA_H * k) / 2
     return { x: (e.clientX - ox) / k, y: (e.clientY - oy) / k }
   }
+  const stopChalk = () => {
+    chalk.current?.stop()
+    chalk.current = null
+  }
   const clampX = (x: number) => Math.min(vw, Math.max(0, x))
   const clampY = (y: number) => Math.min(AREA_H - 8, Math.max(8, y))
 
@@ -120,6 +129,9 @@ export function RulerGame({
     pointerId.current = e.pointerId
     startRef.current = { x: clampX(p.x), y: clampY(p.y) }
     lastX.current = startRef.current.x
+    playSfx('tapSoft')
+    stopChalk()
+    chalk.current = startLoop('chalk')
     setMsg('none')
     setLine({ x0: lastX.current, x1: lastX.current, y: startRef.current.y })
     setP('drawing')
@@ -138,16 +150,19 @@ export function RulerGame({
     const s = startRef.current
     pointerId.current = null
     startRef.current = null
+    stopChalk()
     if (!s) return
     const x1 = clampX(toLocal(e).x)
     const cm = dragCm(s.x, x1)
     if (cm < MIN_CM) {
+      playSfx('buzz', { gain: 0.5 })
       setLine(null)
       setMsg('short')
       setP('ready')
       return
     }
     const rec = makeRecord(order[idx], cm, target)
+    playSfx('stopClick')
     // 다음 사람이 따라 그리지 못하게 뗀 즉시 선을 지운다
     setLine(null)
     setRecords((rs) => [...rs, rec])
@@ -161,6 +176,7 @@ export function RulerGame({
     if (phaseRef.current !== 'drawing' || e.pointerId !== pointerId.current) return
     pointerId.current = null
     startRef.current = null
+    stopChalk()
     setLine(null)
     setMsg('retry')
     setP('ready')

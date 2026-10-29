@@ -5,6 +5,8 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx, startLoop } from '../../platform/sound'
+import type { LoopHandle } from '../../platform/sound'
 import { haptic } from '../../platform/sdk'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
@@ -45,6 +47,22 @@ export function TraceGame({
   const raf = useRef<number | null>(null)
   const t0 = useRef(0)
   const svgRef = useRef<SVGSVGElement | null>(null)
+  const hum = useRef<LoopHandle | null>(null)
+  const stopHum = () => {
+    hum.current?.stop()
+    hum.current = null
+  }
+  useEffect(() => () => hum.current?.stop(), [])
+  // 백그라운드에서 꺼진 웅웅 소리를, 그리던 중이면 돌아올 때 다시 켠다
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState !== 'visible' || phaseRef.current !== 'drawing') return
+      stopHum()
+      hum.current = startLoop('hum')
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
   const { guard, prime } = useScreenGuard(now)
 
   const { ranked, overlay, finish } = useRecordFinish<TraceRecord>({
@@ -96,6 +114,9 @@ export function TraceGame({
     const progress = timeSec !== null ? 1 : maxProg.current / total
     const rec = makeRecord(piece, { progress, timeSec, trail: trailRef.current, failAt })
     cancelFrame()
+    stopHum()
+    // 성공이든 실패든 같은 기록음
+    playSfx('record')
     pointerId.current = null
     setRecords((rs) => [...rs, rec])
     setLastRec(rec)
@@ -122,6 +143,9 @@ export function TraceGame({
       trailRef.current = [p]
       setTrail([p])
       setLastRec(null)
+      playSfx('goBeep', { gain: 0.6 })
+      stopHum()
+      hum.current = startLoop('hum')
       setP('drawing')
     })()
   }
@@ -148,6 +172,7 @@ export function TraceGame({
         return
       }
     }
+    hum.current?.set('pitch', 1 + (0.5 * maxProg.current) / total, 0.1)
     scheduleRender()
   }
 

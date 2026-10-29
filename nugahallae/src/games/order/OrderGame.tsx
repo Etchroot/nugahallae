@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { notePitch, playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -91,11 +92,19 @@ export function OrderGame({
     setRetry(false)
     setLastRec(null)
     setCd(3)
+    playSfx('countBeep')
     setP('count')
-    later(() => setCd(2), COUNT_STEP_MS)
-    later(() => setCd(1), COUNT_STEP_MS * 2)
+    later(() => {
+      setCd(2)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS)
+    later(() => {
+      setCd(1)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS * 2)
     later(() => {
       setGrid(shuffleGrid(rng))
+      playSfx('goBeep')
       targetRef.current = 1
       setTarget(1)
       mistakes.current = 0
@@ -110,6 +119,7 @@ export function OrderGame({
     if (n < targetRef.current) return // 이미 누른 칸
     if (n !== targetRef.current) {
       mistakes.current += 1
+      playSfx('buzz', { gain: 0.6 })
       setWrong(n)
       if (flashTimer.current !== null) clearTimeout(flashTimer.current)
       flashTimer.current = setTimeout(() => setWrong(null), WRONG_FLASH_MS)
@@ -119,6 +129,7 @@ export function OrderGame({
       return
     }
     if (n === GRID_SIZE) {
+      playSfx('record')
       const rec = makeRecord(order[idx], now() - t0.current, mistakes.current)
       targetRef.current = GRID_SIZE + 1
       setTarget(GRID_SIZE + 1)
@@ -128,6 +139,7 @@ export function OrderGame({
       setP('done')
       return
     }
+    playSfx('note', { pitch: notePitch(n - 1) })
     targetRef.current = n + 1
     setTarget(n + 1)
   }

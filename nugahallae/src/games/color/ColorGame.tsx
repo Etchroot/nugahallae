@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { notePitch, playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -96,11 +97,19 @@ export function ColorGame({
     setRetry(false)
     setLastRec(null)
     setCd(3)
+    playSfx('countBeep')
     setP('count')
-    later(() => setCd(2), COUNT_STEP_MS)
-    later(() => setCd(1), COUNT_STEP_MS * 2)
+    later(() => {
+      setCd(2)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS)
+    later(() => {
+      setCd(1)
+      playSfx('countBeep')
+    }, COUNT_STEP_MS * 2)
     later(() => {
       qiRef.current = 0
+      playSfx('goBeep')
       setQi(0)
       mistakes.current = 0
       t0.current = now()
@@ -115,6 +124,7 @@ export function ColorGame({
     if (t - shownAt.current < INPUT_LOCK_MS) return
     if (colorId !== questions[qiRef.current].ink) {
       mistakes.current += 1
+      playSfx('buzz', { gain: 0.6 })
       shakeCount.current += 1
       setShake({ id: colorId, n: shakeCount.current })
       if (shakeTimer.current !== null) clearTimeout(shakeTimer.current)
@@ -125,6 +135,7 @@ export function ColorGame({
       return
     }
     if (qiRef.current + 1 >= QUESTION_COUNT) {
+      playSfx('record')
       const rec = makeRecord(order[idx], t - t0.current, mistakes.current)
       setRecords((rs) => [...rs, rec])
       setLastRec(rec)
@@ -132,6 +143,7 @@ export function ColorGame({
       setP('done')
       return
     }
+    playSfx('note', { pitch: notePitch(qiRef.current) })
     qiRef.current += 1
     shownAt.current = t
     setQi(qiRef.current)

@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -55,6 +56,7 @@ export function TimerGame({
 
   const start = () => {
     if (phaseRef.current !== 'ready') return
+    playSfx('goBeep')
     t0.current = now()
     setShown('0.00')
     setP('running')
@@ -67,6 +69,9 @@ export function TimerGame({
     if (phaseRef.current !== 'running') return
     const elapsed = now() - t0.current
     stopTick()
+    // 기록이 좋든 나쁘든 같은 소리
+    playSfx('stopClick')
+    playSfx('record')
     const rec = makeRecord(order[idx], elapsed, target)
     setRecords((rs) => [...rs, rec])
     setLastRec(rec)

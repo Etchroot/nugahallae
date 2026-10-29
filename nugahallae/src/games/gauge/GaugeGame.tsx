@@ -4,6 +4,7 @@ import { pieceLabel } from '../../domain/pieces'
 import type { Piece } from '../../domain/pieces'
 import { defaultRng } from '../../domain/rng'
 import type { Rng } from '../../domain/rng'
+import { playSfx } from '../../platform/sound'
 import { NextButton } from '../shared/NextButton'
 import { RankList } from '../shared/RankList'
 import { useScreenGuard } from '../shared/useScreenGuard'
@@ -73,6 +74,7 @@ export function GaugeGame({
   const start = () => {
     if (phaseRef.current !== 'ready') return
     round.current = pickRound(rng)
+    playSfx('goBeep')
     t0.current = now()
     setPos(positionAt(round.current, 0))
     setRetry(false)
@@ -89,6 +91,9 @@ export function GaugeGame({
     if (elapsed < STOP_LOCK_MS) return
     const p = positionAt(round.current, elapsed)
     stopTick()
+    // 기록이 좋든 나쁘든 같은 소리
+    playSfx('stopClick')
+    playSfx('record')
     prime()
     const rec = makeRecord(order[idx], distanceOf(p))
     setRecords((rs) => [...rs, rec])
